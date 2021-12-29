@@ -29,7 +29,7 @@ mime = "0.3"
 toml = "0.5"
 hyper = { version = "0.14", features = ["stream"] }
 serde = { version = "1.0", features = ["derive"] }
-cookie = { version = "0.15", default-features = false, features = [
+cookie = { version = "0.16", default-features = false, features = [
   "percent-encode",
   "key-expansion",
 ] }
