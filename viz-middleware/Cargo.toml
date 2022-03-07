@@ -72,7 +72,7 @@ uuid = { version = "0.8", default-features = false, features = ["v4"], optional 
 sessions = { version = "0.2.3", optional = true }
 
 tokio = { version = "1.13", features = ["time"], optional = true }
-tokio-util = { version = "0.6", features = ["io"], optional = true }
+tokio-util = { version = "0.7", features = ["io"], optional = true }
 
 # compression
 async-compression = { version = "0.3", features = ["tokio"], optional = true }
