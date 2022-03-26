@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         rust: [nightly, beta, stable]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set current week of the year in environnement
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
