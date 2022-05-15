@@ -77,7 +77,7 @@ tokio-util = { version = "0.6", features = ["io"], optional = true }
 # compression
 async-compression = { version = "0.3", features = ["tokio"], optional = true }
 bytes = { version = "1.1", optional = true }
-pin-project-lite = { version = "0.2.7", optional = true }
+pin-project-lite = { version = "0.2.9", optional = true }
 
 # jwt
 jsonwebtoken = { version = "7.2", optional = true }
