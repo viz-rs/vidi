@@ -77,6 +77,6 @@ viz-middleware = { path = "../viz-middleware", version = "0.1.2", default-featur
 
 hyper = { version = "0.14", features = ["server"] }
 
-tokio = { version = "1.13", default-features = false, features = ["net"], optional = true }
+tokio = { version = "1.18", default-features = false, features = ["net"], optional = true }
 tokio-rustls = { version = "0.23", optional = true }
 rustls-pemfile = { version = "0.2", optional = true }

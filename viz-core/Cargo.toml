@@ -34,7 +34,7 @@ cookie = { version = "0.15", default-features = false, features = [
   "key-expansion",
 ] }
 
-tokio = { version = "1.13", default-features = false, features = [
+tokio = { version = "1.18", default-features = false, features = [
   "rt",
   "time",
   "fs",
