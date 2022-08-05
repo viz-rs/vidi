@@ -1,8 +1,8 @@
+mod responder;
 mod service;
-mod stream;
 
+pub use responder::Responder;
 pub use service::ServiceMaker;
-pub use stream::Stream;
 
 #[cfg(any(feature = "rustls", feature = "native-tls"))]
 /// TLS/SSL streams for Viz based on TLS libraries.

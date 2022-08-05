@@ -1,11 +1,10 @@
-//! Event Message
-//!
-//! [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format>
-
 use bytes::Bytes;
 use std::fmt::{self, Write};
 
-#[derive(Default)]
+/// Event Message
+///
+/// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format>
+#[derive(Debug, Default)]
 pub struct Event {
     id: Option<String>,
     data: Option<String>,
@@ -15,26 +14,31 @@ pub struct Event {
 }
 
 impl Event {
+    /// The event ID to set the EventSource object's last event ID value.
     pub fn id(mut self, id: impl Into<String>) -> Self {
         self.id.replace(id.into());
         self
     }
 
+    /// The data field for the message.
     pub fn data(mut self, data: impl Into<String>) -> Self {
         self.data.replace(data.into());
         self
     }
 
+    /// A string identifying the type of event described.
     pub fn event(mut self, event: impl Into<String>) -> Self {
         self.event.replace(event.into());
         self
     }
 
+    /// The reconnection time.
     pub fn retry(mut self, retry: u64) -> Self {
         self.retry.replace(retry);
         self
     }
 
+    /// The comment field for the message.
     pub fn comment(mut self, comment: impl Into<String>) -> Self {
         self.comment.replace(comment.into());
         self

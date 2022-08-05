@@ -11,7 +11,7 @@ use crate::{async_trait, FromRequest, Request, RequestExt, Result};
 
 use super::{Payload, PayloadError};
 
-/// Form Extractor
+/// Extracts from-data from the body of a request.
 pub struct Form<T = ()>(pub T);
 
 impl<T> Form<T> {
@@ -21,6 +21,7 @@ impl<T> Form<T> {
         Form(data)
     }
 
+    /// Consumes the Form, returning the wrapped value.
     #[inline]
     pub fn into_inner(self) -> T {
         self.0

@@ -1,6 +1,7 @@
 use crate::{async_trait, Error, Handler, Result};
 
-#[derive(Clone)]
+/// Maps the `Err` value of the output if after the handler called.
+#[derive(Debug, Clone)]
 pub struct MapErr<H, F> {
     h: H,
     f: F,
@@ -8,7 +9,7 @@ pub struct MapErr<H, F> {
 
 impl<H, F> MapErr<H, F> {
     #[inline]
-    pub(crate) fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

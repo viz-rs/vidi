@@ -10,12 +10,14 @@ use futures_util::ready;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 /// TLS State
+#[derive(Debug)]
 enum State<A, S> {
     Handshaking(A),
     Streaming(S),
 }
 
 /// Unified TLS stream type.
+#[derive(Debug)]
 pub struct Stream<A, S> {
     state: State<A, S>,
     pub(crate) remote_addr: Option<SocketAddr>,

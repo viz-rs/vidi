@@ -43,7 +43,7 @@ pub trait RequestExt {
     where
         T: serde::de::DeserializeOwned;
 
-    /// Get a header with specified type by the key.
+    /// Get a header with the specified type by the key.
     fn header<K, T>(&self, key: K) -> Option<T>
     where
         K: header::AsHeaderName,

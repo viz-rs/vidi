@@ -1,4 +1,5 @@
 use std::{
+    fmt,
     sync::{atomic::Ordering, Arc},
     time::Duration,
 };
@@ -12,7 +13,25 @@ use crate::{
 
 use super::{Error as SessionError, Storage, Store, PURGED, RENEWED, UNCHANGED};
 
+/// A configuration for [SessionMiddleware].
 pub struct Config<S, G, V>(Arc<(Store<S, G, V>, CookieOptions)>);
+
+impl<S, G, V> Config<S, G, V> {
+    /// Creates a new configuration with the [`Store`] and [`CookieOptions`].
+    pub fn new(store: Store<S, G, V>, cookie: CookieOptions) -> Self {
+        Self(Arc::new((store, cookie)))
+    }
+
+    /// Gets the store.
+    pub fn store(&self) -> &Store<S, G, V> {
+        &self.0 .0
+    }
+
+    /// Gets the TTL.
+    pub fn ttl(&self) -> Option<Duration> {
+        self.options().max_age
+    }
+}
 
 impl<S, G, V> Clone for Config<S, G, V> {
     fn clone(&self) -> Self {
@@ -20,23 +39,15 @@ impl<S, G, V> Clone for Config<S, G, V> {
     }
 }
 
-impl<S, G, V> Config<S, G, V> {
-    pub fn new(store: Store<S, G, V>, cookie: CookieOptions) -> Self {
-        Self(Arc::new((store, cookie)))
-    }
-
-    pub fn store(&self) -> &Store<S, G, V> {
-        &self.0 .0
-    }
-
-    pub fn ttl(&self) -> Option<Duration> {
-        self.options().max_age
-    }
-}
-
 impl<S, G, V> Cookieable for Config<S, G, V> {
     fn options(&self) -> &CookieOptions {
         &self.0 .1
+    }
+}
+
+impl<S, G, V> fmt::Debug for Config<S, G, V> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SessionConfig").finish()
     }
 }
 
@@ -51,6 +62,8 @@ impl<H, S, G, V> Transform<H> for Config<S, G, V> {
     }
 }
 
+/// Session middleware.
+#[derive(Debug)]
 pub struct SessionMiddleware<H, S, G, V> {
     h: H,
     config: Config<S, G, V>,
@@ -85,12 +98,7 @@ where
 
         let mut session_id = cookie.map(get_cookie_value);
         let data = match &session_id {
-            Some(sid) if (self.config.store().verify)(sid) => self
-                .config
-                .store()
-                .get(sid)
-                .await
-                .map_err(Into::<Error>::into)?,
+            Some(sid) if (self.config.store().verify)(sid) => self.config.store().get(sid).await?,
             _ => None,
         };
         if data.is_none() && session_id.is_some() {
@@ -163,9 +171,12 @@ fn get_cookie_value(c: Cookie<'_>) -> String {
 
 impl From<SessionError> for Error {
     fn from(e: SessionError) -> Self {
-        Error::Report(
-            Box::new(e),
-            StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-        )
+        Self::Responder(e.into_response())
+    }
+}
+
+impl IntoResponse for SessionError {
+    fn into_response(self) -> Response {
+        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
     }
 }

@@ -20,6 +20,7 @@ pub struct Limits {
 impl Default for Limits {
     fn default() -> Self {
         let limits = Limits::new()
+            .insert("payload", Limits::NORMAL)
             .insert("text", Limits::NORMAL)
             .insert("bytes", Limits::NORMAL);
 
@@ -34,19 +35,23 @@ impl Default for Limits {
 }
 
 impl Limits {
+    /// By default 1024 * 8.
     pub const NORMAL: u64 = 1024 * 8;
 
+    /// Creates a new Limits.
     pub fn new() -> Self {
         Limits {
             inner: Arc::new(Vec::new()),
         }
     }
 
+    /// Inserts a name-limit pair into the Limits.
     pub fn insert(mut self, name: &'static str, limit: u64) -> Self {
         Arc::make_mut(&mut self.inner).push((name, limit));
         self
     }
 
+    /// Returns a limit value by the name.
     pub fn get<S>(&self, name: S) -> Option<u64>
     where
         S: AsRef<str>,

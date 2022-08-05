@@ -1,6 +1,7 @@
 use crate::{async_trait, Handler, Result};
 
-#[derive(Clone)]
+/// Maps the input before the handler calls.
+#[derive(Debug, Clone)]
 pub struct Before<H, F> {
     h: H,
     f: F,
@@ -8,7 +9,7 @@ pub struct Before<H, F> {
 
 impl<H, F> Before<H, F> {
     #[inline]
-    pub(crate) fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

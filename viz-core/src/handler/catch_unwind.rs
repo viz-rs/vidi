@@ -4,7 +4,8 @@ use futures_util::FutureExt;
 
 use crate::{async_trait, Handler, IntoResponse, Response, Result};
 
-#[derive(Clone)]
+/// Catches unwinding panics while calling the handler.
+#[derive(Debug, Clone)]
 pub struct CatchUnwind<H, F> {
     h: H,
     f: F,
@@ -12,7 +13,7 @@ pub struct CatchUnwind<H, F> {
 
 impl<H, F> CatchUnwind<H, F> {
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

@@ -66,22 +66,6 @@ where
     }
 }
 
-#[derive(ThisError, Debug)]
-pub enum HeaderError {
-    #[error("Invalid header name {0}")]
-    InvalidName(&'static header::HeaderName),
-    #[error("Missing header name {0}")]
-    MissingName(&'static header::HeaderName),
-    #[error("Invalid header value {0}")]
-    InvalidValue(header::InvalidHeaderValue),
-}
-
-impl IntoResponse for HeaderError {
-    fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
-    }
-}
-
 #[async_trait]
 impl<T> FromRequest for Header<T>
 where
@@ -95,5 +79,25 @@ where
             .map_err(|_| HeaderError::InvalidName(T::name()))
             .and_then(|v| v.ok_or_else(|| HeaderError::MissingName(T::name())))
             .map(Self)
+    }
+}
+
+/// Rejects with an error when header extraction fails.
+#[derive(Debug, ThisError)]
+pub enum HeaderError {
+    /// Invalid header name.
+    #[error("Invalid header name {0}")]
+    InvalidName(&'static header::HeaderName),
+    /// Missing header name.
+    #[error("Missing header name {0}")]
+    MissingName(&'static header::HeaderName),
+    /// Missing header value.
+    #[error("Invalid header value {0}")]
+    InvalidValue(header::InvalidHeaderValue),
+}
+
+impl IntoResponse for HeaderError {
+    fn into_response(self) -> Response {
+        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
     }
 }

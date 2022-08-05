@@ -19,12 +19,15 @@ mod error;
 
 pub use error::WebSocketError;
 pub use tokio_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
+
+/// A wrapper around an underlying raw stream which implements the WebSocket protocol.
 pub type WebSocketStream<T = Upgraded> = tokio_tungstenite::WebSocketStream<T>;
 
 /// Then WebSocket provides the API for creating and managing a [WebSocket][mdn] connection,
 /// as well as for sending and receiving data on the connection.
 ///
 /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/WebSocket>
+#[derive(Debug)]
 pub struct WebSocket {
     key: SecWebsocketKey,
     on_upgrade: Option<OnUpgrade>,
@@ -35,6 +38,10 @@ pub struct WebSocket {
 impl WebSocket {
     const NAME: &'static [u8] = b"websocket";
 
+    /// The specifies one or more protocols that you wish to use.
+    ///
+    /// In order of preference. The first one that is supported by the server will be
+    /// selected and responsed.
     pub fn protocols<I>(mut self, protocols: I) -> Self
     where
         I: IntoIterator,
@@ -50,6 +57,7 @@ impl WebSocket {
         self
     }
 
+    /// Finish the upgrade, passing a function and a [`WebSocketConfig`] to handle the `WebSocket`.
     #[must_use]
     pub fn on_upgrade_with_config<F, Fut>(
         mut self,
@@ -76,6 +84,7 @@ impl WebSocket {
         self.into_response()
     }
 
+    /// Finish the upgrade, passing a function to handle the `WebSocket`.
     pub fn on_upgrade<F, Fut>(self, callback: F) -> Response
     where
         F: FnOnce(WebSocketStream) -> Fut + Send + 'static,

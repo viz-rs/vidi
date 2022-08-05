@@ -8,10 +8,10 @@ pub enum Error {
     /// Receives a [`Response`] as error.
     #[error("response")]
     Responder(Response),
-    /// Receives a box std::error::[`Error`][StdError] as error.
+    /// Receives a boxed [`std::error::Error`][StdError] as error.
     #[error(transparent)]
     Normal(Box<dyn StdError + Send + Sync>),
-    /// Receives a box std::error::[`Error`][StdError] and [`Response`] pair as error.
+    /// Receives a boxed [`std::error::Error`][StdError] and [`Response`] pair as error.
     #[error("report")]
     Report(Box<dyn StdError + Send + Sync>, Response),
 }
@@ -34,7 +34,7 @@ impl Error {
         match self {
             Self::Normal(e) => e.is::<T>(),
             Self::Report(e, _) => e.is::<T>(),
-            Self::Responder(_) => false
+            Self::Responder(_) => false,
         }
     }
 

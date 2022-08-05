@@ -1,11 +1,14 @@
 //! Cookie Middleware.
 
+use std::fmt;
+
 use crate::{
     async_trait,
     header::{HeaderValue, COOKIE, SET_COOKIE},
     types, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
+/// A configure for [CookieMiddleware].
 pub struct Config {
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     key: std::sync::Arc<types::CookieKey>,
@@ -14,15 +17,28 @@ pub struct Config {
 #[allow(clippy::new_without_default)]
 impl Config {
     #[cfg(not(any(feature = "cookie-signed", feature = "cookie-private")))]
+    /// Creates a new config.
     pub fn new() -> Self {
         Self {}
     }
 
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
+    /// Creates a new config with the [`Key`][types::CookieKey].
     pub fn new(key: types::CookieKey) -> Self {
         Self {
             key: std::sync::Arc::new(key),
         }
+    }
+}
+
+impl fmt::Debug for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("CookieConfig");
+
+        #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
+        d.field("key", &[..]);
+
+        d.finish()
     }
 }
 
@@ -41,11 +57,23 @@ where
     }
 }
 
+/// Cookie middleware.
 #[derive(Clone)]
 pub struct CookieMiddleware<H> {
     h: H,
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     key: std::sync::Arc<types::CookieKey>,
+}
+
+impl<H> fmt::Debug for CookieMiddleware<H> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("CookieMiddleware");
+
+        #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
+        d.field("key", &[..]);
+
+        d.finish()
+    }
 }
 
 #[async_trait]

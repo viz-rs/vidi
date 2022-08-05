@@ -3,7 +3,8 @@ use crate::{async_trait, Handler, Result};
 /// Represents a middleware parameter, which is a tuple that includes Requset and BoxHandler.
 pub type Next<I, H> = (I, H);
 
-#[derive(Clone)]
+/// Wraps around the remaining handler or middleware chain.
+#[derive(Debug, Clone)]
 pub struct Around<H, F> {
     h: H,
     f: F,
@@ -11,7 +12,7 @@ pub struct Around<H, F> {
 
 impl<H, F> Around<H, F> {
     #[inline]
-    pub(crate) fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

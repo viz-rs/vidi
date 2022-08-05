@@ -7,14 +7,6 @@ use viz_core::{
     Transform,
 };
 
-macro_rules! repeat {
-    ($macro:ident $($name:ident $verb:tt )+) => {
-        $(
-            $macro!($name $verb);
-        )+
-    };
-}
-
 macro_rules! export_internal_verb {
     ($name:ident $verb:tt) => {
         #[doc = concat!(" Appends a handler buy the HTTP `", stringify!($verb), "` verb into the route.")]
@@ -76,7 +68,7 @@ impl Route {
         H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + Sync + 'static,
     {
-        self.push(method, handler.to_responder().boxed())
+        self.push(method, handler.map_into_response().boxed())
     }
 
     /// Appends a handler by any HTTP verbs into the route.
@@ -347,8 +339,8 @@ mod tests {
 
         let route = Route::new()
             .any(ext.into_handler())
-            .on(Method::GET, handler.before(before))
-            .on(Method::POST, handler.after(after))
+            .on(Method::GET, handler.map_into_response().before(before))
+            .on(Method::POST, handler.map_into_response().after(after))
             .put(handler.around(Around2 {
                 name: "handler around".to_string(),
             }))
@@ -356,11 +348,11 @@ mod tests {
             .map_handler(|handler| {
                 handler
                     .before(before)
+                    .around(around_2)
+                    .after(after)
                     .around(Around4 {
                         name: "4".to_string(),
                     })
-                    .after(after)
-                    .around(around_2)
                     .around(Around2 {
                         name: "2".to_string(),
                     })

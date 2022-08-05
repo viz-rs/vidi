@@ -4,17 +4,12 @@ use hyper::service::{make_service_fn, service_fn};
 use once_cell::sync::Lazy;
 use std::{convert::Infallible, net::SocketAddr};
 use viz::{
-    get, types::Params, IntoResponse, Method, Request, RequestExt, Response, Result, Router,
-    Server, StatusCode, Tree,
+    types::Params, IntoResponse, Method, Request, RequestExt, Response, Result, Router, Server,
+    StatusCode, Tree,
 };
 
 /// Static Lazy Routes
-static TREE: Lazy<Tree> = Lazy::new(|| {
-    Router::new()
-        .route("/", get(index))
-        .route("/me", get(me))
-        .into()
-});
+static TREE: Lazy<Tree> = Lazy::new(|| Router::new().get("/", index).get("/me", me).into());
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")

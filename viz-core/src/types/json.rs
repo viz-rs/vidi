@@ -1,4 +1,4 @@
-//! Represents a JSON extractor/responder.
+//! Represents a JSON extractor or responder.
 
 use std::{
     fmt,

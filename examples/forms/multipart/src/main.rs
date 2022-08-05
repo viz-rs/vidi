@@ -4,7 +4,6 @@ use futures_util::TryStreamExt;
 use std::{fs::File, net::SocketAddr};
 use tempfile::tempdir;
 use viz::{
-    get,
     middleware::limits,
     types::{Multipart, PayloadError},
     IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router, Server,
@@ -48,7 +47,8 @@ async fn main() -> Result<()> {
     println!("listening on {}", addr);
 
     let app = Router::new()
-        .route("/", get(new).post(upload.into_handler()))
+        .get("/", new)
+        .post("/", upload.into_handler())
         // limit body size
         .with(limits::Config::default());
 

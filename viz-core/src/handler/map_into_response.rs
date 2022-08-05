@@ -2,15 +2,18 @@ use std::marker::PhantomData;
 
 use crate::{async_trait, Handler, IntoResponse, Response, Result};
 
-pub struct Responder<H, O>(pub(crate) H, PhantomData<O>);
+/// Maps the handler's output type to the [`Response`].
+#[derive(Debug)]
+pub struct MapInToResponse<H, O>(pub(crate) H, PhantomData<O>);
 
-impl<H, O> Responder<H, O> {
-    pub fn new(h: H) -> Self {
+impl<H, O> MapInToResponse<H, O> {
+    /// Creates a new `Responder`.
+    pub(super) fn new(h: H) -> Self {
         Self(h, PhantomData)
     }
 }
 
-impl<H, O> Clone for Responder<H, O>
+impl<H, O> Clone for MapInToResponse<H, O>
 where
     H: Clone,
 {
@@ -20,7 +23,7 @@ where
 }
 
 #[async_trait]
-impl<H, I, O> Handler<I> for Responder<H, O>
+impl<H, I, O> Handler<I> for MapInToResponse<H, O>
 where
     I: Send + 'static,
     H: Handler<I, Output = Result<O>> + Clone,

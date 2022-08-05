@@ -1,6 +1,6 @@
 [package]
 name = "viz-router"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
@@ -8,12 +8,13 @@ homepage = "https://viz.rs"
 repository = "https://github.com/viz-rs/viz"
 documentation = "https://docs.rs/viz-router"
 description = "Viz Router"
+publish = false
 
 [features]
 default = []
 
 [dependencies]
-viz-core = { path = "../viz-core", version = "0.2" }
+viz-core = { path = "../viz-core", version = "0.3" }
 path-tree = "0.4"
 serde = "1.0"
 thiserror = "1.0"

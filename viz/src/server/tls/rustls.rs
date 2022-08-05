@@ -25,13 +25,14 @@ use tokio_rustls::{
     Accept as TlsAccept,
 };
 
-use crate::{Error, Result, ServiceMaker, Stream as RealStream};
+use crate::{Error, Responder, Result, ServiceMaker};
 
 use super::{Listener, Stream};
 
 pub use tokio_rustls::TlsAcceptor;
 
 /// Tls client authentication configuration.
+#[derive(Debug)]
 pub(crate) enum ClientAuth {
     /// No client auth.
     Off,
@@ -42,6 +43,7 @@ pub(crate) enum ClientAuth {
 }
 
 /// `rustls`'s config.
+#[derive(Debug)]
 pub struct Config {
     cert: Vec<u8>,
     key: Vec<u8>,
@@ -170,7 +172,7 @@ impl Accept for Listener<AddrIncoming, TlsAcceptor, AddrStream> {
 }
 
 impl Service<&Stream<TlsAccept<AddrStream>, TlsStream<AddrStream>>> for ServiceMaker {
-    type Response = RealStream;
+    type Response = Responder;
     type Error = Infallible;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -179,6 +181,6 @@ impl Service<&Stream<TlsAccept<AddrStream>, TlsStream<AddrStream>>> for ServiceM
     }
 
     fn call(&mut self, t: &Stream<TlsAccept<AddrStream>, TlsStream<AddrStream>>) -> Self::Future {
-        future::ready(Ok(RealStream::new(self.tree.clone(), t.remote_addr)))
+        future::ready(Ok(Responder::new(self.tree.clone(), t.remote_addr)))
     }
 }

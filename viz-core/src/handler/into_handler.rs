@@ -1,6 +1,6 @@
 use crate::{FromRequest, IntoResponse, Request, Result};
 
-use super::{FnExt, Handler, ResponderExt};
+use super::{FnExt, FnExtHandler, Handler};
 
 /// Trait implemented by types that can be converted to a [`Handler`].
 pub trait IntoHandler<E, I> {
@@ -19,9 +19,9 @@ where
     H: FnExt<E, Output = Result<O>>,
     O: Send + Sync + 'static,
 {
-    type Handler = ResponderExt<H, E, O>;
+    type Handler = FnExtHandler<H, E, O>;
 
     fn into_handler(self) -> Self::Handler {
-        ResponderExt::new(self)
+        FnExtHandler::new(self)
     }
 }

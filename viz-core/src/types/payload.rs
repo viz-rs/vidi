@@ -1,7 +1,8 @@
-//! Request Payload Trait
+//! Request Payload Trait and Payload Error.
 
 use crate::{Error, IntoResponse, Response, Result, StatusCode, ThisError};
 
+/// Rejects with an error when the body of request extraction fails.
 #[derive(ThisError, Debug)]
 pub enum PayloadError {
     /// 400
@@ -81,16 +82,21 @@ impl From<PayloadError> for Error {
     }
 }
 
+/// An interface for processing the payload data of the HTTP request.
 pub trait Payload {
+    /// Named the payload.
     const NAME: &'static str = "payload";
 
-    /// 1MB
+    /// Limited the payload data size, by default 1MB.
     const LIMIT: u64 = 1024 * 1024;
 
+    /// Specified a media type.
     fn mime() -> mime::Mime;
 
+    /// Detects the payload media type.
     fn detect(m: &mime::Mime) -> bool;
 
+    /// Sets the limit size.
     #[inline]
     fn limit(limit: Option<u64>) -> u64 {
         limit.unwrap_or(Self::LIMIT)

@@ -328,7 +328,7 @@ async fn main() -> Result<()> {
         };
 
         // let rha = Responder::new(a);
-        let rha = Responder::new(aa)
+        let rha = aa.map_into_response()
             .around(th.clone())
             .around(th)
             .around(MyAround {
@@ -338,28 +338,28 @@ async fn main() -> Result<()> {
             .map(map)
             .map_err(map_err)
             .or_else(or_else);
-        let rhb = Responder::new(b);
-        let rhc = Responder::new(c)
+        let rhb = b.map_into_response();
+        let rhc = c.map_into_response()
             .catch_error(|_: CustomError2| async move {
                 "Custom Error 2"
             })
             .catch_error2(|e: std::io::Error| async move {
                 (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
             });
-        let rhd = Responder::new(d)
+        let rhd = d.map_into_response()
             .map(map)
             .and_then(and_then)
             .or_else(or_else)
             .with(viz_core::middleware::cookie::Config::new());
-        let rhe = Responder::new(e).after(after);
-        let rhf = Responder::new(f);
-        let rhg = Responder::new(g);
-        let rhh = ResponderExt::new(h).after(after).before(before);
-        let rhi = ResponderExt::new(i);
-        let rhj = ResponderExt::new(j);
-        let rhk = ResponderExt::new(k);
-        let rhl = ResponderExt::new(l);
-        let rhm = ResponderExt::new(m);
+        let rhe = e.map_into_response().after(after);
+        let rhf = f.map_into_response();
+        let rhg = g.map_into_response();
+        let rhh = h.into_handler().map_into_response().after(after).before(before);
+        let rhi = i.into_handler().map_into_response();
+        let rhj = j.into_handler().map_into_response();
+        let rhk = k.into_handler().map_into_response();
+        let rhl = l.into_handler().map_into_response();
+        let rhm = m.into_handler().map_into_response();
 
         assert!(Handler::call(&rhc, Request::default()).await.is_ok());
 

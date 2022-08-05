@@ -1,4 +1,4 @@
-//! Request Params Extractor
+//! Represents a Params extractor for the path of a URL.
 
 mod de;
 
@@ -17,6 +17,7 @@ use crate::{
 
 pub(crate) use de::PathDeserializer;
 
+/// Extracts params from the path of a URL.
 #[derive(Debug)]
 pub struct Params<T = Vec<(String, String)>>(pub T);
 
@@ -78,12 +79,16 @@ where
     }
 }
 
+/// Rejects a parsing error.
 #[derive(ThisError, Debug)]
 pub enum ParamsError {
+    /// Represents pasing single param was failed.
     #[error("{}", .0)]
     SingleParse(String),
+    /// Represents pasing multi param was failed.
     #[error(transparent)]
     Parse(#[from] serde::de::value::Error),
+    /// Represents params is empty.
     #[error("params is empty")]
     Empty,
 }

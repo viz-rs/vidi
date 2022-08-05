@@ -1,6 +1,6 @@
 [package]
 name = "viz-core"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
@@ -9,6 +9,7 @@ homepage = "https://viz.rs"
 repository = "https://github.com/viz-rs/viz"
 documentation = "https://docs.rs/viz"
 description = "The core traits and types in for the `viz`."
+publish = false
 
 [features]
 default = [

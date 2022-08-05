@@ -22,3 +22,7 @@ viz = { path = "../viz" }
 
 anyhow = "1.0"
 tokio = { version = "1.0", features = ["rt", "macros"] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

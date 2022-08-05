@@ -1,6 +1,22 @@
-use viz_core::{BoxHandler, Handler, HandlerExt, Next, Request, Response, Result, Transform};
+use viz_core::{
+    BoxHandler, Handler, HandlerExt, IntoResponse, Next, Request, Response, Result, Transform,
+};
 
 use crate::{Resources, Route};
+
+macro_rules! export_verb {
+    ($name:ident $verb:ty) => {
+        #[doc = concat!(" Adds a handler with a path and HTTP `", stringify!($verb), "` verb pair.")]
+        pub fn $name<S, H, O>(self, path: S, handler: H) -> Self
+        where
+            S: AsRef<str>,
+            H: Handler<Request, Output = Result<O>> + Clone,
+            O: IntoResponse + Send + Sync + 'static,
+        {
+            self.route(path, Route::new().$name(handler))
+        }
+    };
+}
 
 /// A routes collection.
 #[derive(Clone, Debug, Default)]
@@ -23,7 +39,13 @@ impl Router {
             .iter_mut()
             .find_map(|(p, r)| if p == path { Some(r) } else { None })
         {
-            Some(r) => *r = route,
+            Some(r) => {
+                *r = route.into_iter().fold(
+                    // original route
+                    r.clone().into_iter().collect(),
+                    |or: Route, (method, handler)| or.on(method, handler),
+                );
+            }
             None => routes.push((path.to_string(), route)),
         }
     }
@@ -82,6 +104,29 @@ impl Router {
             }),
             None => self,
         }
+    }
+
+    repeat!(
+        export_verb
+        get GET
+        post POST
+        put PUT
+        delete DELETE
+        head HEAD
+        options OPTIONS
+        connect CONNECT
+        patch PATCH
+        trace TRACE
+    );
+
+    /// Adds a handler with a path and any HTTP verbs."
+    pub fn any<S, H, O>(self, path: S, handler: H) -> Self
+    where
+        S: AsRef<str>,
+        H: Handler<Request, Output = Result<O>> + Clone,
+        O: IntoResponse + Send + Sync + 'static,
+    {
+        self.route(path, Route::new().any(handler))
     }
 
     /// Takes a closure and creates an iterator which calls that closure on each handler.
@@ -260,7 +305,8 @@ mod tests {
         );
 
         let router = Router::new()
-            .route("", get(index))
+            // .route("", get(index))
+            .get("", index)
             .resources("users", users.clone())
             .nest("posts", posts.resources(":post_id/users", users))
             .route("search", any(all))

@@ -1,6 +1,6 @@
 [package]
 name = "viz-handlers"
-version = "0.1.4"
+version = "0.2.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
@@ -8,6 +8,7 @@ homepage = "https://viz.rs"
 repository = "https://github.com/viz-rs/viz"
 documentation = "https://docs.rs/viz-handlers"
 description = "Viz handlers"
+publish = false
 
 [features]
 default = ["serve"]
@@ -22,7 +23,7 @@ serve = [
 ]
 
 [dependencies]
-viz-core = { path = "../viz-core", version = '0.2' }
+viz-core = { path = "../viz-core", version = '0.3' }
 
 # required!
 thiserror = "1.0"

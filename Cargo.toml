@@ -3,7 +3,7 @@ members = [
   "viz",
   "viz-core",
   "viz-handlers",
-  "viz-helmet",
+  # "viz-helmet",
   "viz-macros",
   "viz-router",
 ]

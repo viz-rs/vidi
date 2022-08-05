@@ -1,8 +1,11 @@
 use crate::{async_trait, Handler};
 
-#[derive(Clone)]
+/// Combines two different handlers having the same associated types into a single type.
+#[derive(Debug, Clone)]
 pub enum Either<L, R> {
+    /// First branch of the type.
     Left(L),
+    /// Second branch of the type.
     Right(R),
 }
 

@@ -4,8 +4,6 @@
 //!
 //! # handler
 //!
-//! TODO: `#[handler.before(a).after(b).around(c)]`
-//!
 //! ## Example
 //!
 //! ```

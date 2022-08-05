@@ -3,7 +3,6 @@
 use std::{net::SocketAddr, time::Duration};
 
 use viz::{
-    get,
     middleware::{
         cookie,
         csrf::{self, CsrfToken},
@@ -26,7 +25,8 @@ async fn main() -> Result<()> {
     println!("listening on {}", addr);
 
     let app = Router::new()
-        .route("/", get(index).post(create))
+        .get("/", index)
+        .post("/", create)
         .with(csrf::Config::new(
             csrf::Store::Cookie,
             [Method::GET, Method::HEAD, Method::OPTIONS, Method::TRACE].into(),

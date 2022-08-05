@@ -16,13 +16,14 @@ use hyper::{
 };
 use tokio_native_tls::{TlsAcceptor as TlsAcceptorWrapper, TlsStream};
 
-use crate::{Error, Result, ServiceMaker, Stream as RealStream};
+use crate::{Error, Responder, Result, ServiceMaker};
 
 use super::{Listener, Stream};
 
 pub use tokio_native_tls::native_tls::{Identity, TlsAcceptor};
 
 /// `native-lts`'s config.
+#[derive(Debug)]
 pub struct Config {
     identity: Identity,
 }
@@ -72,7 +73,7 @@ impl Accept for Listener<AddrIncoming, TlsAcceptorWrapper, AddrStream> {
 }
 
 impl Service<&Stream<TlsAccept<AddrStream>, TlsStream<AddrStream>>> for ServiceMaker {
-    type Response = RealStream;
+    type Response = Responder;
     type Error = Infallible;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -81,6 +82,6 @@ impl Service<&Stream<TlsAccept<AddrStream>, TlsStream<AddrStream>>> for ServiceM
     }
 
     fn call(&mut self, t: &Stream<TlsAccept<AddrStream>, TlsStream<AddrStream>>) -> Self::Future {
-        future::ready(Ok(RealStream::new(self.tree.clone(), t.remote_addr)))
+        future::ready(Ok(Responder::new(self.tree.clone(), t.remote_addr)))
     }
 }

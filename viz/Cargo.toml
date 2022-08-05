@@ -1,6 +1,6 @@
 [package]
 name = "viz"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
@@ -15,6 +15,7 @@ categories = [
   "web-programming::http-server",
 ]
 description = "Fast, robust, flexible, lightweight web framework for Rust"
+publish = false
 
 [features]
 default = [
@@ -60,11 +61,11 @@ rustls = ["rustls-pemfile", "tokio-rustls", "futures-util"]
 native-tls = ["tokio-native-tls", "futures-util"]
 
 [dependencies]
-viz-core = { path = "../viz-core", version = "0.2.4" }
-viz-router = { path = "../viz-router", version = "0.2.4" }
-viz-handlers = { path = "../viz-handlers", version = "0.1.4", optional = true }
+viz-core = { path = "../viz-core", version = "0.3.0" }
+viz-router = { path = "../viz-router", version = "0.3.0" }
+viz-handlers = { path = "../viz-handlers", version = "0.2.0", optional = true }
 viz-macros = { path = "../viz-macros", version = "0.1.0", optional = true }
-hyper = { version = "0.14", features = ["tcp", "server", "stream"] }
+hyper = { version = "0.14", features = ["server", "stream", "tcp"] }
 tokio = { version = "1.20", features = ["net"] }
 
 futures-util = { version = "0.3.21", optional = true }
@@ -72,6 +73,11 @@ rustls-pemfile = { version = "1.0.0", optional = true }
 tokio-rustls = { version = "0.23.4", optional = true }
 tokio-native-tls = { version = "0.3.0", optional = true }
 
+[dev-dependencies]
+tokio = { version = "1.20", features = ["macros", "rt", "rt-multi-thread"] }
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]

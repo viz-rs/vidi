@@ -1,6 +1,6 @@
 //! CSRF Middleware.
 
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, fmt, sync::Arc};
 
 use crate::{
     async_trait,
@@ -20,12 +20,17 @@ struct Inner<S, G, V> {
     verify: V,
 }
 
+/// The CSRF token source that is cookie or session.
+#[derive(Debug)]
 pub enum Store {
+    /// Via Cookie.
     Cookie,
     #[cfg(feature = "session")]
+    /// Via Session.
     Session,
 }
 
+/// Extracts CSRF token via cookie or session.
 #[derive(Debug, Clone)]
 pub struct CsrfToken(pub String);
 
@@ -41,17 +46,14 @@ impl FromRequest for CsrfToken {
     }
 }
 
+/// A configuration for [CsrfMiddleware].
 pub struct Config<S, G, V>(Arc<Inner<S, G, V>>);
 
-impl<S, G, V> Clone for Config<S, G, V> {
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
-    }
-}
-
 impl<S, G, V> Config<S, G, V> {
+    /// The name of CSRF header.
     pub const CSRF_TOKEN: &'static str = "x-csrf-token";
 
+    /// Creates a new configuration.
     pub fn new(
         store: Store,
         ignored_methods: HashSet<Method>,
@@ -71,6 +73,7 @@ impl<S, G, V> Config<S, G, V> {
         }))
     }
 
+    /// Gets the CSRF token from cookies or session.
     pub fn get(&self, req: &Request) -> Result<Option<Vec<u8>>> {
         let inner = self.as_ref();
         match inner.store {
@@ -96,6 +99,7 @@ impl<S, G, V> Config<S, G, V> {
         }
     }
 
+    /// Sets the CSRF token to cookies or session.
     #[allow(unused)]
     pub fn set(&self, req: &Request, token: String, secret: Vec<u8>) -> Result<()> {
         let inner = self.as_ref();
@@ -107,6 +111,12 @@ impl<S, G, V> Config<S, G, V> {
             #[cfg(feature = "session")]
             Store::Session => req.session().set(inner.cookie_options.name, secret),
         }
+    }
+}
+
+impl<S, G, V> Clone for Config<S, G, V> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
     }
 }
 
@@ -122,6 +132,16 @@ impl<S, G, V> AsRef<Inner<S, G, V>> for Config<S, G, V> {
     }
 }
 
+impl<S, G, V> fmt::Debug for Config<S, G, V> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CsrfConfig")
+            .field("header", &self.as_ref().header)
+            .field("cookie_options", &self.as_ref().cookie_options)
+            .field("ignored_methods", &self.as_ref().ignored_methods)
+            .finish()
+    }
+}
+
 impl<H, S, G, V> Transform<H> for Config<S, G, V> {
     type Output = CsrfMiddleware<H, S, G, V>;
 
@@ -133,6 +153,8 @@ impl<H, S, G, V> Transform<H> for Config<S, G, V> {
     }
 }
 
+/// CSRF middleware.
+#[derive(Debug)]
 pub struct CsrfMiddleware<H, S, G, V> {
     h: H,
     config: Config<S, G, V>,

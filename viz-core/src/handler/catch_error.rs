@@ -2,11 +2,12 @@ use std::marker::PhantomData;
 
 use crate::{async_trait, Handler, IntoResponse, Response, Result};
 
+/// Catches rejected error while calling the handler.
+#[derive(Debug)]
 pub struct CatchError<H, F, R, E> {
     h: H,
     f: F,
-    r: PhantomData<R>,
-    e: PhantomData<E>,
+    _maker: PhantomData<(R, E)>,
 }
 
 impl<H, F, R, E> Clone for CatchError<H, F, R, E>
@@ -18,20 +19,18 @@ where
         Self {
             h: self.h.clone(),
             f: self.f.clone(),
-            r: PhantomData,
-            e: PhantomData,
+            _maker: PhantomData,
         }
     }
 }
 
 impl<H, F, R, E> CatchError<H, F, R, E> {
     #[inline]
-    pub(crate) fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self {
             h,
             f,
-            r: PhantomData,
-            e: PhantomData,
+            _maker: PhantomData,
         }
     }
 }

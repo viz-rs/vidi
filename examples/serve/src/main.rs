@@ -2,9 +2,7 @@
 
 use std::env;
 use std::net::SocketAddr;
-use viz::{
-    any, get, handlers::serve, Request, Response, ResponseExt, Result, Router, Server, ServiceMaker,
-};
+use viz::{handlers::serve, Request, Response, ResponseExt, Result, Router, Server, ServiceMaker};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")
@@ -18,10 +16,10 @@ async fn main() -> Result<()> {
     let dir = env::current_dir().unwrap();
 
     let app = Router::new()
-        .route("/", get(index))
-        .route("/cargo.toml", get(serve::File::new(dir.join("Cargo.toml"))))
-        .route("/examples/*", get(serve::Dir::new(dir).listing()))
-        .route("/*", any(|_| async { Ok(Response::text("Welcome!")) }));
+        .get("/", index)
+        .get("/cargo.toml", serve::File::new(dir.join("Cargo.toml")))
+        .get("/examples/*", serve::Dir::new(dir).listing())
+        .any("/*", |_| async { Ok(Response::text("Welcome!")) });
 
     if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
         println!("{}", err);

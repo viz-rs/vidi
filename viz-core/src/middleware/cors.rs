@@ -1,6 +1,6 @@
 //! CORS Middleware.
 
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, fmt, sync::Arc};
 
 use crate::{
     async_trait,
@@ -16,6 +16,7 @@ use crate::{
     Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode, Transform,
 };
 
+/// A configuration for [CorsMiddleware].
 pub struct Config {
     max_age: usize,
     credentials: bool,
@@ -61,6 +62,19 @@ impl Clone for Config {
     }
 }
 
+impl fmt::Debug for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CorsConfig")
+            .field("max_age", &self.max_age)
+            .field("credentials", &self.credentials)
+            .field("allow_methods", &self.allow_methods)
+            .field("allow_headers", &self.allow_headers)
+            .field("allow_origins", &self.allow_origins)
+            .field("expose_headers", &self.expose_headers)
+            .finish()
+    }
+}
+
 impl<H> Transform<H> for Config {
     type Output = CorsMiddleware<H>;
 
@@ -75,7 +89,8 @@ impl<H> Transform<H> for Config {
     }
 }
 
-#[derive(Clone)]
+/// CORS middleware.
+#[derive(Debug, Clone)]
 pub struct CorsMiddleware<H> {
     h: H,
     config: Config,

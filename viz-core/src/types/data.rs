@@ -1,4 +1,4 @@
-//! Represents a shared-data extractor or handler/middleware. 
+//! Represents a shared-data extractor or handler/middleware.
 
 use std::{
     any::type_name,
@@ -11,7 +11,7 @@ use crate::{
     Request, RequestExt, Response, Result,
 };
 
-/// Data Extractor
+/// Extracts Data from the extensions of a request.
 pub struct Data<T: ?Sized>(pub T);
 
 impl<T> Data<T> {
@@ -21,6 +21,7 @@ impl<T> Data<T> {
         Self(data)
     }
 
+    /// Consumes the Data, returning the wrapped value.
     #[inline]
     pub fn into_inner(self) -> T {
         self.0
@@ -77,10 +78,6 @@ where
     }
 }
 
-fn error<T>() -> PayloadError {
-    PayloadError::Data(type_name::<T>())
-}
-
 impl<H, T> Transform<H> for Data<T>
 where
     T: Clone + Send + Sync + 'static,
@@ -107,4 +104,8 @@ where
         req.extensions_mut().insert(t.clone());
         h.call(req).await.map(IntoResponse::into_response)
     }
+}
+
+fn error<T>() -> PayloadError {
+    PayloadError::Data(type_name::<T>())
 }

@@ -1,6 +1,7 @@
 use crate::{async_trait, Error, Handler, Result};
 
-#[derive(Clone)]
+/// Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.
+#[derive(Debug, Clone)]
 pub struct OrElse<H, F> {
     h: H,
     f: F,
@@ -8,7 +9,7 @@ pub struct OrElse<H, F> {
 
 impl<H, F> OrElse<H, F> {
     #[inline]
-    pub(crate) fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

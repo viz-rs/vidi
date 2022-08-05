@@ -1,6 +1,7 @@
 use crate::{async_trait, Handler, Result};
 
-#[derive(Clone)]
+/// Calls `op` if the output is `Ok`, otherwise returns the `Err` value of the output.
+#[derive(Debug, Clone)]
 pub struct AndThen<H, F> {
     h: H,
     f: F,
@@ -8,7 +9,7 @@ pub struct AndThen<H, F> {
 
 impl<H, F> AndThen<H, F> {
     #[inline]
-    pub(crate) fn new(h: H, f: F) -> Self {
+    pub(super) fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }
