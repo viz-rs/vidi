@@ -1,0 +1,11 @@
+[package]
+name = "todos"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+viz = { path = "../../../viz" }
+
+serde = { version = "1.0.143", features = ["derive"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

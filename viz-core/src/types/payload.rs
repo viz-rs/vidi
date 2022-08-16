@@ -115,7 +115,7 @@ pub trait Payload {
             return Err(PayloadError::UnsupportedMediaType(Self::mime()));
         }
 
-        if len == None {
+        if len.is_none() {
             return Err(PayloadError::LengthRequired);
         }
 

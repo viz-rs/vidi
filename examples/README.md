@@ -16,6 +16,7 @@ Here you can find a lot of small crabs 🦀.
 * [CORS](cors)
 * [HTTPS/TLS - rustls](rustls)
 * [Defined a static router](static-routes)
+* [Todos](routing/todos)
 
 ### Usage
 

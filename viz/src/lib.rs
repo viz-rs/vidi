@@ -214,7 +214,7 @@
 //!
 //! We can add middleware to a single handler, or to all handlers.
 //!
-//! We also can use [`Transform`] trait for wrapping the inner handler during construction.
+//! We can also use [`Transform`] trait for wrapping the inner handler during construction.
 //!
 //! ```
 //! # use std::time::Duration;
