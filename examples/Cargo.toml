@@ -12,6 +12,7 @@ members = [
   "cors",
   "rustls",
   "static-routes",
+  "routing/todos",
 ]
 exclude = ["tls", "target"]
 

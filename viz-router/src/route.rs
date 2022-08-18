@@ -208,7 +208,7 @@ mod tests {
     use viz_core::{
         async_trait,
         handler::Transform,
-        types::{Data, Query},
+        types::{Query, State},
         Handler, HandlerExt, IntoHandler, IntoResponse, Method, Next, Request, Response, Result,
     };
 
@@ -333,7 +333,7 @@ mod tests {
             }
         }
 
-        async fn ext(_: Query<usize>, _: Data<Arc<String>>) -> Result<impl IntoResponse> {
+        async fn ext(_: Query<usize>, _: State<Arc<String>>) -> Result<impl IntoResponse> {
             Ok(vec![233])
         }
 
