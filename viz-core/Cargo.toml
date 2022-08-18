@@ -13,7 +13,7 @@ publish = true
 
 [features]
 default = [
-  "data",
+  "state",
   "limits",
   "params",
   "json",
@@ -25,7 +25,7 @@ default = [
   "session",
 ]
 
-data = []
+state = []
 limits = []
 
 params = ["serde"]

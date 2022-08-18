@@ -8,10 +8,12 @@ use tokio_stream::wrappers::IntervalStream;
 use viz::{
     get,
     header::ACCEPT,
-    types::{Data, Event, Sse},
+    types::{Event, Sse, State},
     Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
     Server, ServiceMaker, StatusCode,
 };
+
+type ArcSystem = Arc<System>;
 
 async fn index(_: Request) -> Result<Response> {
     Ok(Response::html::<&'static str>(include_str!(
@@ -19,14 +21,16 @@ async fn index(_: Request) -> Result<Response> {
     )))
 }
 
-async fn stats(mut req: Request) -> Result<impl IntoResponse> {
+async fn stats(req: Request) -> Result<impl IntoResponse> {
     // check request `Accept` header
     if !matches!(req.header::<_, String>(ACCEPT), Some(ts) if ts == mime::TEXT_EVENT_STREAM.as_ref())
     {
         Err(StatusCode::BAD_REQUEST.into_error())?
     }
 
-    let Data(sys): Data<Arc<System>> = req.extract().await?;
+    let sys = req
+        .state::<ArcSystem>()
+        .ok_or_else(|| StatusCode::INTERNAL_SERVER_ERROR.into_error())?;
 
     Ok(Sse::new(
         IntervalStream::new(interval(Duration::from_secs(10))).map(move |_| {
@@ -55,7 +59,7 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/", get(index))
-        .route("/stats", get(stats.with(Data::new(sys))));
+        .route("/stats", get(stats.with(State::new(sys))));
 
     if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
         println!("{}", err);

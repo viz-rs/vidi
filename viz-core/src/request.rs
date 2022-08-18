@@ -100,15 +100,15 @@ pub trait RequestExt {
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
     async fn multipart(&mut self) -> Result<Multipart, PayloadError>;
 
-    #[cfg(feature = "data")]
-    /// Return a shared data by the specified type.
-    fn data<T>(&self) -> Option<T>
+    #[cfg(feature = "state")]
+    /// Return a shared state by the specified type.
+    fn state<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
 
-    #[cfg(feature = "data")]
-    /// Store a shared data.
-    fn set_data<T>(&mut self, t: T) -> Option<T>
+    #[cfg(feature = "state")]
+    /// Store a shared state.
+    fn set_state<T>(&mut self, t: T) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
 
@@ -275,16 +275,16 @@ impl RequestExt for Request<Body> {
         ))
     }
 
-    #[cfg(feature = "data")]
-    fn data<T>(&self) -> Option<T>
+    #[cfg(feature = "state")]
+    fn state<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static,
     {
         self.extensions().get().cloned()
     }
 
-    #[cfg(feature = "data")]
-    fn set_data<T>(&mut self, t: T) -> Option<T>
+    #[cfg(feature = "state")]
+    fn set_state<T>(&mut self, t: T) -> Option<T>
     where
         T: Clone + Send + Sync + 'static,
     {

@@ -15,7 +15,7 @@ use crate::{
 pub struct Header<T: ?Sized>(pub T);
 
 impl<T> Header<T> {
-    /// Create new `Data` instance.
+    /// Create new `Header` instance.
     #[inline]
     pub fn new(t: T) -> Self {
         Self(t)

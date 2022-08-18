@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 use tokio::sync::broadcast::{channel, Sender};
 use viz::{
     get,
-    types::{Data, Message, Params, WebSocket},
+    types::{Message, Params, State, WebSocket},
     HandlerExt, IntoHandler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
     Router, Server, ServiceMaker,
 };
@@ -17,7 +17,7 @@ async fn index() -> Result<Response> {
 }
 
 async fn ws(mut req: Request) -> Result<impl IntoResponse> {
-    let (ws, Params(name), Data(sender)): (WebSocket, Params<String>, Data<Sender<String>>) =
+    let (ws, Params(name), State(sender)): (WebSocket, Params<String>, State<Sender<String>>) =
         req.extract().await?;
 
     let tx = sender.clone();
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/", get(index.into_handler()))
-        .route("/ws/:name", get(ws.with(Data::new(channel.0))));
+        .route("/ws/:name", get(ws.with(State::new(channel.0))));
 
     if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
         println!("{}", err);

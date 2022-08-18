@@ -1,4 +1,4 @@
-//! Represents a shared-data extractor or handler/middleware.
+//! Represents a shared-    data extractor or handler/middleware.
 
 use std::{
     any::type_name,
@@ -11,24 +11,24 @@ use crate::{
     Request, RequestExt, Response, Result,
 };
 
-/// Extracts Data from the extensions of a request.
-pub struct Data<T: ?Sized>(pub T);
+/// Extracts State from the extensions of a request.
+pub struct State<T: ?Sized>(pub T);
 
-impl<T> Data<T> {
-    /// Create new `Data` instance.
+impl<T> State<T> {
+    /// Create new `State` instance.
     #[inline]
     pub fn new(data: T) -> Self {
         Self(data)
     }
 
-    /// Consumes the Data, returning the wrapped value.
+    /// Consumes the State, returning the wrapped value.
     #[inline]
     pub fn into_inner(self) -> T {
         self.0
     }
 }
 
-impl<T> Clone for Data<T>
+impl<T> Clone for State<T>
 where
     T: Clone,
 {
@@ -37,13 +37,13 @@ where
     }
 }
 
-impl<T> AsRef<T> for Data<T> {
+impl<T> AsRef<T> for State<T> {
     fn as_ref(&self) -> &T {
         &self.0
     }
 }
 
-impl<T> Deref for Data<T> {
+impl<T> Deref for State<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -51,13 +51,13 @@ impl<T> Deref for Data<T> {
     }
 }
 
-impl<T> DerefMut for Data<T> {
+impl<T> DerefMut for State<T> {
     fn deref_mut(&mut self) -> &mut T {
         &mut self.0
     }
 }
 
-impl<T> fmt::Debug for Data<T>
+impl<T> fmt::Debug for State<T>
 where
     T: fmt::Debug,
 {
@@ -67,31 +67,31 @@ where
 }
 
 #[async_trait]
-impl<T> FromRequest for Data<T>
+impl<T> FromRequest for State<T>
 where
     T: Clone + Send + Sync + 'static,
 {
     type Error = PayloadError;
 
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
-        req.data().map(Self).ok_or_else(error::<T>)
+        req.state().map(Self).ok_or_else(error::<T>)
     }
 }
 
-impl<H, T> Transform<H> for Data<T>
+impl<H, T> Transform<H> for State<T>
 where
     T: Clone + Send + Sync + 'static,
 {
-    type Output = Data<(H, T)>;
+    type Output = State<(H, T)>;
 
     fn transform(&self, h: H) -> Self::Output {
-        Data((h, self.0.clone()))
+        State((h, self.0.clone()))
     }
 }
 
 // TODO: Maybe should be a `before` handler
 #[async_trait]
-impl<H, O, T> Handler<Request> for Data<(H, T)>
+impl<H, O, T> Handler<Request> for State<(H, T)>
 where
     O: IntoResponse,
     H: Handler<Request, Output = Result<O>> + Clone,
@@ -100,12 +100,12 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, mut req: Request) -> Self::Output {
-        let Data((h, t)) = self;
+        let Self((h, t)) = self;
         req.extensions_mut().insert(t.clone());
         h.call(req).await.map(IntoResponse::into_response)
     }
 }
 
 fn error<T>() -> PayloadError {
-    PayloadError::Data(type_name::<T>())
+    PayloadError::State(type_name::<T>())
 }

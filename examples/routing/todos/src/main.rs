@@ -8,7 +8,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 use viz::{
     middleware,
-    types::{Data, Json, Params, Query},
+    types::{Json, Params, Query, State},
     Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, Server,
     ServiceMaker, StatusCode,
 };
@@ -33,8 +33,8 @@ struct Pagination {
 
 // GET /todos?offset=0&limit=10
 async fn list(mut req: Request) -> Result<Response> {
-    let (Data(db), Query(Pagination { offset, limit })) =
-        req.extract::<(Data<DB>, Query<Pagination>)>().await?;
+    let (State(db), Query(Pagination { offset, limit })) =
+        req.extract::<(State<DB>, Query<Pagination>)>().await?;
 
     let todos = db
         .lock()
@@ -50,7 +50,7 @@ async fn list(mut req: Request) -> Result<Response> {
 
 // POST /todos
 async fn create(mut req: Request) -> Result<StatusCode> {
-    let (Data(db), Json(todo)) = req.extract::<(Data<DB>, Json<Todo>)>().await?;
+    let (State(db), Json(todo)) = req.extract::<(State<DB>, Json<Todo>)>().await?;
 
     let mut todos = db
         .lock()
@@ -67,7 +67,7 @@ async fn create(mut req: Request) -> Result<StatusCode> {
 
 // GET /todos/:id
 async fn show(mut req: Request) -> Result<Response> {
-    let (Data(db), Params(id)) = req.extract::<(Data<DB>, Params<u64>)>().await?;
+    let (State(db), Params(id)) = req.extract::<(State<DB>, Params<u64>)>().await?;
 
     let todos = db
         .lock()
@@ -84,8 +84,9 @@ async fn show(mut req: Request) -> Result<Response> {
 
 // PUT /todos/:id
 async fn update(mut req: Request) -> Result<StatusCode> {
-    let (Data(db), Params(id), Json(todo)) =
-        req.extract::<(Data<DB>, Params<u64>, Json<Todo>)>().await?;
+    let (State(db), Params(id), Json(todo)) = req
+        .extract::<(State<DB>, Params<u64>, Json<Todo>)>()
+        .await?;
 
     let mut todos = db
         .lock()
@@ -103,7 +104,7 @@ async fn update(mut req: Request) -> Result<StatusCode> {
 
 // DELETE /todos/:id
 async fn delete(mut req: Request) -> Result<StatusCode> {
-    let (Data(db), Params(id)) = req.extract::<(Data<DB>, Params<u64>)>().await?;
+    let (State(db), Params(id)) = req.extract::<(State<DB>, Params<u64>)>().await?;
 
     let mut todos = db
         .lock()
@@ -133,7 +134,7 @@ async fn main() -> Result<()> {
         .get("/todos/:id", show)
         .put("/todos/:id", update)
         .delete("/todos/:id", delete)
-        .with(Data::new(db))
+        .with(State::new(db))
         // Set limits for the payload data of request
         .with(middleware::limits::Config::new());
 

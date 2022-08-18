@@ -7,10 +7,10 @@ pub use cookie::CookieKey;
 #[cfg(feature = "cookie")]
 pub use cookie::{Cookie, CookieJar, Cookies, CookiesError, SameSite};
 
-#[cfg(feature = "data")]
-mod data;
-#[cfg(feature = "data")]
-pub use data::Data;
+#[cfg(feature = "state")]
+mod state;
+#[cfg(feature = "state")]
+pub use state::State;
 
 #[cfg(feature = "form")]
 mod form;
