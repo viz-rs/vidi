@@ -42,7 +42,7 @@ cookie-signed = ["cookie", "libcookie/signed"]
 
 session = ["cookie", "json", "sessions-core"]
 
-csrf = ["cookie"]
+csrf = ["cookie", "base64", "getrandom"]
 cors = []
 
 [dependencies]
@@ -55,17 +55,21 @@ http-body = "0.4.5"
 hyper = { version = "0.14", features = ["stream"] }
 mime = "0.3.16"
 bytes = "1.1"
+futures-util = "0.3.23"
+
 serde = { version = "1.0", features = ["derive"], optional = true }
 serde_json = { version = "1.0", optional = true }
 serde_urlencoded = { version = "0.7", optional = true }
 form-data = { version = "0.4.1", optional = true }
 sessions-core = { version = "0.3.4", optional = true }
-futures-util = "0.3.21"
 libcookie = { package = "cookie", version = "0.16.0", features = [
   "percent-encode",
 ], optional = true }
-getrandom = "0.2.7"
-base64 = "0.13.0"
+
+# CSRF
+getrandom = { version = "0.2.7", optional = true }
+base64 = { version = "0.13.0", optional = true }
+
 tokio = { version = "1.20", optional = true }
 tokio-tungstenite = { version = "0.17.2", optional = true }
 # TODO: EmbedHandler
