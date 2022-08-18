@@ -5,6 +5,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-viz = { path = "../../viz", features = ["handlers"] }
+viz = { path = "../../../viz", features = ["serve"] }
 
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

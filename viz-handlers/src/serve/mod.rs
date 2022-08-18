@@ -26,7 +26,7 @@ mod error;
 use directory::Directory;
 pub use error::Error;
 
-/// Serve a single file handler.
+/// Serve a single file.
 #[derive(Clone, Debug)]
 pub struct File {
     path: PathBuf,
@@ -54,7 +54,7 @@ impl Handler<Request> for File {
     }
 }
 
-/// Serve a directory handler.
+/// Serve a directory.
 #[derive(Clone, Debug)]
 pub struct Dir {
     path: PathBuf,
@@ -163,6 +163,7 @@ fn extract_etag(mtime: &SystemTime, size: u64) -> Option<ETag> {
     .ok()
 }
 
+#[inline]
 async fn serve(path: &Path, headers: &HeaderMap) -> Result<Response> {
     let mut file = std::fs::File::open(path).map_err(Error::Io)?;
     let metadata = file

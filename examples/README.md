@@ -6,7 +6,8 @@ Here you can find a lot of small crabs 🦀.
 
 * [Hello world](hello-world)
 * [Unix socket domain](unix-socket)
-* [Static file serving and directory listing](serve)
+* [Static file serving and directory listing](static-files/serve)
+* [Static files serving and embedding](static-files/embed)
 * [Extract body from Form](forms/form)
 * [Extract body from Multipart](forms/multipart)
 * [Websockt Chat](websocket-chat)

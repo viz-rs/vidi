@@ -1,4 +1,4 @@
-<h1 align="center">Víz Handlers</h1>
+<h1 align="center">Viz Handlers</h1>
 
 <div align="center">
   <p><strong>Stand-alone handlers for Viz</strong></p>
@@ -28,6 +28,7 @@
 Feature              | Description
 -------------------- | ------------
 [serve](./src/serve) | Static file serving and directory listing
+[embed](./src/embed) | Static files serving and embedding
 
 ## License
 

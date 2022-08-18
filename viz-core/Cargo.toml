@@ -72,8 +72,6 @@ base64 = { version = "0.13.0", optional = true }
 
 tokio = { version = "1.20", optional = true }
 tokio-tungstenite = { version = "0.17.2", optional = true }
-# TODO: EmbedHandler
-rust-embed = { version = "6.4", optional = true }
 tokio-stream = { version = "0.1.9", optional = true }
 tokio-util = { version = "0.7.3", optional = true }
 

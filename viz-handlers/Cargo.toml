@@ -22,6 +22,8 @@ serve = [
   "tokio/io-util",
 ]
 
+embed = ["hex", "mime_guess", "rust-embed"]
+
 [dependencies]
 viz-core = { path = "../viz-core", version = '0.3.1' }
 
@@ -30,6 +32,8 @@ thiserror = "1.0"
 
 percent-encoding = { version = "2.1.0", optional = true }
 mime_guess = { version = "2.0", optional = true }
+rust-embed = { version = "6.4", optional = true }
+hex = { version = "0.4", optional = true }
 tokio = { version = "1.20", optional = true }
 tokio-stream = { version = "0.1.9", optional = true }
 tokio-util = { version = "0.7.3", optional = true }

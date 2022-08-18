@@ -20,3 +20,6 @@
 
 #[cfg(feature = "serve")]
 pub mod serve;
+
+#[cfg(feature = "embed")]
+pub mod embed;

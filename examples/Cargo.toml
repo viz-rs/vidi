@@ -2,7 +2,8 @@
 members = [
   "hello-world",
   "unix-socket",
-  "serve",
+  "static-files/embed",
+  "static-files/serve",
   "forms/form",
   "forms/multipart",
   "websocket-chat",
