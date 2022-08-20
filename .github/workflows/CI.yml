@@ -26,42 +26,72 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
       - name: Install Rust
-        # --no-self-update is necessary because the windows environment cannot self-update rustup.exe.
-        run: rustup update nightly --no-self-update && rustup default nightly
-      - run: cargo test --workspace --all --verbose
-      - run: cargo test --workspace --all --verbose --release --manifest-path examples/Cargo.toml
-      - run: cargo build --workspace --all --verbose --release --manifest-path examples/Cargo.toml
+        uses: dtolnay/rust-toolchain@v1  
+        with:
+          toolchain: nightly
+      - name: Test cases
+        run: |
+          cargo test --workspace --all --verbose
+          cargo test --workspace --all --verbose --release --manifest-path examples/Cargo.toml
+          cargo build --workspace --all --verbose --release --manifest-path examples/Cargo.toml
       - name: Show Examples Release files
         if: matrix.os != 'windows-latest'
-        run: ls -la examples/target/release
+        run: |
+          ls -la examples/target/release
 
   clippy:
     name: cargo clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
       - name: Install Rust
-        run: rustup toolchain install nightly --component clippy && rustup default nightly
-      - run: cargo clippy --workspace --all-targets
-      - run: cargo clippy --workspace --all-targets --manifest-path examples/Cargo.toml
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
+          components: clippy     
+      - name: Check Clippy
+        run: |
+          cargo clippy --workspace --all-targets
+          cargo clippy --workspace --all-targets --manifest-path examples/Cargo.toml
 
   fmt:
     name: cargo fmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
       - name: Install Rust
-        run: rustup update stable
-      - run: cargo fmt --all -- --check
-      - run: cargo fmt --all --manifest-path examples/Cargo.toml -- --check
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
+      - name: Check formatting
+        run: |
+          cargo fmt --all -- --check
+          cargo fmt --all --manifest-path examples/Cargo.toml -- --check
 
   docs:
     name: cargo doc
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
       - name: Install Rust
-        run: rustup update nightly && rustup default nightly
-      - run: RUSTDOCFLAGS="-D warnings --cfg docsrs" cargo doc --workspace --no-deps
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
+      - name: Check documenting
+        run: |
+          RUSTDOCFLAGS="-D warnings --cfg docsrs" cargo doc --workspace --no-deps
