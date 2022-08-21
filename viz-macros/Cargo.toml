@@ -2,6 +2,7 @@
 name = "viz-macros"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.61"
 license = "MIT OR Apache-2.0"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
 homepage = "https://viz.rs"
