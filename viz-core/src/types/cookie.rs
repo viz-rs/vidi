@@ -10,11 +10,11 @@ use crate::{
     ThisError,
 };
 
-pub use libcookie::{Cookie, CookieJar, SameSite};
+pub use ::cookie::{Cookie, CookieJar, SameSite};
 
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
 /// A cryptographic master key for use with `Signed` and/or `Private` jars.
-pub type CookieKey = libcookie::Key;
+pub type CookieKey = ::cookie::Key;
 
 /// Extracts the cookies from the request.
 pub struct Cookies {

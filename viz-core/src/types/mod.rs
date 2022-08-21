@@ -3,9 +3,9 @@
 #[cfg(feature = "cookie")]
 mod cookie;
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
-pub use cookie::CookieKey;
+pub use self::cookie::CookieKey;
 #[cfg(feature = "cookie")]
-pub use cookie::{Cookie, CookieJar, Cookies, CookiesError, SameSite};
+pub use self::cookie::{Cookie, CookieJar, Cookies, CookiesError, SameSite};
 
 #[cfg(feature = "state")]
 mod state;
