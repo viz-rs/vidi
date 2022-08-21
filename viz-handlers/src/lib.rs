@@ -23,3 +23,6 @@ pub mod serve;
 
 #[cfg(feature = "embed")]
 pub mod embed;
+
+#[cfg(feature = "prometheus")]
+pub mod prometheus;

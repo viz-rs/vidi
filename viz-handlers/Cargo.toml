@@ -15,15 +15,17 @@ publish = true
 default = ["serve"]
 
 serve = [
-  "mime_guess",
-  "percent-encoding",
-  "tokio-stream",
+  "dep:mime_guess",
+  "dep:percent-encoding",
+  "dep:tokio-stream",
   "tokio-util/io",
   "tokio/fs",
   "tokio/io-util",
 ]
 
-embed = ["hex", "mime_guess", "rust-embed"]
+embed = ["dep:hex", "dep:mime_guess", "dep:rust-embed"]
+
+prometheus = ["dep:opentelemetry", "dep:opentelemetry-prometheus"]
 
 [dependencies]
 viz-core = { path = "../viz-core", version = '0.3.1' }
@@ -31,13 +33,23 @@ viz-core = { path = "../viz-core", version = '0.3.1' }
 # required!
 thiserror = "1.0"
 
-percent-encoding = { version = "2.1.0", optional = true }
+# serve & embed
 mime_guess = { version = "2.0", optional = true }
-rust-embed = { version = "6.4", optional = true }
-hex = { version = "0.4", optional = true }
+
+# serve
+percent-encoding = { version = "2.1.0", optional = true }
 tokio = { version = "1.20", optional = true }
 tokio-stream = { version = "0.1.9", optional = true }
 tokio-util = { version = "0.7.3", optional = true }
+
+# embed
+hex = { version = "0.4", optional = true }
+rust-embed = { version = "6.4", optional = true }
+
+# OpenTelemetry
+opentelemetry = { version = "0.17.0", optional = true }
+# Prometheus Exporter
+opentelemetry-prometheus = { version = "0.10.0",  features = ["prometheus-encoding"], optional = true }
 
 [package.metadata.docs.rs]
 all-features = true

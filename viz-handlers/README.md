@@ -29,12 +29,17 @@
       alt="Download" /></a>
 </div>
 
-## Crate Features
+## Features
 
-Feature              | Description
--------------------- | ------------
-[serve](./src/serve) | Static file serving and directory listing
-[embed](./src/embed) | Static files serving and embedding
+Feature      | Description
+------------ | ------------
+[serve]      | Static file serving and directory listing
+[embed]      | Static files serving and embedding
+[prometheus] | OpenTelemetry(OTEL) Prometheus Exporter
+
+[serve]: https://docs.rs/viz-handlers/latest/viz_handlers/serve
+[embed]: https://docs.rs/viz-handlers/latest/viz_handlers/embed
+[prometheus]: https://docs.rs/viz-handlers/latest/viz_handlers/prometheus
 
 ## License
 
