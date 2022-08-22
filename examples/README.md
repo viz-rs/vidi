@@ -18,6 +18,8 @@ Here you can find a lot of small crabs 🦀.
 * [HTTPS/TLS - rustls](rustls)
 * [Defined a static router](static-routes)
 * [Todos](routing/todos)
+* [Integration Opentelemetry(OTEL)](https://github.com/open-telemetry/opentelemetry-rust)
+  * [Prometheus Exporter](otel/prometheus)
 
 ### Usage
 

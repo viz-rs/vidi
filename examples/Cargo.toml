@@ -14,6 +14,7 @@ members = [
   "rustls",
   "static-routes",
   "routing/todos",
+  "otel/*",
 ]
 exclude = ["tls", "target"]
 

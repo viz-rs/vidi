@@ -46,6 +46,8 @@ session = ["cookie", "json", "dep:sessions-core"]
 csrf = ["cookie", "dep:base64", "dep:getrandom"]
 cors = []
 
+otel = ["dep:opentelemetry"]
+
 [dependencies]
 async-trait = "0.1.56"
 bytes = "1.1"
@@ -68,6 +70,9 @@ sessions-core = { version = "0.3.4", optional = true }
 # CSRF
 getrandom = { version = "0.2.7", optional = true }
 base64 = { version = "0.13.0", optional = true }
+
+# OpenTelemetry
+opentelemetry = { version = "0.17.0", optional = true }
 
 tokio = { version = "1.20", optional = true }
 tokio-tungstenite = { version = "0.17.2", optional = true }
