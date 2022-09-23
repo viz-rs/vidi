@@ -15,7 +15,7 @@ pub use opentelemetry_prometheus::ExporterBuilder;
 
 /// The [`PrometheusExporter`] wrapper.
 ///
-/// [`PrometheusExporter`]: https://docs.rs/opentelemetry-prometheus/latest/opentelemetry_prometheus/struct.PrometheusExporter.html
+/// [`PrometheusExporter`]: opentelemetry_prometheus::PrometheusExporter
 #[derive(Clone, Debug)]
 pub struct Exporter {
     inner: PrometheusExporter,

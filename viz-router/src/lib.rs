@@ -26,6 +26,7 @@ mod route;
 mod router;
 mod tree;
 
+pub use path_tree::{Path, PathTree};
 pub use resources::Resources;
 pub use route::*;
 pub use router::Router;

@@ -16,7 +16,7 @@ default = []
 
 [dependencies]
 viz-core = { path = "../viz-core", version = "0.3.1" }
-path-tree = "0.4"
+path-tree = { version = "0.5.1" }
 serde = "1.0"
 thiserror = "1.0"
 

@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter, Result};
 
-use path_tree::PathTree;
+use path_tree::{Path, PathTree};
 
 use viz_core::{BoxHandler, Method};
 
@@ -16,11 +16,10 @@ impl Tree {
         &'a self,
         method: &'a Method,
         path: &'a str,
-    ) -> Option<(&'a BoxHandler, Vec<(&'a str, &'a str)>)> {
+    ) -> Option<Path<'_, 'a, BoxHandler>> {
         self.0
             .iter()
-            .find_map(|(m, t)| if m == method { Some(t) } else { None })
-            .and_then(|t| t.find(path))
+            .find_map(|(m, t)| if m == method { t.find(path) } else { None })
     }
 
     /// Consumes the Tree, returning the wrapped value.

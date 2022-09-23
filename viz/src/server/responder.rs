@@ -8,7 +8,8 @@ use std::{
 };
 
 use crate::{
-    types::Params, Handler, IntoResponse, Method, Request, RequestExt, Response, StatusCode, Tree,
+    types::{Params, Route},
+    Handler, IntoResponse, Method, Request, RequestExt, Response, StatusCode, Tree,
 };
 
 /// Handles the HTTP [`Request`] and retures the HTTP [`Response`].
@@ -32,8 +33,7 @@ impl Responder {
     ) -> Result<Response, Infallible> {
         let method = req.method().to_owned();
         let path = req.path().to_owned();
-
-        Ok(
+        let responed = Ok(
             match tree.find(&method, &path).or_else(|| {
                 if method == Method::HEAD {
                     tree.find(&Method::GET, &path)
@@ -41,17 +41,23 @@ impl Responder {
                     None
                 }
             }) {
-                Some((handler, params)) => {
+                Some(route) => {
                     req.extensions_mut().insert(addr);
-                    req.extensions_mut().insert(Into::<Params>::into(params));
-                    handler
+                    req.extensions_mut()
+                        .insert(Into::<Params>::into(route.params()));
+                    req.extensions_mut()
+                        .insert(Route::new(*route.id, route.pattern()));
+                    req.set_state(tree.clone());
+                    route
+                        .value
                         .call(req)
                         .await
                         .unwrap_or_else(IntoResponse::into_response)
                 }
                 None => StatusCode::NOT_FOUND.into_response(),
             },
-        )
+        );
+        responed
     }
 }
 

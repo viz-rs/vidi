@@ -61,6 +61,8 @@ pub use websocket::{Message, WebSocket, WebSocketConfig, WebSocketError, WebSock
 
 mod header;
 mod payload;
+mod route;
 
 pub use header::{Header, HeaderError};
 pub use payload::{Payload, PayloadError};
+pub use route::Route;

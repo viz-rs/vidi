@@ -1,6 +1,10 @@
 use std::mem::replace;
 
-use crate::{async_trait, header, types::PayloadError, Body, Bytes, FromRequest, Request, Result};
+use crate::{
+    async_trait, header,
+    types::{PayloadError, Route},
+    Body, Bytes, FromRequest, Request, Result,
+};
 
 #[cfg(feature = "limits")]
 use crate::types::Limits;
@@ -142,6 +146,9 @@ pub trait RequestExt {
     where
         T: std::str::FromStr,
         T::Err: std::fmt::Display;
+
+    /// Get current route.
+    fn route(&self) -> &Route;
 }
 
 #[async_trait]
@@ -343,5 +350,9 @@ impl RequestExt for Request<Body> {
             .get::<Params>()
             .ok_or(ParamsError::Empty)?
             .find(name)
+    }
+
+    fn route(&self) -> &Route {
+        self.extensions().get().expect("should get current route")
     }
 }
