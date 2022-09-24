@@ -68,9 +68,9 @@ viz-handlers = { path = "../viz-handlers", version = "0.2.1", default-features =
 viz-macros = { path = "../viz-macros", version = "0.1.0", optional = true }
 
 hyper = { version = "0.14", features = ["server", "stream", "tcp"] }
-tokio = { version = "1.20", features = ["net"] }
+tokio = { version = "1.21", features = ["net"] }
 
-futures-util = { version = "0.3.23", optional = true }
+futures-util = { version = "0.3.24", optional = true }
 rustls-pemfile = { version = "1.0.0", optional = true }
 tokio-rustls = { version = "0.23.4", optional = true }
 tokio-native-tls = { version = "0.3.0", optional = true }

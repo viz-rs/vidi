@@ -4,7 +4,7 @@ use bytes::{BufMut, BytesMut};
 use crate::{header, Body, Response, Result, StatusCode};
 
 /// The [Response] Extension.
-pub trait ResponseExt {
+pub trait ResponseExt: Sized {
     /// The response with the specified [`Content-Type`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type>

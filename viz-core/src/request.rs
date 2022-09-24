@@ -34,7 +34,10 @@ use crate::types::{Params, ParamsError, PathDeserializer};
 
 /// The [Request] Extension.
 #[async_trait]
-pub trait RequestExt {
+pub trait RequestExt: Sized {
+    /// Get URL's schema of this request.
+    fn schema(&self) -> Option<&http::uri::Scheme>;
+
     /// Get URL's path of this request.
     fn path(&self) -> &str;
 
@@ -149,10 +152,17 @@ pub trait RequestExt {
 
     /// Get current route.
     fn route(&self) -> &Route;
+
+    /// Get remote addr.
+    fn remote_addr(&self) -> Option<&std::net::SocketAddr>;
 }
 
 #[async_trait]
 impl RequestExt for Request<Body> {
+    fn schema(&self) -> Option<&http::uri::Scheme> {
+        self.uri().scheme()
+    }
+
     fn path(&self) -> &str {
         self.uri().path()
     }
@@ -350,6 +360,10 @@ impl RequestExt for Request<Body> {
             .get::<Params>()
             .ok_or(ParamsError::Empty)?
             .find(name)
+    }
+
+    fn remote_addr(&self) -> Option<&std::net::SocketAddr> {
+        self.extensions().get()
     }
 
     fn route(&self) -> &Route {

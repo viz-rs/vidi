@@ -37,19 +37,19 @@ thiserror = "1.0"
 mime_guess = { version = "2.0", optional = true }
 
 # serve
-percent-encoding = { version = "2.1.0", optional = true }
-tokio = { version = "1.20", optional = true }
-tokio-stream = { version = "0.1.9", optional = true }
-tokio-util = { version = "0.7.3", optional = true }
+percent-encoding = { version = "2.2.0", optional = true }
+tokio = { version = "1.21", optional = true }
+tokio-stream = { version = "0.1.10", optional = true }
+tokio-util = { version = "0.7.4", optional = true }
 
 # embed
 hex = { version = "0.4", optional = true }
-rust-embed = { version = "6.4", optional = true }
+rust-embed = { version = "6.4.1", optional = true }
 
 # OpenTelemetry
-opentelemetry = { version = "0.17.0", optional = true }
+opentelemetry = { version = "0.18.0", optional = true }
 # Prometheus Exporter
-opentelemetry-prometheus = { version = "0.10.0",  features = ["prometheus-encoding"], optional = true }
+opentelemetry-prometheus = { version = "0.11.0",  features = ["prometheus-encoding"], optional = true }
 
 [package.metadata.docs.rs]
 all-features = true

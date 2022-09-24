@@ -24,6 +24,7 @@ default = [
   "websocket",
   "cookie",
   "session",
+  "otel"
 ]
 
 state = []
@@ -46,19 +47,19 @@ session = ["cookie", "json", "dep:sessions-core"]
 csrf = ["cookie", "dep:base64", "dep:getrandom"]
 cors = []
 
-otel = ["dep:opentelemetry"]
+otel = ["dep:opentelemetry", "dep:opentelemetry-semantic-conventions"]
 
 [dependencies]
 async-trait = "0.1.56"
 bytes = "1.1"
 dyn-clone = "1.0.8"
-futures-util = "0.3.23"
-headers = "0.3.7"
+futures-util = "0.3.24"
+headers = "0.3.8"
 http = "0.2.7"
 http-body = "0.4.5"
 hyper = { version = "0.14", features = ["stream"] }
 mime = "0.3.16"
-thiserror = "1.0.31"
+thiserror = "1.0.35"
 
 cookie = { version = "0.16.0", features = ["percent-encode"], optional = true }
 form-data = { version = "0.4.1", optional = true }
@@ -72,17 +73,17 @@ getrandom = { version = "0.2.7", optional = true }
 base64 = { version = "0.13.0", optional = true }
 
 # OpenTelemetry
-opentelemetry = { version = "0.17.0", optional = true }
+opentelemetry = { version = "0.18.0", optional = true }
+opentelemetry-semantic-conventions = { version = "0.10.0", optional = true }
 
-tokio = { version = "1.20", optional = true }
+tokio = { version = "1.21", optional = true }
 tokio-tungstenite = { version = "0.17.2", optional = true }
-tokio-stream = { version = "0.1.9", optional = true }
-tokio-util = { version = "0.7.3", optional = true }
+tokio-stream = { version = "0.1.10", optional = true }
+tokio-util = { version = "0.7.4", optional = true }
+rfc7239 = "0.1.0"
 
 [dev-dependencies]
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
-# https://github.com/dtolnay/trybuild/pull/172
-trybuild = { version = "1.0.61", git = "https://github.com/Anders429/trybuild" }
+tokio = { version = "1.21", features = ["rt-multi-thread", "macros"] }
 
 [package.metadata.docs.rs]
 all-features = true
