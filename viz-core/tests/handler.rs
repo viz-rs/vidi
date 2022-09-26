@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 use viz_core::*;
-use tokio;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -277,8 +276,7 @@ async fn main() -> Result<()> {
             type Output = H::Output;
 
             async fn call(&self, (i, h): Next<I, H>) -> Self::Output {
-                let res = h.call(i).await;
-                res
+                h.call(i).await
             }
         }
 
@@ -314,21 +312,22 @@ async fn main() -> Result<()> {
                 name: "round 1".to_string(),
             })
             .map(map)
-            .catch_error(|_: CustomError2| async move {
-                "Custom Error 2"
-            })
-            .catch_unwind(|_: Box<dyn std::any::Any + Send>| async move {
-                panic!("Custom Error 2")
-            });
+            .catch_error(|_: CustomError2| async move { "Custom Error 2" })
+            .catch_unwind(
+                |_: Box<dyn std::any::Any + Send>| async move { panic!("Custom Error 2") },
+            );
 
-        assert!(Handler::call(&aa, Request::new(Body::empty())).await.is_ok());
+        assert!(Handler::call(&aa, Request::new(Body::empty()))
+            .await
+            .is_ok());
 
-        let th = MyAround{
+        let th = MyAround {
             name: "".to_string(),
         };
 
         // let rha = Responder::new(a);
-        let rha = aa.map_into_response()
+        let rha = aa
+            .map_into_response()
             .around(th.clone())
             .around(th)
             .around(MyAround {
@@ -339,14 +338,14 @@ async fn main() -> Result<()> {
             .map_err(map_err)
             .or_else(or_else);
         let rhb = b.map_into_response();
-        let rhc = c.map_into_response()
-            .catch_error(|_: CustomError2| async move {
-                "Custom Error 2"
-            })
+        let rhc = c
+            .map_into_response()
+            .catch_error(|_: CustomError2| async move { "Custom Error 2" })
             .catch_error2(|e: std::io::Error| async move {
                 (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
             });
-        let rhd = d.map_into_response()
+        let rhd = d
+            .map_into_response()
             .map(map)
             .and_then(and_then)
             .or_else(or_else)
@@ -354,7 +353,11 @@ async fn main() -> Result<()> {
         let rhe = e.map_into_response().after(after);
         let rhf = f.map_into_response();
         let rhg = g.map_into_response();
-        let rhh = h.into_handler().map_into_response().after(after).before(before);
+        let rhh = h
+            .into_handler()
+            .map_into_response()
+            .after(after)
+            .before(before);
         let rhi = i.into_handler().map_into_response();
         let rhj = j.into_handler().map_into_response();
         let rhk = k.into_handler().map_into_response();
@@ -365,7 +368,9 @@ async fn main() -> Result<()> {
 
         assert!(rha.call(Request::default()).await.is_ok());
 
-        assert!(Handler::call(&rha, Request::new(Body::empty())).await.is_ok());
+        assert!(Handler::call(&rha, Request::new(Body::empty()))
+            .await
+            .is_ok());
 
         assert!(rhb.call(Request::default()).await.is_err());
         // dbg!(rhc.call(Request::default()).await);
@@ -384,7 +389,11 @@ async fn main() -> Result<()> {
         // dbg!(Handler::call(&rhi, Request::default()).await);
 
         let brha: BoxHandler = rha.boxed();
-        let brhb: BoxHandler = Box::new(rhb).around(MyAround { name: "MyRound 3".to_string() }).boxed();
+        let brhb: BoxHandler = Box::new(rhb)
+            .around(MyAround {
+                name: "MyRound 3".to_string(),
+            })
+            .boxed();
         let brhc: BoxHandler = Box::new(rhc);
         let brhd: BoxHandler = Box::new(rhd);
         let brhe: BoxHandler = rhe.boxed();
@@ -407,7 +416,6 @@ async fn main() -> Result<()> {
 
         Ok(())
     }
-
 
     it_works().await
 }

@@ -67,14 +67,16 @@ Middleware                       | Description
 [csrf][m:csrf]                   | CSRF
 [limits][m:limits]               | Limits
 [session][m:session]             | Session
-[opentelemetry][m:opentelemetry] | OpenTelemetry
+[otel::tracing][m:otel::tracing] | OpenTelemetry Tracing
+[otel::metrics][m:otel::metrics] | OpenTelemetry Metrics
 
 [m:cookie]: https://docs.rs/viz-core/latest/viz_core/middleware/cookie
 [m:cors]: https://docs.rs/viz-core/latest/viz_core/middleware/cors
 [m:csrf]: https://docs.rs/viz-core/latest/viz_core/middleware/csrf
 [m:limits]: https://docs.rs/viz-core/latest/viz_core/middleware/limits
 [m:session]: https://docs.rs/viz-core/latest/viz_core/middleware/session
-[m:opentelemetry]: https://docs.rs/viz-core/latest/viz_core/middleware/opentelemetry
+[m:otel::tracing]: https://docs.rs/viz-core/latest/viz_core/middleware/otel/tracing
+[m:otel::metrics]: https://docs.rs/viz-core/latest/viz_core/middleware/otel/metrics
 
 
 ## License

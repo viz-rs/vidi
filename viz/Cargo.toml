@@ -56,7 +56,11 @@ macros = ["dep:viz-macros"]
 handlers = ["dep:viz-handlers"]
 serve = ["handlers", "viz-handlers?/serve"]
 embed = ["handlers", "viz-handlers?/embed"]
-prometheus = ["handlers", "viz-handlers?/prometheus"]
+
+otel = ["viz-core/otel"]
+otel-tracing = ["otel", "viz-core/otel-tracing"]
+otel-metrics = ["otel", "viz-core/otel-metrics"]
+otel-prometheus = ["handlers", "viz-handlers?/prometheus"]
 
 rustls = ["dep:rustls-pemfile", "dep:tokio-rustls", "dep:futures-util"]
 native-tls = ["dep:tokio-native-tls", "dep:futures-util"]

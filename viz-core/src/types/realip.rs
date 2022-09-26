@@ -54,10 +54,6 @@ impl RealIp {
             return Some(RealIp(real_ip));
         }
 
-        if let Some(addr) = req.remote_addr() {
-            Some(RealIp(addr.ip()))
-        } else {
-            None
-        }
+        req.remote_addr().map(|addr| RealIp(addr.ip()))
     }
 }

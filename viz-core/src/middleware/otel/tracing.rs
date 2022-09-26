@@ -1,4 +1,6 @@
-//! Opentelemetry request tracking middleware.
+//! Request tracing middleware with [OpenTelemetry].
+//!
+//! [OpenTelemetry]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
 
 use std::sync::Arc;
 
@@ -11,23 +13,21 @@ use opentelemetry::{
     },
     Context, Key, Value,
 };
-use opentelemetry_semantic_conventions::{
-    resource::{TELEMETRY_SDK_LANGUAGE, TELEMETRY_SDK_NAME, TELEMETRY_SDK_VERSION},
-    trace::{
-        EXCEPTION_MESSAGE,
-        HTTP_CLIENT_IP,
-        HTTP_FLAVOR,
-        HTTP_HOST,
-        HTTP_METHOD,
-        HTTP_RESPONSE_CONTENT_LENGTH,
-        HTTP_ROUTE,
-        HTTP_SCHEME, // , HTTP_SERVER_NAME
-        HTTP_STATUS_CODE,
-        HTTP_TARGET,
-        HTTP_USER_AGENT,
-        NET_HOST_PORT,
-        NET_PEER_IP,
-    },
+use opentelemetry_semantic_conventions::trace::{
+    EXCEPTION_MESSAGE,
+    HTTP_CLIENT_IP,
+    HTTP_FLAVOR,
+    HTTP_HOST,
+    HTTP_METHOD,
+    HTTP_RESPONSE_CONTENT_LENGTH,
+    HTTP_ROUTE,
+    HTTP_SCHEME,
+    // , HTTP_SERVER_NAME
+    HTTP_STATUS_CODE,
+    HTTP_TARGET,
+    HTTP_USER_AGENT,
+    NET_HOST_PORT,
+    NET_PEER_IP,
 };
 
 use crate::{
@@ -64,9 +64,7 @@ impl<H, T> Transform<H> for Config<T> {
     }
 }
 
-/// Opentelemetry tracing middleware.
-///
-/// [Opentelemetry]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
+/// OpenTelemetry tracing middleware.
 #[derive(Debug, Clone)]
 pub struct TracingMiddleware<H, T> {
     h: H,
@@ -162,10 +160,7 @@ impl<'a> Extractor for RequestHeaderCarrier<'a> {
 }
 
 fn build_attributes(req: &Request, http_route: &String) -> OrderMap<Key, Value> {
-    let mut attributes = OrderMap::<Key, Value>::with_capacity(11);
-    attributes.insert(TELEMETRY_SDK_NAME, env!("CARGO_CRATE_NAME").into());
-    attributes.insert(TELEMETRY_SDK_VERSION, env!("CARGO_PKG_VERSION").into());
-    attributes.insert(TELEMETRY_SDK_LANGUAGE, "rust".into());
+    let mut attributes = OrderMap::<Key, Value>::with_capacity(10);
     attributes.insert(
         HTTP_SCHEME,
         req.schema()

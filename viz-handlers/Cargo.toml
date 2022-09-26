@@ -25,7 +25,7 @@ serve = [
 
 embed = ["dep:hex", "dep:mime_guess", "dep:rust-embed"]
 
-prometheus = ["dep:opentelemetry", "dep:opentelemetry-prometheus"]
+prometheus = ["opentelemetry/metrics", "dep:opentelemetry-prometheus"]
 
 [dependencies]
 viz-core = { path = "../viz-core", version = '0.3.1' }
@@ -47,8 +47,7 @@ hex = { version = "0.4", optional = true }
 rust-embed = { version = "6.4.1", optional = true }
 
 # OpenTelemetry
-opentelemetry = { version = "0.18.0", optional = true }
-# Prometheus Exporter
+opentelemetry = { version = "0.18.0", default-features = false, optional = true }
 opentelemetry-prometheus = { version = "0.11.0",  features = ["prometheus-encoding"], optional = true }
 
 [package.metadata.docs.rs]

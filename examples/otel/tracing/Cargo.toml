@@ -1,11 +1,11 @@
 [package]
-name = "tracing"
+name = "otel-tracing"
 version = "0.1.0"
 edition = "2021"
 publish = false
 
 [dependencies]
-viz = { path = "../../../viz" }
+viz = { path = "../../../viz", features = ["otel-tracing"] }
 
 tokio = { version = "1.0", features = [
   "rt-multi-thread",

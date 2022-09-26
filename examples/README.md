@@ -19,7 +19,8 @@ Here you can find a lot of small crabs 🦀.
 * [Defined a static router](static-routes)
 * [Todos](routing/todos)
 * [Integration Opentelemetry(OTEL)](https://github.com/open-telemetry/opentelemetry-rust)
-  * [Prometheus Exporter](otel/prometheus)
+  * [Tracing](otel/tracing)
+  * [Metrics & Prometheus](otel/metrics)
 
 ### Usage
 
