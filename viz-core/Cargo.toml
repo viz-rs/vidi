@@ -23,7 +23,7 @@ default = [
   "multipart",
   "websocket",
   "cookie",
-  "session"
+  "session",
 ]
 
 state = []
@@ -45,6 +45,8 @@ session = ["cookie", "json", "dep:sessions-core"]
 
 csrf = ["cookie", "dep:base64", "dep:getrandom"]
 cors = []
+
+compression = ["dep:tokio-util", "dep:async-compression"]
 
 otel = ["dep:opentelemetry", "dep:opentelemetry-semantic-conventions"]
 otel-tracing = ["otel", "opentelemetry?/trace"]
@@ -73,6 +75,9 @@ sessions-core = { version = "0.3.4", optional = true }
 # CSRF
 getrandom = { version = "0.2.7", optional = true }
 base64 = { version = "0.13.0", optional = true }
+
+# Compression
+async-compression = { version = "0.3.14", features = ["tokio", "gzip", "brotli", "deflate"], optional = true }
 
 # OpenTelemetry
 opentelemetry = { version = "0.18.0", default-features = false, optional = true }

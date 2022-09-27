@@ -49,6 +49,8 @@ session = ["cookie", "viz-core/session"]
 csrf = ["cookie", "viz-core/csrf"]
 cors = ["viz-core/cors"]
 
+compression = ["viz-core/compression"]
+
 unix-socket = []
 
 macros = ["dep:viz-macros"]

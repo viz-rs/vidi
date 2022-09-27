@@ -16,3 +16,6 @@ pub mod otel;
 
 #[cfg(feature = "cookie")]
 pub mod helper;
+
+#[cfg(feature = "compression")]
+pub mod compression;
