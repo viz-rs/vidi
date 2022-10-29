@@ -105,7 +105,7 @@ impl<S, G, V> Config<S, G, V> {
         let inner = self.as_ref();
         match inner.store {
             Store::Cookie => {
-                self.set_cookie(&req.cookies()?, &token);
+                self.set_cookie(&req.cookies()?, token);
                 Ok(())
             }
             #[cfg(feature = "session")]

@@ -9,7 +9,7 @@ use tokio_stream::wrappers::IntervalStream;
 use crate::{
     header::{CACHE_CONTROL, CONTENT_TYPE},
     headers::{Connection, HeaderMapExt, HeaderValue},
-    Error, IntoResponse, Response, ResponseExt, Result,
+    Bytes, IntoResponse, Response, ResponseExt,
 };
 
 mod event;
@@ -25,7 +25,7 @@ pub struct Sse<S> {
 
 impl<S> Sse<S>
 where
-    S: Stream<Item = Event> + Send + 'static,
+    S: Stream<Item = Event> + Send + Sync + 'static,
 {
     /// Creates a new Server-Sent Event.
     pub fn new(stream: S) -> Self {
@@ -44,15 +44,15 @@ where
 
 impl<S> IntoResponse for Sse<S>
 where
-    S: Stream<Item = Event> + Send + 'static,
+    S: Stream<Item = Event> + Send + Sync + 'static,
 {
     fn into_response(self) -> Response {
-        let stream = self.stream.map(Result::<_, Error>::Ok);
+        let stream = self.stream.map(|e| Ok::<Bytes, std::io::Error>(e.into()));
         let mut res = if let Some(duration) = self.interval {
             Response::stream(select(
                 stream,
                 IntervalStream::new(interval_at(Instant::now(), duration))
-                    .map(|_| Ok(Event::default().comment(":\n\n"))),
+                    .map(|_| Ok(Event::default().comment(":\n\n").into())),
             ))
         } else {
             Response::stream(stream)

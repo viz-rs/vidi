@@ -1,15 +1,8 @@
-use std::{
-    convert::Infallible,
-    future::Future,
-    net::SocketAddr,
-    pin::Pin,
-    sync::Arc,
-    task::{Context, Poll},
-};
+use std::{convert::Infallible, future::Future, net::SocketAddr, pin::Pin, sync::Arc};
 
 use crate::{
     types::{Params, RouteInfo},
-    Handler, IntoResponse, Method, Request, RequestExt, Response, StatusCode, Tree,
+    Handler, Incoming, IncomingBody, IntoResponse, Method, Request, Response, StatusCode, Tree,
 };
 
 /// Handles the HTTP [`Request`] and retures the HTTP [`Response`].
@@ -27,12 +20,12 @@ impl Responder {
 
     /// Serves a request and returns a response.
     async fn serve(
-        mut req: Request,
+        mut req: Request<Incoming>,
         tree: Arc<Tree>,
         addr: Option<SocketAddr>,
     ) -> Result<Response, Infallible> {
         let method = req.method().to_owned();
-        let path = req.path().to_owned();
+        let path = req.uri().path().to_owned();
         let responed = Ok(
             match tree.find(&method, &path).or_else(|| {
                 if method == Method::HEAD {
@@ -50,7 +43,7 @@ impl Responder {
                     }));
                     // req.set_state(tree.clone());
                     handler
-                        .call(req)
+                        .call(req.map(|body| IncomingBody::new(Some(body))))
                         .await
                         .unwrap_or_else(IntoResponse::into_response)
                 }
@@ -61,18 +54,13 @@ impl Responder {
     }
 }
 
-impl hyper::service::Service<Request> for Responder {
+impl hyper::service::Service<Request<Incoming>> for Responder {
     type Response = Response;
     type Error = Infallible;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     #[inline]
-    fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
-    }
-
-    #[inline]
-    fn call(&mut self, req: Request) -> Self::Future {
+    fn call(&mut self, req: Request<Incoming>) -> Self::Future {
         Box::pin(Self::serve(req, self.tree.clone(), self.addr))
     }
 }

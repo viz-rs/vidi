@@ -7,8 +7,5 @@ publish = false
 [dependencies]
 viz = { path = "../../../viz", features = ["otel-metrics", "otel-prometheus"] }
 
-tokio = { version = "1.0", features = [
-  "rt-multi-thread",
-  "macros",
-] }
-opentelemetry = { version = "0.18.0", default-features = false, features = ["metrics"]}
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+opentelemetry = { workspace = true, default-features = false, features = ["metrics"]}

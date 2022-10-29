@@ -7,6 +7,6 @@ publish = false
 [dependencies]
 viz = { path = "../../viz" }
 
-hyper = { version = "0.14" }
+hyper = "1.0.0-rc.1"
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
 once_cell = "1.13"

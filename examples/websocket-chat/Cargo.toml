@@ -7,5 +7,5 @@ publish = false
 [dependencies]
 viz = { path = "../../viz", features = ["websocket"] }
 
-tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros"] }
-futures-util = "0.3.21"
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
+futures-util.workspace = true

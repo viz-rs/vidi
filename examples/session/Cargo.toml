@@ -8,5 +8,5 @@ publish = false
 viz = { path = "../../viz", features = ["session"] }
 sessions = { version = "0.3.4", features = ["memory"] }
 
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 nano-id = "0.2"

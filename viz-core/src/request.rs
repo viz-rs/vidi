@@ -3,13 +3,14 @@ use std::{mem::replace, sync::Arc};
 use crate::{
     async_trait, header,
     types::{PayloadError, RouteInfo},
-    Body, Bytes, FromRequest, Request, Result,
+    Bytes, FromRequest, Incoming, IncomingBody, Request, Result,
 };
+use http_body_util::{BodyExt, Collected};
 
 #[cfg(feature = "limits")]
 use crate::types::Limits;
 #[cfg(feature = "limits")]
-use http_body::{LengthLimitError, Limited};
+use http_body_util::{LengthLimitError, Limited};
 
 #[cfg(any(feature = "form", feature = "json", feature = "multipart"))]
 use crate::types::Payload;
@@ -66,6 +67,9 @@ pub trait RequestExt: Sized {
     async fn extract<T>(&mut self) -> Result<T, T::Error>
     where
         T: FromRequest;
+
+    /// Get Incoming body.
+    fn incoming(&mut self) -> Option<Incoming>;
 
     /// Return with a [Bytes][mdn] representation of the request body.
     ///
@@ -158,7 +162,7 @@ pub trait RequestExt: Sized {
 }
 
 #[async_trait]
-impl RequestExt for Request<Body> {
+impl RequestExt for Request {
     fn schema(&self) -> Option<&http::uri::Scheme> {
         self.uri().scheme()
     }
@@ -206,17 +210,29 @@ impl RequestExt for Request<Body> {
         T::extract(self).await
     }
 
+    fn incoming(&mut self) -> Option<Incoming> {
+        replace(self.body_mut(), IncomingBody::used()).into_incoming()
+    }
+
     async fn bytes(&mut self) -> Result<Bytes, PayloadError> {
-        hyper::body::to_bytes(replace(self.body_mut(), Body::empty()))
+        // self.body_mut()
+        self.incoming()
+            .ok_or(PayloadError::Used)?
+            .collect()
             .await
             .map_err(|_| PayloadError::Read)
+            .map(Collected::to_bytes)
     }
 
     #[cfg(feature = "limits")]
     async fn bytes_with(&mut self, name: &str, max: u64) -> Result<Bytes, PayloadError> {
-        let limit = self.limits().get(name).unwrap_or(max) as usize;
-        let body = Limited::new(replace(self.body_mut(), Body::empty()), limit);
-        hyper::body::to_bytes(body).await.map_err(|err| {
+        Limited::new(
+            self.incoming().ok_or(PayloadError::Used)?,
+            self.limits().get(name).unwrap_or(max) as usize,
+        )
+        .collect()
+        .await
+        .map_err(|err| {
             if err.downcast_ref::<LengthLimitError>().is_some() {
                 return PayloadError::TooLarge;
             }
@@ -225,6 +241,7 @@ impl RequestExt for Request<Body> {
             }
             PayloadError::Read
         })
+        .map(Collected::to_bytes)
     }
 
     async fn text(&mut self) -> Result<String, PayloadError> {
@@ -280,10 +297,8 @@ impl RequestExt for Request<Body> {
             .ok_or(PayloadError::MissingBoundary)?
             .as_str();
 
-        let body = replace(self.body_mut(), Body::empty());
-
         Ok(Multipart::with_limits(
-            body,
+            self.incoming().ok_or(PayloadError::Used)?,
             boundary,
             self.extensions()
                 .get::<std::sync::Arc<MultipartLimits>>()

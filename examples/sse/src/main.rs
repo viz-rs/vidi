@@ -3,14 +3,16 @@
 use futures_util::StreamExt;
 use std::{net::SocketAddr, sync::Arc};
 use systemstat::{Platform, System};
+use tokio::net::TcpListener;
 use tokio::time::{interval, Duration};
 use tokio_stream::wrappers::IntervalStream;
 use viz::{
     get,
     header::ACCEPT,
+    server::conn::http1,
     types::{Event, Sse, State},
-    Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
-    Server, ServiceMaker, StatusCode,
+    Error, HandlerExt, IntoResponse, Request, RequestExt, Responder, Response, ResponseExt, Result,
+    Router, StatusCode, Tree,
 };
 
 type ArcSystem = Arc<System>;
@@ -53,6 +55,7 @@ async fn stats(req: Request) -> Result<impl IntoResponse> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
     let sys = Arc::new(System::new());
@@ -60,10 +63,18 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .route("/", get(index))
         .route("/stats", get(stats.with(State::new(sys))));
+    let tree = Arc::new(Tree::from(app));
 
-    if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
-        println!("{err}");
+    loop {
+        let (stream, addr) = listener.accept().await?;
+        let tree = tree.clone();
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .await
+            {
+                eprintln!("Error while serving HTTP connection: {}", err);
+            }
+        });
     }
-
-    Ok(())
 }

@@ -1,7 +1,6 @@
 mod listener;
 mod stream;
 
-pub use hyper::server::conn::AddrIncoming;
 pub use listener::Listener;
 pub use stream::Stream;
 

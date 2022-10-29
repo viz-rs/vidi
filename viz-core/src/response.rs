@@ -1,37 +1,38 @@
 #[cfg(feature = "json")]
 use bytes::{BufMut, BytesMut};
+use http_body_util::Full;
 
-use crate::{header, Body, Response, Result, StatusCode};
+use crate::{header, Bytes, Error, OutgoingBody, Response, Result, StatusCode};
 
 /// The [Response] Extension.
 pub trait ResponseExt: Sized {
     /// The response with the specified [`Content-Type`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type>
-    fn with<T>(t: T, c: &'static str) -> Response
+    fn with<B>(b: B, c: &'static str) -> Response
     where
-        T: Into<Body>,
+        B: Into<OutgoingBody>,
     {
-        let mut res = Response::new(t.into());
+        let mut res = Response::new(b.into());
         res.headers_mut()
             .insert(header::CONTENT_TYPE, header::HeaderValue::from_static(c));
         res
     }
 
     /// The response with `text/plain; charset=utf-8` media type.
-    fn text<T>(t: T) -> Response
+    fn text<B>(b: B) -> Response
     where
-        T: Into<Body>,
+        B: Into<Full<Bytes>>,
     {
-        Self::with(t, mime::TEXT_PLAIN_UTF_8.as_ref())
+        Self::with(b.into(), mime::TEXT_PLAIN_UTF_8.as_ref())
     }
 
     /// The response with `text/html; charset=utf-8` media type.
-    fn html<T>(t: T) -> Response
+    fn html<B>(b: B) -> Response
     where
-        T: Into<Body>,
+        B: Into<Full<Bytes>>,
     {
-        Self::with(t, mime::TEXT_HTML_UTF_8.as_ref())
+        Self::with(b.into(), mime::TEXT_HTML_UTF_8.as_ref())
     }
 
     #[cfg(feature = "json")]
@@ -42,18 +43,23 @@ pub trait ResponseExt: Sized {
     {
         let mut buf = BytesMut::new().writer();
         serde_json::to_writer(&mut buf, &t)
-            .map(|_| Self::with(buf.into_inner().freeze(), mime::APPLICATION_JSON.as_ref()))
+            .map(|_| {
+                Self::with(
+                    Full::new(buf.into_inner().freeze()),
+                    mime::APPLICATION_JSON.as_ref(),
+                )
+            })
             .map_err(crate::types::PayloadError::Json)
     }
 
     /// Responds to a stream.
-    fn stream<S, O, E>(s: S) -> Response
+    fn stream<S, D, E>(s: S) -> Response
     where
-        S: futures_util::Stream<Item = Result<O, E>> + Send + 'static,
-        O: Into<bytes::Bytes> + 'static,
-        E: std::error::Error + Send + Sync + 'static,
+        S: futures_util::Stream<Item = Result<D, E>> + Send + Sync + 'static,
+        D: Into<Bytes>,
+        E: Into<Error> + 'static,
     {
-        Response::new(Body::wrap_stream(s))
+        Response::new(OutgoingBody::streaming(s))
     }
 
     // TODO: Download transfers the file from path as an attachment.

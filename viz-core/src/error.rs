@@ -96,7 +96,7 @@ where
     T: IntoResponse,
 {
     fn from((e, t): (E, T)) -> Self {
-        Error::Report(Box::new(e), t.into_response())
+        Self::Report(Box::new(e), t.into_response())
     }
 }
 
@@ -106,8 +106,20 @@ impl From<http::Error> for Error {
     }
 }
 
+impl From<hyper::Error> for Error {
+    fn from(e: hyper::Error) -> Self {
+        (e, StatusCode::BAD_REQUEST).into()
+    }
+}
+
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
-        Error::normal(e)
+        Self::normal(e)
+    }
+}
+
+impl From<Box<dyn StdError + Send + Sync>> for Error {
+    fn from(value: Box<dyn StdError + Send + Sync>) -> Self {
+        Self::Normal(value)
     }
 }

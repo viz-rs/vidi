@@ -1,15 +1,16 @@
 [package]
 name = "viz-core"
 version = "0.4.3"
-edition = "2021"
-rust-version = "1.60"
-license = "MIT OR Apache-2.0"
-authors = ["Fangdun Tsai <cfddream@gmail.com>"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/viz-core"
+description = "The core traits and types in for Viz"
+keywords = ["async", "framework", "http", "service", "web"]
 categories = ["asynchronous", "network-programming", "web-programming"]
-homepage = "https://viz.rs"
-repository = "https://github.com/viz-rs/viz"
-documentation = "https://docs.rs/viz"
-description = "The core traits and types in for the Viz"
 publish = true
 
 [features]
@@ -53,23 +54,29 @@ otel-tracing = ["otel", "opentelemetry?/trace"]
 otel-metrics = ["otel", "opentelemetry?/metrics"]
 
 [dependencies]
-async-trait = "0.1.58"
-bytes = "1.1"
-dyn-clone = "1.0.8"
-futures-util = "0.3.25"
-headers = "0.3.8"
-http = "0.2.7"
-http-body = "0.4.5"
-hyper = { version = "0.14", features = ["stream"] }
-mime = "0.3.16"
-thiserror = "1.0.35"
+async-trait.workspace = true
+bytes.workspace = true
+dyn-clone.workspace = true
+futures-util.workspace = true
+headers.workspace = true
+http.workspace = true
+http-body.workspace = true
+http-body-util.workspace = true
 
-rfc7239 = "0.1.0" # realip
+pin-project-lite.workspace = true
+
+hyper.workspace = true
+
+mime.workspace = true
+thiserror.workspace = true
+
+rfc7239 = "0.1.0"                                                               # realip
 cookie = { version = "0.16.1", features = ["percent-encode"], optional = true }
-form-data = { version = "0.4.1", optional = true }
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_json = { version = "1.0", optional = true }
-serde_urlencoded = { version = "0.7", optional = true }
+form-data = { version = "0.4.2", optional = true }
+
+serde = { workspace = true, features = ["derive"], optional = true }
+serde_json = { workspace = true, optional = true }
+serde_urlencoded = { workspace = true, optional = true }
 sessions-core = { version = "0.3.4", optional = true }
 
 # CSRF
@@ -77,19 +84,24 @@ getrandom = { version = "0.2.8", optional = true }
 base64 = { version = "0.13.0", optional = true }
 
 # Compression
-async-compression = { version = "0.3.15", features = ["tokio", "gzip", "brotli", "deflate"], optional = true }
+async-compression = { version = "0.3.15", features = [
+  "tokio",
+  "gzip",
+  "brotli",
+  "deflate",
+], optional = true }
 
 # OpenTelemetry
-opentelemetry = { version = "0.18.0", default-features = false, optional = true }
-opentelemetry-semantic-conventions = { version = "0.10.0", optional = true }
+opentelemetry = { workspace = true, default-features = false, optional = true }
+opentelemetry-semantic-conventions = { workspace = true, optional = true }
 
-tokio = { version = "1.21", optional = true }
-tokio-tungstenite = { version = "0.17.2", optional = true }
-tokio-stream = { version = "0.1.11", optional = true }
-tokio-util = { version = "0.7.4", optional = true }
+tokio = { workspace = true, optional = true }
+tokio-tungstenite = { workspace = true, optional = true }
+tokio-stream = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 [package.metadata.docs.rs]
 all-features = true

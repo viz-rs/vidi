@@ -21,9 +21,9 @@
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 /// Represents an HTTP Request.
-pub type Request<T = Body> = http::Request<T>;
+pub type Request<T = IncomingBody> = http::Request<T>;
 /// Represents an HTTP Response.
-pub type Response<T = Body> = http::Response<T>;
+pub type Response<T = OutgoingBody> = http::Response<T>;
 /// Represents either success (Ok) or failure (Err).
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
@@ -38,12 +38,14 @@ pub use crate::handler::{BoxHandler, FnExt, Handler, HandlerExt, IntoHandler, Ne
 pub mod middleware;
 pub mod types;
 
+mod body;
 mod error;
 mod from_request;
 mod into_response;
 mod request;
 mod response;
 
+pub use body::{IncomingBody, OutgoingBody};
 pub use error::Error;
 pub use from_request::FromRequest;
 pub use into_response::IntoResponse;
@@ -55,7 +57,9 @@ pub use bytes::{Bytes, BytesMut};
 #[doc(inline)]
 pub use headers;
 pub use http::{header, Method, StatusCode};
-pub use hyper::Body;
+pub use hyper::body::{Body, Incoming};
+/// Response Outcoming Body
+pub type OutcomingBody<T = Bytes> = http_body_util::combinators::BoxBody<T, Error>;
 pub use std::future::Future;
 pub use thiserror::Error as ThisError;
 

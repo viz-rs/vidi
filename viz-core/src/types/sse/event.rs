@@ -1,5 +1,6 @@
-use bytes::Bytes;
 use std::fmt::{self, Write};
+
+use bytes::Bytes;
 
 /// Event Message
 ///

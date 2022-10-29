@@ -204,6 +204,7 @@ impl fmt::Debug for Route {
 #[allow(dead_code)]
 mod tests {
     use super::Route;
+    use http_body_util::BodyExt;
     use serde::Deserialize;
     use std::sync::Arc;
     use viz_core::{
@@ -407,7 +408,7 @@ mod tests {
             Ok(r) => r,
             Err(e) => e.into_response(),
         };
-        assert_eq!(hyper::body::to_bytes(res.into_body()).await?, "");
+        assert_eq!(res.into_body().collect().await?.to_bytes(), "");
 
         let (_, h) = route
             .methods
@@ -423,7 +424,7 @@ mod tests {
             Err(e) => e.into_response(),
         };
         assert_eq!(
-            hyper::body::to_bytes(res.into_body()).await?.to_vec(),
+            res.into_body().collect().await?.to_bytes().to_vec(),
             vec![98, 101, 102, 111, 114, 101, 1]
         );
 

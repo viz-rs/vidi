@@ -172,11 +172,12 @@ impl Router {
 
 #[cfg(test)]
 mod tests {
+    use http_body_util::{BodyExt, Full};
     use std::sync::Arc;
     use viz_core::{
         async_trait,
         types::{Params, RouteInfo},
-        Body, Error, Handler, HandlerExt, IntoResponse, Method, Next, Request, RequestExt,
+        Error, Handler, HandlerExt, IncomingBody, IntoResponse, Method, Next, Request, RequestExt,
         Response, ResponseExt, Result, StatusCode, Transform,
     };
 
@@ -217,11 +218,11 @@ mod tests {
     #[tokio::test]
     async fn router() -> anyhow::Result<()> {
         async fn index(_: Request) -> Result<Response> {
-            Ok(Response::new("index".into()))
+            Ok(Response::text("index"))
         }
 
         async fn all(_: Request) -> Result<Response> {
-            Ok(Response::new("any".into()))
+            Ok(Response::text("any"))
         }
 
         async fn not_found(_: Request) -> Result<impl IntoResponse> {
@@ -229,7 +230,7 @@ mod tests {
         }
 
         async fn search(_: Request) -> Result<Response> {
-            Ok(Response::new("search".into()))
+            Ok(Response::text("search"))
         }
 
         async fn show(req: Request) -> Result<Response> {
@@ -239,11 +240,11 @@ mod tests {
                 s.push_str(&id);
                 s
             });
-            Ok(Response::new(("show".to_string() + &items).into()))
+            Ok(Response::text("show".to_string() + &items))
         }
 
         async fn create(_: Request) -> Result<Response> {
-            Ok(Response::new("create".into()))
+            Ok(Response::text("create"))
         }
 
         async fn update(req: Request) -> Result<Response> {
@@ -253,7 +254,7 @@ mod tests {
                 s.push_str(&id);
                 s
             });
-            Ok(Response::new(("update".to_string() + &items).into()))
+            Ok(Response::text("update".to_string() + &items))
         }
 
         async fn delete(req: Request) -> Result<Response> {
@@ -263,7 +264,7 @@ mod tests {
                 s.push_str(&id);
                 s
             });
-            Ok(Response::new(("delete".to_string() + &items).into()))
+            Ok(Response::text("delete".to_string() + &items))
         }
 
         async fn middle<H>((req, h): Next<Request, H>) -> Result<Response>
@@ -286,9 +287,9 @@ mod tests {
 
                     let mut buf = bytes::BytesMut::new();
                     buf.extend(b"users: ");
-                    buf.extend(hyper::body::to_bytes(body).await.map_err(Error::normal)?);
+                    buf.extend(body.collect().await.map_err(Error::normal)?.to_bytes());
 
-                    Ok(Response::from_parts(parts, Body::from(buf.freeze())))
+                    Ok(Response::from_parts(parts, Full::from(buf.freeze()).into()))
                 })
                 .boxed()
             });
@@ -307,9 +308,9 @@ mod tests {
 
                         let mut buf = bytes::BytesMut::new();
                         buf.extend(b"posts: ");
-                        buf.extend(hyper::body::to_bytes(body).await.map_err(Error::normal)?);
+                        buf.extend(body.collect().await.map_err(Error::normal)?.to_bytes());
 
-                        Ok(Response::from_parts(parts, Body::from(buf.freeze())))
+                        Ok(Response::from_parts(parts, Full::from(buf.freeze()).into()))
                     })
                     .boxed()
                 }),
@@ -332,7 +333,7 @@ mod tests {
         assert!(node.is_some());
         let (h, _) = node.unwrap();
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             ""
         );
 
@@ -342,7 +343,7 @@ mod tests {
         assert!(node.is_some());
         let (h, _) = node.unwrap();
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: create"
         );
 
@@ -357,7 +358,7 @@ mod tests {
             params: Into::<Params>::into(route.params()),
         }));
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: show foo"
         );
 
@@ -372,7 +373,7 @@ mod tests {
             params: Into::<Params>::into(route.params()),
         }));
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: update foo"
         );
 
@@ -387,7 +388,7 @@ mod tests {
             params: Into::<Params>::into(route.params()),
         }));
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: delete foo"
         );
 
@@ -397,7 +398,7 @@ mod tests {
         assert!(node.is_some());
         let (h, _) = node.unwrap();
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: index"
         );
 
@@ -407,7 +408,7 @@ mod tests {
         assert!(node.is_some());
         let (h, _) = node.unwrap();
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: create"
         );
 
@@ -422,7 +423,7 @@ mod tests {
             params: Into::<Params>::into(route.params()),
         }));
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: show foo bar"
         );
 
@@ -440,7 +441,7 @@ mod tests {
         assert_eq!(route_info.pattern, "/posts/:post_id/users/:user_id");
         req.extensions_mut().insert(route_info);
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: update foo bar"
         );
 
@@ -455,7 +456,7 @@ mod tests {
             params: Into::<Params>::into(route.params()),
         }));
         assert_eq!(
-            hyper::body::to_bytes(h.call(req).await?.into_body()).await?,
+            h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: delete foo bar"
         );
 
@@ -520,7 +521,7 @@ mod tests {
             Request::builder()
                 .method(method.to_owned())
                 .uri(path.to_owned())
-                .body(Body::empty())
+                .body(IncomingBody::Empty)
                 .unwrap(),
             method,
             path.to_string(),

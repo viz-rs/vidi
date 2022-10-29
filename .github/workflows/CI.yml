@@ -33,11 +33,11 @@ jobs:
       - name: Test cases
         run: |
           cargo test --workspace --all --verbose
-          cargo build --workspace --all --verbose --release --manifest-path examples/Cargo.toml
+          cargo build --workspace --all --verbose --release
       - name: Show Examples Release files
         if: matrix.os != 'windows-latest'
         run: |
-          ls -la examples/target/release
+          ls -la target/release
 
   clippy:
     name: cargo clippy
@@ -51,7 +51,6 @@ jobs:
       - name: Check Clippy
         run: |
           cargo clippy --workspace --all-targets
-          cargo clippy --workspace --all-targets --manifest-path examples/Cargo.toml
 
   fmt:
     name: cargo fmt
@@ -65,7 +64,6 @@ jobs:
       - name: Check formatting
         run: |
           cargo fmt --all -- --check
-          cargo fmt --all --manifest-path examples/Cargo.toml -- --check
 
   docs:
     name: cargo doc

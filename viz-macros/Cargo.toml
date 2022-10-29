@@ -1,14 +1,17 @@
 [package]
 name = "viz-macros"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.60"
-license = "MIT OR Apache-2.0"
-authors = ["Fangdun Tsai <cfddream@gmail.com>"]
-homepage = "https://viz.rs"
-repository = "https://github.com/viz-rs/viz"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
 documentation = "https://docs.rs/viz-macros"
-description = "Viz proc macros"
+description = "The proc macros for Viz"
+keywords = ["async", "http", "web"]
+categories = ["asynchronous", "network-programming", "web-programming"]
+publish = true
 
 [lib]
 proc-macro = true
@@ -21,8 +24,8 @@ syn = { version = "1.0", features = ["full", "parsing"] }
 [dev-dependencies]
 viz = { path = "../viz" }
 
-anyhow = "1.0"
-tokio = { version = "1.0", features = ["rt", "macros"] }
+anyhow.workspace = true
+tokio = { workspace = true, features = ["rt", "macros"] }
 
 [package.metadata.docs.rs]
 all-features = true

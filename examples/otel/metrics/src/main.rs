@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
+use tokio::net::TcpListener;
 
 use opentelemetry::{
     global,
@@ -13,7 +14,8 @@ use opentelemetry::{
 use viz::{
     handlers::prometheus::{ExporterBuilder, Prometheus},
     middleware::otel,
-    Request, Result, Router, Server, ServiceMaker,
+    server::conn::http1,
+    Request, Responder, Result, Router, Tree,
 };
 
 async fn index(_: Request) -> Result<&'static str> {
@@ -23,6 +25,7 @@ async fn index(_: Request) -> Result<&'static str> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
     let exporter = {
@@ -44,10 +47,18 @@ async fn main() -> Result<()> {
         .get("/:username", index)
         .get("/metrics", Prometheus::new(exporter))
         .with(otel::metrics::Config::new(meter));
+    let tree = Arc::new(Tree::from(app));
 
-    if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
-        println!("{err}");
+    loop {
+        let (stream, addr) = listener.accept().await?;
+        let tree = tree.clone();
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .await
+            {
+                eprintln!("Error while serving HTTP connection: {}", err);
+            }
+        });
     }
-
-    Ok(())
 }

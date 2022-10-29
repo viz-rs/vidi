@@ -2,6 +2,7 @@
 //!
 //! [OTEL]: https://docs.rs/opentelemetry-prometheus
 
+use http_body_util::Full;
 use opentelemetry::{global::handle_error, metrics::MetricsError};
 use opentelemetry_prometheus::{Encoder, PrometheusExporter, TextEncoder};
 
@@ -44,7 +45,7 @@ impl Handler<Request> for Prometheus {
             Err((StatusCode::INTERNAL_SERVER_ERROR, text).into_error())?
         }
 
-        let mut res = Response::new(body.into());
+        let mut res = Response::new(Full::from(body).into());
 
         res.headers_mut().append(
             CONTENT_TYPE,

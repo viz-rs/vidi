@@ -1,13 +1,14 @@
 #![deny(warnings)]
 
 use futures_util::TryStreamExt;
-use std::{fs::File, net::SocketAddr};
+use std::{fs::File, net::SocketAddr, sync::Arc};
 use tempfile::tempdir;
+use tokio::net::TcpListener;
 use viz::{
     middleware::limits,
+    server::conn::http1,
     types::{Multipart, PayloadError},
-    IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router, Server,
-    ServiceMaker,
+    IntoHandler, IntoResponse, Request, Responder, Response, ResponseExt, Result, Router, Tree,
 };
 
 // HTML form for uploading photos
@@ -44,6 +45,7 @@ async fn upload(mut form: Multipart) -> Result<Response> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
     let app = Router::new()
@@ -51,10 +53,18 @@ async fn main() -> Result<()> {
         .post("/", upload.into_handler())
         // limit body size
         .with(limits::Config::default());
+    let tree = Arc::new(Tree::from(app));
 
-    if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
-        println!("{err}");
+    loop {
+        let (stream, addr) = listener.accept().await?;
+        let tree = tree.clone();
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .await
+            {
+                eprintln!("Error while serving HTTP connection: {}", err);
+            }
+        });
     }
-
-    Ok(())
 }

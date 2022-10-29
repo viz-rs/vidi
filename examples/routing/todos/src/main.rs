@@ -4,13 +4,15 @@ use std::{
     net::SocketAddr,
     sync::{Arc, Mutex, PoisonError},
 };
+use tokio::net::TcpListener;
 
 use serde::{Deserialize, Serialize};
 use viz::{
     middleware,
+    server::conn::http1,
     types::{Json, Params, Query, State},
-    Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, Server,
-    ServiceMaker, StatusCode,
+    Error, IntoResponse, Request, RequestExt, Responder, Response, ResponseExt, Result, Router,
+    StatusCode, Tree,
 };
 
 type DB = Arc<Mutex<Vec<Todo>>>;
@@ -120,6 +122,7 @@ async fn delete(mut req: Request) -> Result<StatusCode> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
     let db = DB::default();
@@ -133,10 +136,18 @@ async fn main() -> Result<()> {
         .with(State::new(db))
         // Set limits for the payload data of request
         .with(middleware::limits::Config::new());
+    let tree = Arc::new(Tree::from(app));
 
-    if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
-        println!("{err}");
+    loop {
+        let (stream, addr) = listener.accept().await?;
+        let tree = tree.clone();
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .await
+            {
+                eprintln!("Error while serving HTTP connection: {}", err);
+            }
+        });
     }
-
-    Ok(())
 }

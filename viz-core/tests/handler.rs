@@ -1,3 +1,4 @@
+use http_body_util::Full;
 use std::marker::PhantomData;
 use viz_core::*;
 
@@ -93,7 +94,7 @@ async fn main() -> Result<()> {
 
     impl From<MyString> for Error {
         fn from(e: MyString) -> Self {
-            Error::Responder(Response::new(e.0.into()))
+            Error::Responder(Response::new(Full::from(e.0).into()))
         }
     }
 
@@ -120,7 +121,7 @@ async fn main() -> Result<()> {
             fn into_response(self) -> Response {
                 Response::builder()
                     .status(http::StatusCode::NOT_FOUND)
-                    .body(self.to_string().into())
+                    .body(Full::from(self.to_string()).into())
                     .unwrap()
             }
         }
@@ -142,7 +143,7 @@ async fn main() -> Result<()> {
             fn into_response(self) -> Response {
                 Response::builder()
                     .status(http::StatusCode::NOT_FOUND)
-                    .body(self.to_string().into())
+                    .body(Full::from(self.to_string()).into())
                     .unwrap()
             }
         }
@@ -317,7 +318,7 @@ async fn main() -> Result<()> {
                 |_: Box<dyn std::any::Any + Send>| async move { panic!("Custom Error 2") },
             );
 
-        assert!(Handler::call(&aa, Request::new(Body::empty()))
+        assert!(Handler::call(&aa, Request::new(IncomingBody::Empty))
             .await
             .is_ok());
 
@@ -368,7 +369,7 @@ async fn main() -> Result<()> {
 
         assert!(rha.call(Request::default()).await.is_ok());
 
-        assert!(Handler::call(&rha, Request::new(Body::empty()))
+        assert!(Handler::call(&rha, Request::new(IncomingBody::Empty))
             .await
             .is_ok());
 

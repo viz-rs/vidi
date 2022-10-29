@@ -1,54 +1,51 @@
 [package]
 name = "viz-handlers"
 version = "0.3.3"
-edition = "2021"
-rust-version = "1.60"
-license = "MIT OR Apache-2.0"
-authors = ["Fangdun Tsai <cfddream@gmail.com>"]
-homepage = "https://viz.rs"
-repository = "https://github.com/viz-rs/viz"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
 documentation = "https://docs.rs/viz-handlers"
-description = "Viz handlers"
+description = "The handlers for Viz"
+keywords = ["async", "http", "web"]
+categories = ["asynchronous", "network-programming", "web-programming"]
 publish = true
 
 [features]
 default = ["serve"]
 
-serve = [
-  "dep:mime_guess",
-  "dep:percent-encoding",
-  "dep:tokio-stream",
-  "tokio-util/io",
-  "tokio/fs",
-  "tokio/io-util",
-]
+serve = ["dep:mime_guess", "dep:http-body", "dep:percent-encoding", "dep:tokio-stream", "tokio-util/io", "tokio/fs", "tokio/io-util"]
 
-embed = ["dep:hex", "dep:mime_guess", "dep:rust-embed"]
+embed = ["dep:hex", "dep:mime_guess", "dep:http-body-util", "dep:rust-embed"]
 
-prometheus = ["opentelemetry/metrics", "dep:opentelemetry-prometheus"]
+prometheus = ["dep:http-body-util", "opentelemetry/metrics", "dep:opentelemetry-prometheus"]
 
 [dependencies]
 viz-core = { path = "../viz-core", version = '0.4.3' }
 
 # required!
-thiserror = "1.0"
+thiserror.workspace = true
 
 # serve & embed
-mime_guess = { version = "2.0", optional = true }
+mime_guess = { workspace = true, optional = true }
+http-body = { workspace = true, optional = true }
+http-body-util = { workspace = true, optional = true }
 
 # serve
-percent-encoding = { version = "2.2.0", optional = true }
-tokio = { version = "1.21", optional = true }
-tokio-stream = { version = "0.1.11", optional = true }
-tokio-util = { version = "0.7.4", optional = true }
+percent-encoding = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+tokio-stream = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
 
 # embed
-hex = { version = "0.4", optional = true }
-rust-embed = { version = "6.4.2", features = ["compression"], optional = true }
+hex = { workspace = true, optional = true }
+rust-embed = { workspace = true, optional = true }
 
 # OpenTelemetry
-opentelemetry = { version = "0.18.0", default-features = false, optional = true }
-opentelemetry-prometheus = { version = "0.11.0",  features = ["prometheus-encoding"], optional = true }
+opentelemetry = { workspace = true, default-features = false, optional = true }
+opentelemetry-prometheus = { workspace = true, optional = true }
 
 [package.metadata.docs.rs]
 all-features = true

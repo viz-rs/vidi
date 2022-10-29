@@ -1,11 +1,14 @@
 #![deny(warnings)]
 
-use hyper::service::{make_service_fn, service_fn};
+use hyper::service::service_fn;
 use once_cell::sync::Lazy;
-use std::{convert::Infallible, net::SocketAddr, sync::Arc};
+use std::{net::SocketAddr, sync::Arc};
+use tokio::net::TcpListener;
 use viz::{
+    server::conn::http1,
     types::{Params, RouteInfo},
-    IntoResponse, Method, Request, RequestExt, Response, Result, Router, Server, StatusCode, Tree,
+    IncomingBody, IntoResponse, Method, Request, RequestExt, Response, Result, Router, StatusCode,
+    Tree,
 };
 
 /// Static Lazy Routes
@@ -22,20 +25,29 @@ async fn me(_: Request) -> Result<&'static str> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
-    let make_svc =
-        make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(|req| serve(req, None))) });
-
-    if let Err(err) = Server::bind(&addr).serve(make_svc).await {
-        println!("{err}");
+    loop {
+        let (stream, addr) = listener.accept().await?;
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .serve_connection(
+                    stream,
+                    service_fn(|req| {
+                        serve(req.map(|body| IncomingBody::new(Some(body))), Some(addr))
+                    }),
+                )
+                .await
+            {
+                eprintln!("Error while serving HTTP connection: {}", err);
+            }
+        });
     }
-
-    Ok(())
 }
 
 /// Serves a request and returns a response.
-pub async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Response, Infallible> {
+async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Response, hyper::Error> {
     let method = req.method().to_owned();
     let path = req.path().to_owned();
     let responed = Ok(

@@ -7,7 +7,4 @@ publish = false
 [dependencies]
 viz = { path = "../../viz" }
 
-tokio = { version = "1.0", features = [
-  "rt-multi-thread",
-  "macros",
-] }
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }

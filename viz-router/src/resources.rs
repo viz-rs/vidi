@@ -242,9 +242,10 @@ impl IntoIterator for Resources {
 mod tests {
     use super::Kind;
     use crate::{get, Resources};
+    use http_body_util::BodyExt;
     use viz_core::{
-        async_trait, Handler, HandlerExt, IntoResponse, Method, Next, Request, Response, Result,
-        Transform,
+        async_trait, Handler, HandlerExt, IntoResponse, Method, Next, Request, Response,
+        ResponseExt, Result, Transform,
     };
 
     #[tokio::test]
@@ -314,31 +315,31 @@ mod tests {
         }
 
         async fn new_post(_: Request) -> Result<Response> {
-            Ok(Response::new("new post".into()))
+            Ok(Response::text("new post"))
         }
 
         async fn show_post(_: Request) -> Result<Response> {
-            Ok(Response::new("show post".into()))
+            Ok(Response::text("show post"))
         }
 
         async fn edit_post(_: Request) -> Result<Response> {
-            Ok(Response::new("edit post".into()))
+            Ok(Response::text("edit post"))
         }
 
         async fn delete_post(_: Request) -> Result<Response> {
-            Ok(Response::new("delete post".into()))
+            Ok(Response::text("delete post"))
         }
 
         async fn update_post(_: Request) -> Result<Response> {
-            Ok(Response::new("update post".into()))
+            Ok(Response::text("update post"))
         }
 
         async fn any_posts(_: Request) -> Result<Response> {
-            Ok(Response::new("any posts".into()))
+            Ok(Response::text("any posts"))
         }
 
         async fn search_posts(_: Request) -> Result<Response> {
-            Ok(Response::new("search posts".into()))
+            Ok(Response::text("search posts"))
         }
 
         let resource = Resources::default()
@@ -385,7 +386,7 @@ mod tests {
             .unwrap();
 
         let res = h.call(Request::default()).await?;
-        assert_eq!(hyper::body::to_bytes(res.into_body()).await?, "show post");
+        assert_eq!(res.into_body().collect().await?.to_bytes(), "show post");
 
         let handler = |_| async { Ok(()) };
         let geocoder = Resources::default()

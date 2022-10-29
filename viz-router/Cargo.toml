@@ -1,14 +1,16 @@
 [package]
 name = "viz-router"
 version = "0.4.3"
-edition = "2021"
-rust-version = "1.60"
-license = "MIT OR Apache-2.0"
-authors = ["Fangdun Tsai <cfddream@gmail.com>"]
-homepage = "https://viz.rs"
-repository = "https://github.com/viz-rs/viz"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
 documentation = "https://docs.rs/viz-router"
-description = "Viz Router"
+description = "The router for Viz"
+keywords = ["async", "framework", "http", "web", "router"]
+categories = ["asynchronous", "network-programming", "web-programming"]
 publish = true
 
 [features]
@@ -16,13 +18,16 @@ default = []
 
 [dependencies]
 viz-core = { path = "../viz-core", version = "0.4.3" }
-path-tree = { version = "0.7" }
-serde = "1.0"
-thiserror = "1.0"
+
+path-tree.workspace = true
+serde.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
-anyhow = "1.0"
-bytes = "1.0"
-hyper = "0.14.20"
-serde_derive = "1.0"
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+anyhow.workspace = true
+bytes.workspace = true
+serde_derive.workspace = true
+
+hyper.workspace = true 
+http-body-util.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

@@ -3,7 +3,85 @@ members = [
   "viz",
   "viz-core",
   "viz-handlers",
-  # "viz-helmet",
   "viz-macros",
   "viz-router",
+
+  "examples/hello-world",
+  # "examples/unix-socket",
+  "examples/static-files/embed",
+  "examples/static-files/serve",
+  "examples/forms/form",
+  # "examples/forms/multipart",
+  "examples/websocket-chat",
+  "examples/sse",
+  "examples/session",
+  "examples/csrf",
+  "examples/cors",
+  # "examples/rustls",
+  "examples/static-routes",
+  "examples/routing/todos",
+  "examples/otel/*",
+  "examples/compression"
 ]
+
+[workspace.package]
+authors = ["Fangdun Tsai <cfddream@gmail.com>"]
+edition = "2021"
+homepage = "https://viz.rs"
+documentation = "https://docs.rs/viz"
+repository = "https://github.com/viz-rs/viz"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+async-trait = "0.1.58"
+dyn-clone = "1.0.8"
+bytes = "1.0"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+serde_urlencoded = "0.7"
+thiserror = "1.0"
+pin-project-lite = "0.2"
+
+# router
+path-tree = "0.7"
+
+futures-util = "0.3.25"
+hyper = { version = "1.0.0-rc.1", features = ["server"]}
+headers = "0.3.8"
+http = "0.2.8"
+http-body = "1.0.0-rc.1"
+http-body-util = "0.1.0-rc.1"
+
+tokio = { version = "1.21", features = ["net"] }
+tokio-tungstenite = "0.17.2"
+tokio-stream = "0.1.11"
+tokio-util = "0.7.4"
+rustls-pemfile = "1.0.0"
+tokio-rustls = "0.23.4"
+tokio-native-tls = "0.3.0"
+
+anyhow = "1.0"
+mime = "0.3.16"
+mime_guess = "2.0"
+percent-encoding = "2.2.0"
+
+hex = "0.4"
+rust-embed = { version = "6.4.2", features = ["compression"] }
+
+# OpenTelemetry
+opentelemetry = { version = "0.18.0", default-features = false }
+opentelemetry-prometheus = { version = "0.11.0",  features = ["prometheus-encoding"] }
+opentelemetry-semantic-conventions = { version = "0.10.0" }
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'unwind'
+incremental = false
+overflow-checks = false
+strip = true

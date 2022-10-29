@@ -1,15 +1,14 @@
 //! Compression Middleware.
 
-use std::{io, str::FromStr};
+use std::str::FromStr;
 
 use async_compression::tokio::bufread;
-use futures_util::TryStreamExt;
 use tokio_util::io::{ReaderStream, StreamReader};
 
 use crate::{
     async_trait,
     header::{HeaderValue, ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH},
-    Body, Handler, IntoResponse, Request, Response, Result, Transform,
+    Handler, IntoResponse, OutgoingBody, Request, Response, Result, Transform,
 };
 
 /// Compress response body.
@@ -79,13 +78,17 @@ impl<T: IntoResponse> IntoResponse for Compress<T> {
         match self.algo {
             ContentCoding::Gzip | ContentCoding::Deflate | ContentCoding::Brotli => {
                 res = res.map(|body| {
-                    let body = StreamReader::new(body.map_err(map_hyper_err));
+                    let body = StreamReader::new(body);
                     if self.algo == ContentCoding::Gzip {
-                        Body::wrap_stream(ReaderStream::new(bufread::GzipEncoder::new(body)))
+                        OutgoingBody::streaming(ReaderStream::new(bufread::GzipEncoder::new(body)))
                     } else if self.algo == ContentCoding::Deflate {
-                        Body::wrap_stream(ReaderStream::new(bufread::DeflateEncoder::new(body)))
+                        OutgoingBody::streaming(ReaderStream::new(bufread::DeflateEncoder::new(
+                            body,
+                        )))
                     } else {
-                        Body::wrap_stream(ReaderStream::new(bufread::BrotliEncoder::new(body)))
+                        OutgoingBody::streaming(ReaderStream::new(bufread::BrotliEncoder::new(
+                            body,
+                        )))
                     }
                 });
                 res.headers_mut()
@@ -156,8 +159,4 @@ fn parse_accept_encoding(s: &str) -> Option<ContentCoding> {
         })
         .max_by_key(|(_, q)| *q as u16)
         .map(|(c, _)| c)
-}
-
-fn map_hyper_err(e: hyper::Error) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, e)
 }

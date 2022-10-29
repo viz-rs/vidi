@@ -2,6 +2,7 @@
 
 use std::{borrow::Cow, marker::PhantomData};
 
+use http_body_util::Full;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use viz_core::{
     async_trait,
@@ -16,7 +17,7 @@ pub struct File<E>(Cow<'static, str>, PhantomData<E>);
 
 impl<E> Clone for File<E> {
     fn clone(&self) -> Self {
-        Self(self.0.to_owned(), PhantomData)
+        Self(self.0.clone(), PhantomData)
     }
 }
 
@@ -84,7 +85,7 @@ where
         Err(StatusCode::METHOD_NOT_ALLOWED.into_error())?;
     }
 
-    match E::get(&path) {
+    match E::get(path) {
         Some(EmbeddedFile { data, metadata }) => {
             let hash = hex::encode(metadata.sha256_hash());
 
@@ -99,12 +100,10 @@ where
             Response::builder()
                 .header(
                     CONTENT_TYPE,
-                    mime_guess::from_path(&path)
-                        .first_or_octet_stream()
-                        .as_ref(),
+                    mime_guess::from_path(path).first_or_octet_stream().as_ref(),
                 )
                 .header(ETAG, hash)
-                .body(data.into())
+                .body(Full::from(data).into())
                 .map_err(Into::into)
         }
         None => Err(StatusCode::NOT_FOUND.into_error()),

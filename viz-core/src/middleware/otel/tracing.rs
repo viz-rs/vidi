@@ -164,7 +164,7 @@ fn build_attributes(req: &Request, http_route: &String) -> OrderMap<Key, Value> 
     attributes.insert(
         HTTP_SCHEME,
         req.schema()
-            .or_else(|| Some(&Scheme::HTTP))
+            .or(Some(&Scheme::HTTP))
             .map(ToString::to_string)
             .unwrap()
             .into(),

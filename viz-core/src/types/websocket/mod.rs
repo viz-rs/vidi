@@ -12,7 +12,7 @@ use crate::{
         Connection, HeaderMapExt, HeaderValue, SecWebsocketAccept, SecWebsocketKey,
         SecWebsocketVersion, Upgrade,
     },
-    Body, FromRequest, IntoResponse, Request, Response, Result, StatusCode,
+    FromRequest, IntoResponse, OutgoingBody, Request, Response, Result, StatusCode,
 };
 
 mod error;
@@ -172,7 +172,7 @@ impl IntoResponse for WebSocket {
                     .and_then(|v| HeaderValue::from_str(v).ok())
             });
 
-        let mut res = Response::new(Body::empty());
+        let mut res = Response::new(OutgoingBody::Empty);
 
         *res.status_mut() = StatusCode::SWITCHING_PROTOCOLS;
         res.headers_mut().typed_insert(Connection::upgrade());

@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
-use std::{net::SocketAddr, time::Duration};
+use std::{net::SocketAddr, sync::Arc, time::Duration};
+use tokio::net::TcpListener;
 
 use viz::{
     middleware::{
@@ -8,7 +9,8 @@ use viz::{
         csrf::{self, CsrfToken},
         helper::CookieOptions,
     },
-    Method, Request, RequestExt, Result, Router, Server, ServiceMaker,
+    server::conn::http1,
+    Method, Request, RequestExt, Responder, Result, Router, Tree,
 };
 
 async fn index(mut req: Request) -> Result<String> {
@@ -22,6 +24,7 @@ async fn create(_req: Request) -> Result<&'static str> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
     let app = Router::new()
@@ -36,10 +39,18 @@ async fn main() -> Result<()> {
             csrf::verify,
         ))
         .with(cookie::Config::new());
+    let tree = Arc::new(Tree::from(app));
 
-    if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
-        println!("{err}");
+    loop {
+        let (stream, addr) = listener.accept().await?;
+        let tree = tree.clone();
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .await
+            {
+                eprintln!("Error while serving HTTP connection: {}", err);
+            }
+        });
     }
-
-    Ok(())
 }
