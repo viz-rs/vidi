@@ -1,0 +1,11 @@
+[package]
+name = "template-leptos"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+leptos = "0.0.18"
+leptos_meta = "0.0.2"
+leptos_router = "0.0.4"
