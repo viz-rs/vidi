@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
 pub async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Response, Infallible> {
     let method = req.method().to_owned();
     let path = req.path().to_owned();
-    let responed = Ok(
+    let responded = Ok(
         match TREE.find(&method, &path).or_else(|| {
             if method == Method::HEAD {
                 TREE.find(&Method::GET, &path)
@@ -63,5 +63,5 @@ pub async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Res
             None => StatusCode::NOT_FOUND.into_response(),
         },
     );
-    responed
+    responded
 }
