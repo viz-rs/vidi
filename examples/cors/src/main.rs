@@ -1,8 +1,10 @@
 #![deny(warnings)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::{collections::HashSet, net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{get, middleware::cors, server::conn::http1, Request, Responder, Result, Router, Tree};
+use viz::{
+    get, middleware::cors, server::conn::http1, Method, Request, Responder, Result, Router, Tree,
+};
 
 async fn index(_req: Request) -> Result<&'static str> {
     Ok("Hello, World!")
@@ -18,9 +20,14 @@ async fn main() -> Result<()> {
     let listener = TcpListener::bind(addr).await?;
     println!("listening on {addr}");
 
+    let custom_cors = cors::Config::new()
+        .allow_methods(HashSet::from([Method::GET, Method::POST]))
+        .credentials(true);
+
     let app = Router::new()
         .route("/", get(index).options(options))
-        .with(cors::Config::default());
+        // .with(cors::Config::default()); // Default CORS config
+        .with(custom_cors);                // Our custom CORS config
     let tree = Arc::new(Tree::from(app));
 
     loop {
