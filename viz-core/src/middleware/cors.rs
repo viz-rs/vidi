@@ -28,6 +28,73 @@ pub struct Config {
     origin_verify: Option<Arc<dyn Fn(&HeaderValue) -> bool + Send + Sync>>,
 }
 
+impl Config {
+    /// Create a new [Config] with default values.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /**
+       Seconds a preflight request can be cached. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age)
+    */
+    pub fn max_age(mut self, max_age: usize) -> Self {
+        self.max_age = max_age;
+        self
+    }
+
+    /**
+       Whether to allow credentials. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)
+    */
+    pub fn credentials(mut self, credentials: bool) -> Self {
+        self.credentials = credentials;
+        self
+    }
+
+    /**
+       Allowed HTTP methods. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods)
+    */
+    pub fn allow_methods(mut self, allow_methods: HashSet<Method>) -> Self {
+        self.allow_methods = allow_methods;
+        self
+    }
+
+    /**
+       Allowed HTTP headers. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers)
+    */
+    pub fn allow_headers(mut self, allow_headers: HashSet<HeaderName>) -> Self {
+        self.allow_headers = allow_headers;
+        self
+    }
+
+    /**
+        Allowed origins. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin)
+    */
+    pub fn allow_origins(mut self, allow_origins: HashSet<HeaderValue>) -> Self {
+        self.allow_origins = allow_origins;
+        self
+    }
+
+    /**
+       Exposed HTTP headers. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers)
+    */
+    pub fn expose_headers(mut self, expose_headers: HashSet<HeaderName>) -> Self {
+        self.expose_headers = expose_headers;
+        self
+    }
+
+    /**
+       A function to verify the origin. If the function returns false, the request will be rejected.
+    */
+    #[allow(clippy::type_complexity)]
+    pub fn origin_verify(
+        mut self,
+        origin_verify: Option<Arc<dyn Fn(&HeaderValue) -> bool + Send + Sync>>,
+    ) -> Self {
+        self.origin_verify = origin_verify;
+        self
+    }
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
