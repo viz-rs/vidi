@@ -5,7 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-viz = { path = "../../../viz", features = ["limits", "json"] }
+viz = { path = "../../viz", features = ["limits", "json"] }
 
 serde = {version = "1.0", features = ["derive"] }
 tokio = { version = "1.0", features = [
