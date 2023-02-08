@@ -21,7 +21,7 @@ impl Config {
 
     /// Sets a limits for the Text/Bytes/Form.
     pub fn limits(mut self, limits: types::Limits) -> Self {
-        self.limits = limits;
+        self.limits = limits.sort();
         self
     }
 

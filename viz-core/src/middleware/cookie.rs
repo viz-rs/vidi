@@ -5,7 +5,7 @@ use std::fmt;
 use crate::{
     async_trait,
     header::{HeaderValue, COOKIE, SET_COOKIE},
-    types, Handler, IntoResponse, Request, Response, Result, Transform,
+    types::{Cookie, Cookies, CookieJar}, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// A configure for [CookieMiddleware].
@@ -90,14 +90,14 @@ where
             .get_all(COOKIE)
             .iter()
             .filter_map(|c| HeaderValue::to_str(c).ok())
-            .fold(types::CookieJar::new(), add_cookie);
+            .fold(CookieJar::new(), add_cookie);
 
-        let cookies = types::Cookies::new(jar);
+        let cookies = Cookies::new(jar);
         #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
         let cookies = cookies.with_key(self.key.clone());
 
         req.extensions_mut()
-            .insert::<types::Cookies>(cookies.clone());
+            .insert::<Cookies>(cookies.clone());
 
         self.h
             .call(req)
@@ -108,7 +108,6 @@ where
                 match cookies.jar().lock() {
                     Ok(c) => {
                         c.delta()
-                            .into_iter()
                             .filter_map(|cookie| {
                                 HeaderValue::from_str(&cookie.encoded().to_string()).ok()
                             })
@@ -127,11 +126,9 @@ where
 }
 
 #[inline]
-fn add_cookie(mut jar: types::CookieJar, value: &str) -> types::CookieJar {
-    value
-        .split(types::Cookies::SPLITER)
-        .map(str::trim)
-        .filter_map(|v| types::Cookie::parse_encoded(v).ok())
+fn add_cookie(mut jar: CookieJar, value: &str) -> CookieJar {
+    Cookie::split_parse_encoded(value)
+        .filter_map(|c| c.ok())
         .for_each(|cookie| jar.add_original(cookie.into_owned()));
     jar
 }

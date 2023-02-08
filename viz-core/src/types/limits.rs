@@ -20,9 +20,9 @@ pub struct Limits {
 impl Default for Limits {
     fn default() -> Self {
         let limits = Limits::new()
+            .insert("bytes", Limits::NORMAL)
             .insert("payload", Limits::NORMAL)
-            .insert("text", Limits::NORMAL)
-            .insert("bytes", Limits::NORMAL);
+            .insert("text", Limits::NORMAL);
 
         #[cfg(feature = "json")]
         let limits = limits.insert("json", <Json as Payload>::LIMIT);
@@ -30,7 +30,7 @@ impl Default for Limits {
         #[cfg(feature = "form")]
         let limits = limits.insert("form", <Form as Payload>::LIMIT);
 
-        limits
+        limits.sort()
     }
 }
 
@@ -60,6 +60,13 @@ impl Limits {
             .binary_search_by_key(&name.as_ref(), |&(a, _)| a)
             .map(|i| self.inner[i].1)
             .ok()
+    }
+
+    /// Sorts the limits for binary search.
+    #[must_use]
+    pub fn sort(mut self) -> Self {
+        Arc::make_mut(&mut self.inner).sort_by_key(|a| a.0);
+        self
     }
 }
 

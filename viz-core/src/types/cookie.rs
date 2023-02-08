@@ -34,8 +34,6 @@ impl Clone for Cookies {
 }
 
 impl Cookies {
-    pub(crate) const SPLITER: char = ';';
-
     /// Creates a new Cookies with the [`CookieJar`].
     pub fn new(cookie_jar: CookieJar) -> Self {
         Self {

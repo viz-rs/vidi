@@ -15,7 +15,8 @@ members = [
   "static-routes",
   "routing/todos",
   "otel/*",
-  "compression"
+  "compression",
+  "limits"
 ]
 exclude = ["tls", "target"]
 

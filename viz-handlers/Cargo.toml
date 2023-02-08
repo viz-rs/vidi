@@ -1,6 +1,6 @@
 [package]
 name = "viz-handlers"
-version = "0.4.4"
+version = "0.4.5"
 edition = "2021"
 rust-version = "1.60"
 license = "MIT OR Apache-2.0"
@@ -9,7 +9,6 @@ homepage = "https://viz.rs"
 repository = "https://github.com/viz-rs/viz"
 documentation = "https://docs.rs/viz-handlers"
 description = "Viz handlers"
-publish = true
 
 [features]
 default = ["serve"]
@@ -28,7 +27,7 @@ embed = ["dep:hex", "dep:mime_guess", "dep:rust-embed"]
 prometheus = ["opentelemetry/metrics", "dep:opentelemetry-prometheus"]
 
 [dependencies]
-viz-core = { path = "../viz-core", version = '0.4.4' }
+viz-core = { path = "../viz-core", version = '0.4.5' }
 
 # required!
 thiserror = "1.0"
@@ -38,7 +37,7 @@ mime_guess = { version = "2.0", optional = true }
 
 # serve
 percent-encoding = { version = "2.2.0", optional = true }
-tokio = { version = "1.24", optional = true }
+tokio = { version = "1.25", optional = true }
 tokio-stream = { version = "0.1.11", optional = true }
 tokio-util = { version = "0.7.4", optional = true }
 
