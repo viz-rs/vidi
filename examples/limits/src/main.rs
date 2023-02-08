@@ -1,10 +1,7 @@
 #![deny(warnings)]
 
 use std::net::SocketAddr;
-use viz::{
-    middleware::limits, Request, RequestExt, Result,
-    Router, Server, ServiceMaker,
-};
+use viz::{middleware::limits, Request, RequestExt, Result, Router, Server, ServiceMaker};
 
 async fn echo(mut req: Request) -> Result<String> {
     Ok(format!("len: {}", req.text().await?.len()))
