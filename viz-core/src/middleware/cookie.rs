@@ -5,8 +5,7 @@ use std::fmt;
 use crate::{
     async_trait,
     header::{HeaderValue, COOKIE, SET_COOKIE},
-    types::{Cookie, CookieJar, Cookies},
-    Handler, IntoResponse, Request, Response, Result, Transform,
+    types, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// A configure for [CookieMiddleware].
@@ -91,13 +90,14 @@ where
             .get_all(COOKIE)
             .iter()
             .filter_map(|c| HeaderValue::to_str(c).ok())
-            .fold(CookieJar::new(), add_cookie);
+            .fold(types::CookieJar::new(), add_cookie);
 
-        let cookies = Cookies::new(jar);
+        let cookies = types::Cookies::new(jar);
         #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
         let cookies = cookies.with_key(self.key.clone());
 
-        req.extensions_mut().insert::<Cookies>(cookies.clone());
+        req.extensions_mut()
+            .insert::<types::Cookies>(cookies.clone());
 
         self.h
             .call(req)
@@ -126,9 +126,9 @@ where
 }
 
 #[inline]
-fn add_cookie(mut jar: CookieJar, value: &str) -> CookieJar {
-    Cookie::split_parse_encoded(value)
-        .filter_map(|c| c.ok())
+fn add_cookie(mut jar: types::CookieJar, value: &str) -> types::CookieJar {
+    types::Cookie::split_parse_encoded(value)
+        .filter_map(Result::ok)
         .for_each(|cookie| jar.add_original(cookie.into_owned()));
     jar
 }
