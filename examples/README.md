@@ -10,6 +10,7 @@ Here you can find a lot of small crabs 🦀.
 * [Static files serving and embedding](static-files/embed)
 * [Extract body from Form](forms/form)
 * [Extract body from Multipart](forms/multipart)
+* [Extract body data with a limits](limits)
 * [Websockt Chat](websocket-chat)
 * [Server-Sent Events](sse)
 * [Session](session)
