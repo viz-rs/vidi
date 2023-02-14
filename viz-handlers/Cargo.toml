@@ -49,6 +49,9 @@ rust-embed = { version = "6.4.2", features = ["compression"], optional = true }
 opentelemetry = { version = "0.18.0", default-features = false, optional = true }
 opentelemetry-prometheus = { version = "0.11.0",  features = ["prometheus-encoding"], optional = true }
 
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros"] }
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

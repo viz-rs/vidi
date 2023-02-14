@@ -18,7 +18,7 @@ use crate::{
 pub(crate) use de::PathDeserializer;
 
 /// Extracts params from the path of a URL.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Params<T = Vec<(String, String)>>(pub T);
 
 impl<T> AsRef<T> for Params<T> {

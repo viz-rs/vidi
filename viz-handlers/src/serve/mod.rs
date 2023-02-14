@@ -16,7 +16,6 @@ use viz_core::{
         AcceptRanges, ContentLength, ContentRange, ContentType, ETag, HeaderMap, HeaderMapExt,
         IfMatch, IfModifiedSince, IfNoneMatch, IfUnmodifiedSince, LastModified, Range,
     },
-    types::Params,
     Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result, StatusCode,
 };
 
@@ -103,11 +102,7 @@ impl Handler<Request> for Dir {
         let mut prev = false;
         let mut path = self.path.clone();
 
-        if let Some(param) = req
-            .extensions()
-            .get::<Params>()
-            .and_then(|params| params.first().map(|(_, v)| v))
-        {
+        if let Some(param) = req.route_info().params.first().map(|(_, v)| v) {
             let p = percent_encoding::percent_decode_str(param)
                 .decode_utf8()
                 .map_err(|_| Error::InvalidPath)?;
@@ -250,4 +245,76 @@ async fn serve(path: &Path, headers: &HeaderMap) -> Result<Response> {
     };
 
     Ok(res)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Dir, File};
+    use std::sync::Arc;
+    use viz_core::{
+        types::{Params, RouteInfo},
+        Handler, IntoResponse, Request, Result, StatusCode,
+    };
+
+    #[tokio::test]
+    async fn file() -> Result<()> {
+        let serve = File::new("src/serve/mod.rs");
+
+        let mut req: Request = Request::default();
+        req.extensions_mut().insert(Arc::new(RouteInfo {
+            id: 2,
+            pattern: "/*".to_string(),
+            params: Into::<Params>::into(vec![("*1", "mod.rs")]),
+        }));
+        *req.uri_mut() = "/mod.rs".parse().unwrap();
+
+        let result = serve.call(req).await;
+
+        assert_eq!(result.unwrap().status(), StatusCode::OK);
+
+        let mut req: Request = Request::default();
+        req.extensions_mut().insert(Arc::new(RouteInfo {
+            id: 2,
+            pattern: "/*".to_string(),
+            params: Into::<Params>::into(vec![("*1", "mod")]),
+        }));
+        *req.uri_mut() = "/mod".parse().unwrap();
+
+        let result = serve.call(req).await;
+
+        assert_eq!(result.unwrap().status(), StatusCode::OK);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn dir() -> Result<()> {
+        let serve = Dir::new("src/serve");
+
+        let mut req: Request = Request::default();
+        req.extensions_mut().insert(Arc::new(RouteInfo {
+            id: 2,
+            pattern: "/*".to_string(),
+            params: Into::<Params>::into(vec![("*1", "list.tpl")]),
+        }));
+        *req.uri_mut() = "/list.tpl".parse().unwrap();
+
+        let result = serve.call(req).await;
+
+        assert_eq!(result.unwrap().status(), StatusCode::OK);
+
+        let mut req: Request = Request::default();
+        req.extensions_mut().insert(Arc::new(RouteInfo {
+            id: 2,
+            pattern: "/*".to_string(),
+            params: Into::<Params>::into(vec![("*1", "list")]),
+        }));
+        *req.uri_mut() = "/list".parse().unwrap();
+
+        let result = serve.call(req).await.map_err(IntoResponse::into_response);
+
+        assert_eq!(result.unwrap_err().status(), StatusCode::NOT_FOUND);
+
+        Ok(())
+    }
 }
