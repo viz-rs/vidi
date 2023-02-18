@@ -1,6 +1,6 @@
 [package]
 name = "viz"
-version = "0.4.7"
+version = "0.4.8"
 edition = "2021"
 rust-version = "1.60"
 readme = "README.md"
@@ -68,9 +68,9 @@ rustls = ["dep:rustls-pemfile", "dep:tokio-rustls", "dep:futures-util"]
 native-tls = ["dep:tokio-native-tls", "dep:futures-util"]
 
 [dependencies]
-viz-core = { path = "../viz-core", version = "0.4.7" }
-viz-router = { path = "../viz-router", version = "0.4.7" }
-viz-handlers = { path = "../viz-handlers", version = "0.4.7", default-features = false, optional = true }
+viz-core = { path = "../viz-core", version = "0.4.8" }
+viz-router = { path = "../viz-router", version = "0.4.8" }
+viz-handlers = { path = "../viz-handlers", version = "0.4.8", default-features = false, optional = true }
 viz-macros = { path = "../viz-macros", version = "0.1.0", optional = true }
 
 hyper = { version = "0.14", features = ["server", "stream", "tcp"] }
