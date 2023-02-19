@@ -24,6 +24,7 @@ members = [
   "examples/otel/*",
   "examples/compression",
   "examples/templates/*",
+  "examples/tracing",
 ]
 
 [workspace.package]
@@ -83,6 +84,10 @@ opentelemetry-prometheus = { version = "0.11.0", features = [
   "prometheus-encoding",
 ] }
 opentelemetry-semantic-conventions = { version = "0.10.0" }
+
+# Tracing
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 
 [workspace.metadata.docs.rs]
 all-features = true

@@ -1,0 +1,12 @@
+[package]
+name = "tracing"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[dependencies]
+viz.workspace = true
+
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
