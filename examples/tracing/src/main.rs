@@ -2,9 +2,9 @@
 
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{server::conn::http1, Request, RequestExt, Responder, Result, Router, Tree};
-use tracing::{debug, info, instrument, error};
+use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use viz::{server::conn::http1, Request, RequestExt, Responder, Result, Router, Tree};
 
 #[instrument]
 async fn index(req: Request) -> Result<&'static str> {
