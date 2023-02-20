@@ -21,6 +21,7 @@ members = [
   "examples/rustls",
   "examples/static-routes",
   "examples/routing/todos",
+  "examples/routing/openapi",
   "examples/otel/*",
   "examples/compression",
   "examples/templates/*",
@@ -55,13 +56,14 @@ thiserror = "1.0"
 # router
 path-tree = "0.7.1"
 
-futures-util = "0.3.26"
+# http
 hyper = { version = "1.0.0-rc.2", features = ["server"] }
 headers = "0.3.8"
 http = "0.2.9"
 http-body = "1.0.0-rc.2"
 http-body-util = "0.1.0-rc.2"
 
+futures-util = "0.3.26"
 tokio = { version = "1.25", features = ["net"] }
 tokio-tungstenite = "0.18.0"
 tokio-stream = "0.1.11"

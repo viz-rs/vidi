@@ -20,6 +20,7 @@ Here you can find a lot of small crabs 🦀.
 * [HTTPS/TLS - rustls](rustls)
 * [Defined a static router](static-routes)
 * [Todos](routing/todos)
+* [OpenAPI](routing/openapi) powered by [utoipa](https://docs.rs/utoipa/latest/utoipa/)
 * [Integration Opentelemetry(OTEL)](https://github.com/open-telemetry/opentelemetry-rust)
   * [Tracing](otel/tracing)
   * [Metrics & Prometheus](otel/metrics)

@@ -15,6 +15,7 @@ use viz::{
     StatusCode, Tree,
 };
 
+/// In-memory todo store
 type DB = Arc<Mutex<Vec<Todo>>>;
 
 const LIMIT: usize = 10;

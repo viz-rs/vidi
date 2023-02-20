@@ -74,7 +74,7 @@ where
     type Error = StateError;
 
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
-        req.state().map(Self).ok_or_else(error::<T>)
+        req.state().map(Self).ok_or_else(StateError::new::<T>)
     }
 }
 
@@ -111,6 +111,13 @@ where
 #[error("missing state type `{0}`")]
 pub struct StateError(pub &'static str);
 
+impl StateError {
+    /// Creates a `State` Error
+    pub fn new<T>() -> Self {
+        StateError(type_name::<T>())
+    }
+}
+
 impl IntoResponse for StateError {
     fn into_response(self) -> Response {
         (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
@@ -121,8 +128,4 @@ impl From<StateError> for Error {
     fn from(e: StateError) -> Self {
         e.into_error()
     }
-}
-
-fn error<T>() -> StateError {
-    StateError(type_name::<T>())
 }
