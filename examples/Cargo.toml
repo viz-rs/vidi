@@ -16,7 +16,8 @@ members = [
   "routing/todos",
   "otel/*",
   "compression",
-  "limits"
+  "limits",
+  "leptos"
 ]
 exclude = ["tls", "target"]
 
