@@ -1,6 +1,6 @@
 //! Compression Middleware.
 
-use std::{cmp::Ordering, str::FromStr};
+use std::str::FromStr;
 
 use async_compression::tokio::bufread;
 use tokio_util::io::{ReaderStream, StreamReader};
@@ -149,20 +149,12 @@ fn parse_accept_encoding(s: &str) -> Option<ContentCoding> {
     s.split(',')
         .map(str::trim)
         .filter_map(|v| match v.split_once(";q=") {
-            None => v.parse::<ContentCoding>().ok().map(|c| (c, 1.)),
+            None => v.parse::<ContentCoding>().ok().map(|c| (c, 100)),
             Some((c, q)) => Some((
                 c.parse::<ContentCoding>().ok()?,
-                q.parse::<f32>().ok().filter(|v| *v >= 0. && *v <= 1.)?,
+                q.parse::<f32>().ok().filter(|v| *v >= 0. && *v <= 1.).map(|v| (v * 100.) as u8)?,
             )),
         })
-        .max_by(|(_, a), (_, b)| {
-            if a == b {
-                Ordering::Equal
-            } else if a < b {
-                Ordering::Less
-            } else {
-                Ordering::Greater
-            }
-        })
+        .max_by_key(|(_, q)| *q)
         .map(|(c, _)| c)
 }

@@ -8,7 +8,7 @@ use crate::{
     types, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
-/// A configure for [CookieMiddleware].
+/// A configure for [`CookieMiddleware`].
 pub struct Config {
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     key: std::sync::Arc<types::CookieKey>,

@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use crate::{async_trait, types, Handler, IntoResponse, Request, Response, Result, Transform};
 
-/// A configuration for [LimitsMiddleware].
+/// A configuration for [`LimitsMiddleware`].
 #[derive(Debug, Clone)]
 pub struct Config {
     limits: types::Limits,

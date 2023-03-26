@@ -1,6 +1,6 @@
-//! Request metrics middleware with [OpenTelemetry].
+//! Request metrics middleware with [`OpenTelemetry`].
 //!
-//! [OpenTelemetry]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md
+//! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md
 
 use std::time::SystemTime;
 
@@ -92,7 +92,7 @@ where
     async fn call(&self, req: Request) -> Self::Output {
         let timer = SystemTime::now();
         let cx = Context::current();
-        let mut attributes = build_attributes(&req, &req.route_info().pattern);
+        let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
 
         self.active_requests.add(&cx, 1, &attributes);
 
@@ -122,7 +122,7 @@ where
     }
 }
 
-fn build_attributes(req: &Request, http_route: &String) -> Vec<KeyValue> {
+fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
     let mut attributes = Vec::with_capacity(10);
     attributes.push(
         HTTP_SCHEME.string(
@@ -134,7 +134,7 @@ fn build_attributes(req: &Request, http_route: &String) -> Vec<KeyValue> {
     );
     attributes.push(HTTP_FLAVOR.string(format!("{:?}", req.version())));
     attributes.push(HTTP_METHOD.string(req.method().to_string()));
-    attributes.push(HTTP_ROUTE.string(http_route.clone()));
+    attributes.push(HTTP_ROUTE.string(http_route.to_string()));
     if let Some(path_and_query) = req.uri().path_and_query() {
         attributes.push(HTTP_TARGET.string(path_and_query.as_str().to_string()));
     }

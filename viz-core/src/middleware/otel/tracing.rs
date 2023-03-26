@@ -33,7 +33,7 @@ use super::HTTP_HOST;
 
 use crate::{
     async_trait,
-    header::{HeaderMap, USER_AGENT},
+    header::{HeaderMap, HeaderName, USER_AGENT},
     headers::{self, HeaderMapExt},
     types::RealIp,
     Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
@@ -46,7 +46,7 @@ pub struct Config<T> {
 }
 
 impl<T> Config<T> {
-    /// Creats new OpenTelemetry tracing config.
+    /// Creats new `OpenTelemetry` tracing config.
     pub fn new(t: T) -> Self {
         Self {
             tracer: Arc::new(t),
@@ -88,7 +88,7 @@ where
         });
 
         let http_route = &req.route_info().pattern;
-        let attributes = build_attributes(&req, http_route);
+        let attributes = build_attributes(&req, http_route.as_str());
 
         let mut span = self
             .tracer
@@ -156,11 +156,11 @@ impl<'a> Extractor for RequestHeaderCarrier<'a> {
     }
 
     fn keys(&self) -> Vec<&str> {
-        self.headers.keys().map(|header| header.as_str()).collect()
+        self.headers.keys().map(HeaderName::as_str).collect()
     }
 }
 
-fn build_attributes(req: &Request, http_route: &String) -> OrderMap<Key, Value> {
+fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
     let mut attributes = OrderMap::<Key, Value>::with_capacity(10);
     attributes.insert(
         HTTP_SCHEME,
@@ -172,7 +172,7 @@ fn build_attributes(req: &Request, http_route: &String) -> OrderMap<Key, Value> 
     );
     attributes.insert(HTTP_FLAVOR, format!("{:?}", req.version()).into());
     attributes.insert(HTTP_METHOD, req.method().to_string().into());
-    attributes.insert(HTTP_ROUTE, http_route.to_owned().into());
+    attributes.insert(HTTP_ROUTE, http_route.to_string().into());
     if let Some(path_and_query) = req.uri().path_and_query() {
         attributes.insert(HTTP_TARGET, path_and_query.as_str().to_string().into());
     }

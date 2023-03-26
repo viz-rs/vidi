@@ -48,7 +48,7 @@ impl FromRequest for CsrfToken {
     }
 }
 
-/// A configuration for [CsrfMiddleware].
+/// A configuration for [`CsrfMiddleware`].
 pub struct Config<S, G, V>(Arc<Inner<S, G, V>>);
 
 impl<S, G, V> Config<S, G, V> {

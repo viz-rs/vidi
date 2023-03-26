@@ -16,7 +16,7 @@ use crate::{
     Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode, Transform,
 };
 
-/// A configuration for [CorsMiddleware].
+/// A configuration for [`CorsMiddleware`].
 pub struct Config {
     max_age: usize,
     credentials: bool,
@@ -29,7 +29,7 @@ pub struct Config {
 }
 
 impl Config {
-    /// Create a new [Config] with default values.
+    /// Create a new [`Config`] with default values.
     pub fn new() -> Self {
         Self::default()
     }
@@ -75,7 +75,7 @@ impl Config {
     {
         self.allow_headers = allow_headers
             .into_iter()
-            .flat_map(|h| h.try_into().ok())
+            .filter_map(|h| h.try_into().ok())
             .collect();
         self
     }
@@ -90,7 +90,7 @@ impl Config {
     {
         self.allow_origins = allow_origins
             .into_iter()
-            .flat_map(|h| h.try_into().ok())
+            .filter_map(|h| h.try_into().ok())
             .collect();
         self
     }
@@ -105,13 +105,14 @@ impl Config {
     {
         self.expose_headers = expose_headers
             .into_iter()
-            .flat_map(|h| h.try_into().ok())
+            .filter_map(|h| h.try_into().ok())
             .collect();
         self
     }
 
     /// A function to verify the origin. If the function returns false, the request will be rejected.
     #[allow(clippy::type_complexity)]
+    #[must_use]
     pub fn origin_verify(
         mut self,
         origin_verify: Option<Arc<dyn Fn(&HeaderValue) -> bool + Send + Sync>>,
@@ -212,8 +213,7 @@ where
                 .config
                 .origin_verify
                 .as_ref()
-                .map(|f| (f)(&origin))
-                .unwrap_or(true)
+                .map_or(true, |f| (f)(&origin))
         {
             return Err(StatusCode::FORBIDDEN.into_error());
         }
@@ -223,11 +223,10 @@ where
             // Preflight request
             if req
                 .header(ACCESS_CONTROL_REQUEST_METHOD)
-                .map(|method| {
+                .map_or(false, |method| {
                     self.config.allow_methods.is_empty()
                         || self.config.allow_methods.contains(&method)
                 })
-                .unwrap_or(false)
             {
                 headers.typed_insert(self.acam.clone());
             } else {
@@ -236,7 +235,7 @@ where
 
             let (allow_headers, request_headers) = req
                 .header(ACCESS_CONTROL_REQUEST_HEADERS)
-                .map(|hs: HeaderValue| {
+                .map_or((true, None), |hs: HeaderValue| {
                     (
                         hs.to_str()
                             .map(|hs| {
@@ -247,8 +246,7 @@ where
                             .unwrap_or(false),
                         Some(hs),
                     )
-                })
-                .unwrap_or((true, None));
+                });
 
             if !allow_headers {
                 return Err((StatusCode::FORBIDDEN, "Invalid Preflight Request").into_error());

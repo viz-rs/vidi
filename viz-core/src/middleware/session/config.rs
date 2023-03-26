@@ -13,7 +13,7 @@ use crate::{
 
 use super::{Error as SessionError, Storage, Store, PURGED, RENEWED, UNCHANGED};
 
-/// A configuration for [SessionMiddleware].
+/// A configuration for [`SessionMiddleware`].
 pub struct Config<S, G, V>(Arc<(Store<S, G, V>, CookieOptions)>);
 
 impl<S, G, V> Config<S, G, V> {
@@ -138,14 +138,11 @@ where
             }
         }
 
-        let sid = match session_id {
-            Some(sid) => sid,
-            None => {
-                let sid = (self.config.store().generate)();
-                self.config.set_cookie(&cookies, &sid);
-                sid
-            }
-        };
+        let sid = session_id.unwrap_or_else(|| {
+            let sid = (self.config.store().generate)();
+            self.config.set_cookie(&cookies, &sid);
+            sid
+        });
 
         self.config
             .store()

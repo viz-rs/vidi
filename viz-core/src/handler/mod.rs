@@ -72,7 +72,7 @@ where
 /// [`FutureExt`]: https://docs.rs/futures/latest/futures/future/trait.FutureExt.html
 /// [`StreamExt`]: https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html
 pub trait HandlerExt<I>: Handler<I> {
-    /// Converts this Handler into a [BoxHandler].
+    /// Converts this Handler into a [`BoxHandler`].
     fn boxed(self) -> BoxHandler<I, Self::Output>
     where
         Self: Sized,
