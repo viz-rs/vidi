@@ -152,7 +152,10 @@ fn parse_accept_encoding(s: &str) -> Option<ContentCoding> {
             None => v.parse::<ContentCoding>().ok().map(|c| (c, 100)),
             Some((c, q)) => Some((
                 c.parse::<ContentCoding>().ok()?,
-                q.parse::<f32>().ok().filter(|v| *v >= 0. && *v <= 1.).map(|v| (v * 100.) as u8)?,
+                q.parse::<f32>()
+                    .ok()
+                    .filter(|v| *v >= 0. && *v <= 1.)
+                    .map(|v| (v * 100.) as u8)?,
             )),
         })
         .max_by_key(|(_, q)| *q)

@@ -181,7 +181,7 @@ where
     H: Handler<Request, Output = Result<O>> + Clone,
     S: Fn() -> Result<Vec<u8>> + Send + Sync + 'static,
     G: Fn(&[u8], Vec<u8>) -> Vec<u8> + Send + Sync + 'static,
-    V: Fn(Vec<u8>, String) -> bool + Send + Sync + 'static,
+    V: Fn(&[u8], String) -> bool + Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
@@ -193,7 +193,7 @@ where
             let mut forbidden = true;
             if let Some(secret) = secret.take() {
                 if let Some(raw_token) = req.header(&config.header) {
-                    forbidden = !(config.verify)(secret, raw_token);
+                    forbidden = !(config.verify)(&secret, raw_token);
                 }
             }
             if forbidden {
@@ -230,11 +230,11 @@ pub fn secret() -> Result<Vec<u8>> {
 
 /// Generates Token
 pub fn generate(secret: &[u8], otp: Vec<u8>) -> Vec<u8> {
-    mask(secret.to_vec(), otp)
+    mask(secret, otp)
 }
 
 /// Verifys Token with a secret
-pub fn verify(secret: Vec<u8>, raw_token: String) -> bool {
+pub fn verify(secret: &[u8], raw_token: String) -> bool {
     if let Ok(token) = base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(raw_token) {
         return is_64(&token) && secret == unmask::<32>(token);
     }
@@ -242,7 +242,7 @@ pub fn verify(secret: Vec<u8>, raw_token: String) -> bool {
 }
 
 /// Retures masked token
-fn mask(secret: Vec<u8>, mut otp: Vec<u8>) -> Vec<u8> {
+fn mask(secret: &[u8], mut otp: Vec<u8>) -> Vec<u8> {
     otp.extend::<Vec<u8>>(
         secret
             .iter()
