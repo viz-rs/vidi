@@ -32,8 +32,8 @@ impl IncomingBody {
     /// Into incoming
     pub fn into_incoming(self) -> Option<Incoming> {
         match self {
+            Self::Empty => None,
             Self::Incoming(inner) => inner,
-            _ => None,
         }
     }
 }

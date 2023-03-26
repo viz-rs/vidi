@@ -27,8 +27,7 @@ impl IntoResponse for Error {
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Full::from(error.to_string()).into())
                 .unwrap(),
-            Error::Responder(resp) => resp,
-            Error::Report(_, resp) => resp,
+            Error::Responder(resp) | Error::Report(_, resp) => resp,
         }
     }
 }

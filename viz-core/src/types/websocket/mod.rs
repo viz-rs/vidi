@@ -1,4 +1,4 @@
-//! WebSocket Extractor
+//! `WebSocket` Extractor
 
 use std::{borrow::Cow, future::Future};
 
@@ -20,10 +20,10 @@ mod error;
 pub use error::WebSocketError;
 pub use tokio_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
 
-/// A wrapper around an underlying raw stream which implements the WebSocket protocol.
+/// A wrapper around an underlying raw stream which implements the `WebSocket` protocol.
 pub type WebSocketStream<T = Upgraded> = tokio_tungstenite::WebSocketStream<T>;
 
-/// Then WebSocket provides the API for creating and managing a [WebSocket][mdn] connection,
+/// Then `WebSocket` provides the API for creating and managing a [`WebSocket`][mdn] connection,
 /// as well as for sending and receiving data on the connection.
 ///
 /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/WebSocket>

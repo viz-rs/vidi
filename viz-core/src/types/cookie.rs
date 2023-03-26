@@ -66,21 +66,21 @@ impl Cookies {
     /// Adds `cookie` to this cookies.
     pub fn add(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
-            c.add(cookie.into_owned())
+            c.add(cookie.into_owned());
         }
     }
 
     /// Adds an "original" `cookie` to this cookies.
     pub fn add_original(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
-            c.add_original(cookie.into_owned())
+            c.add_original(cookie.into_owned());
         }
     }
 
     /// Removes all delta cookies.
     pub fn reset_delta(&self) {
         if let Ok(mut c) = self.jar().lock() {
-            c.reset_delta()
+            c.reset_delta();
         }
     }
 }

@@ -63,10 +63,7 @@ pub use thiserror::Error as ThisError;
 
 #[doc(hidden)]
 mod tuples {
-    use super::{
-        async_trait, Error, FnExt, FromRequest, Future, HandlerExt, IntoResponse, Request,
-        RequestExt, Result,
-    };
+    use super::{async_trait, Error, FnExt, FromRequest, Future, IntoResponse, Request, Result};
 
     tuple_impls!(A B C D E F G H I J K L);
 }
