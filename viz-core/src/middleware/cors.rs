@@ -30,6 +30,7 @@ pub struct Config {
 
 impl Config {
     /// Create a new [`Config`] with default values.
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -37,6 +38,7 @@ impl Config {
     /// Seconds a preflight request can be cached. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age
+    #[must_use]
     pub fn max_age(mut self, max_age: usize) -> Self {
         self.max_age = max_age;
         self
@@ -45,6 +47,7 @@ impl Config {
     /// Whether to allow credentials. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
+    #[must_use]
     pub fn credentials(mut self, credentials: bool) -> Self {
         self.credentials = credentials;
         self
@@ -53,6 +56,7 @@ impl Config {
     /// Allowed HTTP methods. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
+    #[must_use]
     pub fn allow_methods<H>(mut self, allow_methods: H) -> Self
     where
         H: IntoIterator,
@@ -68,6 +72,7 @@ impl Config {
     /// Allowed HTTP headers. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
+    #[must_use]
     pub fn allow_headers<H>(mut self, allow_headers: H) -> Self
     where
         H: IntoIterator,
@@ -83,6 +88,7 @@ impl Config {
     /// Allowed origins. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+    #[must_use]
     pub fn allow_origins<H>(mut self, allow_origins: H) -> Self
     where
         H: IntoIterator,
@@ -98,6 +104,7 @@ impl Config {
     /// Exposed HTTP headers. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
+    #[must_use]
     pub fn expose_headers<H>(mut self, expose_headers: H) -> Self
     where
         H: IntoIterator,

@@ -48,7 +48,6 @@ impl Limits {
 
     /// Sorts the limits for binary search.
     #[must_use]
-    #[must_use]
     pub fn sort(mut self) -> Self {
         Arc::make_mut(&mut self.inner).sort_by_key(|a| a.0);
         self

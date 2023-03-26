@@ -170,6 +170,7 @@ pub trait HandlerExt<I>: Handler<I> {
     }
 
     /// Maps the handler.
+    #[must_use]
     fn with_fn<F>(self, f: F) -> Self
     where
         F: Fn(Self) -> Self,

@@ -24,6 +24,7 @@ pub struct Session {
 
 impl Session {
     /// Creates new `Session` with `Data`
+    #[must_use]
     pub fn new(data: Data) -> Self {
         Self {
             state: Arc::new(State {
@@ -34,16 +35,21 @@ impl Session {
     }
 
     /// Gets status of the session
+    #[must_use]
     pub fn status(&self) -> &AtomicU8 {
         &self.state.status
     }
 
     /// Gets lock data of the session
+    #[must_use]
     pub fn lock_data(&self) -> &RwLock<Data> {
         &self.state.data
     }
 
     /// Gets a value by the key
+    ///
+    /// # Errors
+    /// TODO
     pub fn get<T>(&self, key: &str) -> Result<Option<T>, Error>
     where
         T: DeserializeOwned,
@@ -62,6 +68,9 @@ impl Session {
     }
 
     /// Sets a value by the key
+    ///
+    /// # Errors
+    /// TODO
     pub fn set<T>(&self, key: &str, val: T) -> Result<(), Error>
     where
         T: Serialize,
