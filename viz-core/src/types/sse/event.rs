@@ -15,7 +15,7 @@ pub struct Event {
 }
 
 impl Event {
-    /// The event ID to set the EventSource object's last event ID value.
+    /// The event ID to set the `EventSource` object's last event ID value.
     pub fn id(mut self, id: impl Into<String>) -> Self {
         self.id.replace(id.into());
         self

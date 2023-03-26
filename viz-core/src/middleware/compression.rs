@@ -1,6 +1,6 @@
 //! Compression Middleware.
 
-use std::str::FromStr;
+use std::{cmp::Ordering, str::FromStr};
 
 use async_compression::tokio::bufread;
 use tokio_util::io::{ReaderStream, StreamReader};
@@ -103,7 +103,7 @@ impl<T: IntoResponse> IntoResponse for Compress<T> {
 
 /// [`ContentCoding`]
 ///
-/// [ContentCoding]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding
+/// [`ContentCoding`]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding
 #[derive(Debug, PartialEq)]
 pub enum ContentCoding {
     /// gzip
@@ -148,15 +148,21 @@ impl From<ContentCoding> for &'static str {
 fn parse_accept_encoding(s: &str) -> Option<ContentCoding> {
     s.split(',')
         .map(str::trim)
-        .filter_map(|v| {
-            Some(match v.split_once(";q=") {
-                Some((c, q)) => (
-                    c.parse::<ContentCoding>().ok()?,
-                    q.parse::<f32>().ok()? * 1000.,
-                ),
-                None => (v.parse::<ContentCoding>().ok()?, 1000.),
-            })
+        .filter_map(|v| match v.split_once(";q=") {
+            None => v.parse::<ContentCoding>().ok().map(|c| (c, 1.)),
+            Some((c, q)) => Some((
+                c.parse::<ContentCoding>().ok()?,
+                q.parse::<f32>().ok().filter(|v| *v >= 0. && *v <= 1.)?,
+            )),
         })
-        .max_by_key(|(_, q)| *q as u16)
+        .max_by(|(_, a), (_, b)| {
+            if a == b {
+                Ordering::Equal
+            } else if a < b {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        })
         .map(|(c, _)| c)
 }

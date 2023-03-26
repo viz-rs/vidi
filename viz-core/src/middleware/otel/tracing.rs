@@ -39,14 +39,14 @@ use crate::{
     Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
 };
 
-/// Opentelemetry tracing config.
+/// `OpenTelemetry` tracing config.
 #[derive(Debug)]
 pub struct Config<T> {
     tracer: Arc<T>,
 }
 
 impl<T> Config<T> {
-    /// Creats new Opentelemetry tracing config.
+    /// Creats new OpenTelemetry tracing config.
     pub fn new(t: T) -> Self {
         Self {
             tracer: Arc::new(t),
@@ -65,7 +65,7 @@ impl<H, T> Transform<H> for Config<T> {
     }
 }
 
-/// OpenTelemetry tracing middleware.
+/// `OpenTelemetry` tracing middleware.
 #[derive(Debug, Clone)]
 pub struct TracingMiddleware<H, T> {
     h: H,
@@ -190,7 +190,7 @@ fn build_attributes(req: &Request, http_route: &String) -> OrderMap<Key, Value> 
     //     attributes.insert(HTTP_SERVER_NAME, server_name.to_string().into());
     // }
     if let Some(remote_ip) = req.remote_addr().map(|add| add.ip()) {
-        if realip.map(|realip| realip.0 != remote_ip).unwrap_or(true) {
+        if realip.map_or(true, |realip| realip.0 != remote_ip) {
             // Client is going through a proxy
             attributes.insert(NET_SOCK_PEER_ADDR, remote_ip.to_string().into());
         }

@@ -1,6 +1,6 @@
 //! `WebSocket` Extractor
 
-use std::{borrow::Cow, future::Future};
+use std::{borrow::Cow, future::Future, str};
 
 use hyper::upgrade::{OnUpgrade, Upgraded};
 use tokio_tungstenite::tungstenite::protocol::Role;
@@ -58,6 +58,10 @@ impl WebSocket {
     }
 
     /// Finish the upgrade, passing a function and a [`WebSocketConfig`] to handle the `WebSocket`.
+    ///
+    /// # Panics
+    ///
+    /// When missing `OnUpgrade`
     #[must_use]
     pub fn on_upgrade_with_config<F, Fut>(
         mut self,
@@ -68,7 +72,7 @@ impl WebSocket {
         F: FnOnce(WebSocketStream) -> Fut + Send + 'static,
         Fut: Future<Output = ()> + Send + 'static,
     {
-        let on_upgrade = self.on_upgrade.take().unwrap();
+        let on_upgrade = self.on_upgrade.take().expect("missing OnUpgrade");
 
         tokio::task::spawn(async move {
             let upgraded = match on_upgrade.await {
@@ -78,7 +82,7 @@ impl WebSocket {
 
             let socket = WebSocketStream::from_raw_socket(upgraded, Role::Server, config).await;
 
-            (callback)(socket).await
+            (callback)(socket).await;
         });
 
         self.into_response()
@@ -167,7 +171,7 @@ impl IntoResponse for WebSocket {
                 let protocols = self.protocols.as_ref()?;
                 req_protocols
                     .split(',')
-                    .map(|req_p| req_p.trim())
+                    .map(str::trim)
                     .find(|req_p| protocols.iter().any(|p| p == req_p))
                     .and_then(|v| HeaderValue::from_str(v).ok())
             });

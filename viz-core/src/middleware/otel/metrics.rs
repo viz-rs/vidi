@@ -73,7 +73,7 @@ impl<H> Transform<H> for Config {
     }
 }
 
-/// Request metrics middleware with OpenTelemetry.
+/// Request metrics middleware with `OpenTelemetry`.
 #[derive(Debug, Clone)]
 pub struct MetricsMiddleware<H> {
     h: H,
@@ -134,7 +134,7 @@ fn build_attributes(req: &Request, http_route: &String) -> Vec<KeyValue> {
     );
     attributes.push(HTTP_FLAVOR.string(format!("{:?}", req.version())));
     attributes.push(HTTP_METHOD.string(req.method().to_string()));
-    attributes.push(HTTP_ROUTE.string(http_route.to_owned()));
+    attributes.push(HTTP_ROUTE.string(http_route.clone()));
     if let Some(path_and_query) = req.uri().path_and_query() {
         attributes.push(HTTP_TARGET.string(path_and_query.as_str().to_string()));
     }
@@ -152,7 +152,7 @@ fn build_attributes(req: &Request, http_route: &String) -> Vec<KeyValue> {
     //     attributes.insert(HTTP_SERVER_NAME, server_name.to_string().into());
     // }
     if let Some(remote_ip) = req.remote_addr().map(|add| add.ip()) {
-        if realip.map(|realip| realip.0 != remote_ip).unwrap_or(true) {
+        if realip.map_or(true, |realip| realip.0 != remote_ip) {
             // Client is going through a proxy
             attributes.push(NET_SOCK_PEER_ADDR.string(remote_ip.to_string()));
         }
@@ -162,7 +162,7 @@ fn build_attributes(req: &Request, http_route: &String) -> Vec<KeyValue> {
         .port_u16()
         .filter(|port| *port != 80 || *port != 443)
     {
-        attributes.push(NET_HOST_PORT.i64(port as i64));
+        attributes.push(NET_HOST_PORT.i64(i64::from(port)));
     }
 
     attributes
