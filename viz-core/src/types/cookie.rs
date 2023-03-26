@@ -51,7 +51,7 @@ impl Cookies {
     /// Removes `cookie` from this cookies.
     pub fn remove(&self, name: impl AsRef<str>) {
         if let Ok(mut c) = self.jar().lock() {
-            c.remove(Cookie::named(name.as_ref().to_string()))
+            c.remove(Cookie::named(name.as_ref().to_string()));
         }
     }
 

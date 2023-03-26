@@ -124,7 +124,7 @@ impl Session {
         let status = self.status().load(Ordering::Acquire);
         // not allowed `PURGED & RENEWED`
         if status != PURGED && status != RENEWED {
-            self.status().store(RENEWED, Ordering::SeqCst)
+            self.status().store(RENEWED, Ordering::SeqCst);
         }
     }
 

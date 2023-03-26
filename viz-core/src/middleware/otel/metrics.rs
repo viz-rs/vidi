@@ -104,7 +104,7 @@ where
             .map(|resp| {
                 self.active_requests.add(&cx, -1, &attributes);
 
-                attributes.push(HTTP_STATUS_CODE.i64(resp.status().as_u16() as i64));
+                attributes.push(HTTP_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
 
                 resp
             });
@@ -151,7 +151,7 @@ fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
     // if server_name != host {
     //     attributes.insert(HTTP_SERVER_NAME, server_name.to_string().into());
     // }
-    if let Some(remote_ip) = req.remote_addr().map(|add| add.ip()) {
+    if let Some(remote_ip) = req.remote_addr().map(std::net::SocketAddr::ip) {
         if realip.map_or(true, |realip| realip.0 != remote_ip) {
             // Client is going through a proxy
             attributes.push(NET_SOCK_PEER_ADDR.string(remote_ip.to_string()));
