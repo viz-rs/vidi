@@ -219,7 +219,7 @@ where
         }
 
         let mut headers = HeaderMap::new();
-        let mut res = if req.method() == Method::OPTIONS {
+        let mut resp = if req.method() == Method::OPTIONS {
             // Preflight request
             if req
                 .header(ACCESS_CONTROL_REQUEST_METHOD)
@@ -288,9 +288,9 @@ where
             );
         }
 
-        res.headers_mut().extend(headers);
+        resp.headers_mut().extend(headers);
 
-        Ok(res)
+        Ok(resp)
     }
 }
 

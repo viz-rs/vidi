@@ -96,7 +96,7 @@ where
 
         self.active_requests.add(&cx, 1, &attributes);
 
-        let res = self
+        let resp = self
             .h
             .call(req)
             .await
@@ -118,7 +118,7 @@ where
             &attributes,
         );
 
-        res
+        resp
     }
 }
 

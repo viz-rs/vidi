@@ -1,6 +1,6 @@
-//! Request tracing middleware with [OpenTelemetry].
+//! Request tracing middleware with [`OpenTelemetry`].
 //!
-//! [OpenTelemetry]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
+//! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
 
 use std::sync::Arc;
 
@@ -99,7 +99,7 @@ where
 
         span.add_event("request.started".to_string(), vec![]);
 
-        let res = self
+        let resp = self
             .h
             .call(req)
             .with_context(Context::current_with_span(span))
@@ -108,7 +108,7 @@ where
         let cx = Context::current();
         let span = cx.span();
 
-        match res {
+        match resp {
             Ok(resp) => {
                 let resp = resp.into_response();
                 span.add_event("request.completed".to_string(), vec![]);

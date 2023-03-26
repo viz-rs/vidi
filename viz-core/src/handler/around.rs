@@ -1,6 +1,6 @@
 use crate::{async_trait, Handler, Result};
 
-/// Represents a middleware parameter, which is a tuple that includes Requset and BoxHandler.
+/// Represents a middleware parameter, which is a tuple that includes Requset and `BoxHandler`.
 pub type Next<I, H> = (I, H);
 
 /// Wraps around the remaining handler or middleware chain.
