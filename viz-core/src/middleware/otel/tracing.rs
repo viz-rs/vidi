@@ -112,7 +112,7 @@ where
             Ok(resp) => {
                 let resp = resp.into_response();
                 span.add_event("request.completed".to_string(), vec![]);
-                span.set_attribute(HTTP_STATUS_CODE.i64(resp.status().as_u16() as i64));
+                span.set_attribute(HTTP_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
                 if let Some(content_length) = resp.headers().typed_get::<headers::ContentLength>() {
                     span.set_attribute(HTTP_RESPONSE_CONTENT_LENGTH.i64(content_length.0 as i64));
                 }
@@ -189,7 +189,7 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
     // if server_name != host {
     //     attributes.insert(HTTP_SERVER_NAME, server_name.to_string().into());
     // }
-    if let Some(remote_ip) = req.remote_addr().map(|add| add.ip()) {
+    if let Some(remote_ip) = req.remote_addr().map(std::net::SocketAddr::ip) {
         if realip.map_or(true, |realip| realip.0 != remote_ip) {
             // Client is going through a proxy
             attributes.insert(NET_SOCK_PEER_ADDR, remote_ip.to_string().into());
