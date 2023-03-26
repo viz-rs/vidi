@@ -39,13 +39,23 @@ impl Limits {
     pub const NORMAL: u64 = 1024 * 8;
 
     /// Creates a new Limits.
+    #[must_use]
     pub fn new() -> Self {
         Limits {
             inner: Arc::new(Vec::new()),
         }
     }
 
+    /// Sorts the limits for binary search.
+    #[must_use]
+    #[must_use]
+    pub fn sort(mut self) -> Self {
+        Arc::make_mut(&mut self.inner).sort_by_key(|a| a.0);
+        self
+    }
+
     /// Inserts a name-limit pair into the Limits.
+    #[must_use]
     pub fn insert(mut self, name: &'static str, limit: u64) -> Self {
         Arc::make_mut(&mut self.inner).push((name, limit));
         self
@@ -60,13 +70,6 @@ impl Limits {
             .binary_search_by_key(&name.as_ref(), |&(a, _)| a)
             .map(|i| self.inner[i].1)
             .ok()
-    }
-
-    /// Sorts the limits for binary search.
-    #[must_use]
-    pub fn sort(mut self) -> Self {
-        Arc::make_mut(&mut self.inner).sort_by_key(|a| a.0);
-        self
     }
 }
 

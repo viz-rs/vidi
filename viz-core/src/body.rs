@@ -20,16 +20,19 @@ pub enum IncomingBody {
 
 impl IncomingBody {
     /// Creates new Incoming Body
+    #[must_use]
     pub fn new(inner: Option<Incoming>) -> Self {
         Self::Incoming(inner)
     }
 
     /// Incoming body has been used
+    #[must_use]
     pub fn used() -> Self {
         Self::Incoming(None)
     }
 
     /// Into incoming
+    #[must_use]
     pub fn into_incoming(self) -> Option<Incoming> {
         match self {
             Self::Empty => None,

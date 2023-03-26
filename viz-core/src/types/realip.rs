@@ -1,4 +1,4 @@
-use std::net::IpAddr;
+use std::{net::IpAddr, str};
 
 use rfc7239::{NodeIdentifier, NodeName};
 
@@ -47,7 +47,7 @@ impl RealIp {
             .and_then(|value| {
                 value
                     .split(',')
-                    .map(|value| value.trim())
+                    .map(str::trim)
                     .find_map(|value| value.parse::<IpAddr>().ok())
             })
         {

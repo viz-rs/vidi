@@ -15,11 +15,13 @@ pub struct Config {
 
 impl Config {
     /// Creates a new Config.
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Sets a limits for the Text/Bytes/Form.
+    #[must_use]
     pub fn limits(mut self, limits: types::Limits) -> Self {
         self.limits = limits.sort();
         self
@@ -27,6 +29,7 @@ impl Config {
 
     #[cfg(feature = "multipart")]
     /// Sets a limits for the Multipart Form.
+    #[must_use]
     pub fn multipart(mut self, limits: types::MultipartLimits) -> Self {
         *Arc::make_mut(&mut self.multipart) = limits;
         self
