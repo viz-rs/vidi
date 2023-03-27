@@ -1,5 +1,7 @@
 //! Built-in Middleware.
 
+#![allow(clippy::module_name_repetitions)]
+
 #[cfg(feature = "cookie")]
 pub mod cookie;
 #[cfg(feature = "cors")]
