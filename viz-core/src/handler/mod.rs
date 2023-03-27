@@ -1,5 +1,7 @@
 //! Traits and types for handling an HTTP.
 
+#![allow(clippy::module_name_repetitions)]
+
 use crate::{async_trait, Future};
 
 mod after;

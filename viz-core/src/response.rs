@@ -37,6 +37,9 @@ pub trait ResponseExt: Sized {
 
     #[cfg(feature = "json")]
     /// The response with `application/javascript; charset=utf-8` media type.
+    ///
+    /// # Errors
+    /// Throws a [`PayloadError`].
     fn json<T>(t: T) -> Result<Response, crate::types::PayloadError>
     where
         T: serde::Serialize,

@@ -230,7 +230,6 @@ where
 ///
 /// # Errors
 /// TODO
-#[must_use]
 pub fn secret() -> Result<Vec<u8>> {
     let mut buf = [0u8; 32];
     getrandom::getrandom(&mut buf)
