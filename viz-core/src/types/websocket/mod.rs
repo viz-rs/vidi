@@ -42,6 +42,7 @@ impl WebSocket {
     ///
     /// In order of preference. The first one that is supported by the server will be
     /// selected and responsed.
+    #[must_use]
     pub fn protocols<I>(mut self, protocols: I) -> Self
     where
         I: IntoIterator,

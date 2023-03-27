@@ -28,6 +28,7 @@ where
     S: Stream<Item = Event> + Send + Sync + 'static,
 {
     /// Creates a new Server-Sent Event.
+    #[must_use]
     pub fn new(stream: S) -> Self {
         Self {
             stream,
@@ -36,6 +37,7 @@ where
     }
 
     /// Sets a interval for Server-Sent Event.
+    #[must_use]
     pub fn interval(mut self, duration: Duration) -> Self {
         self.interval.replace(duration);
         self
