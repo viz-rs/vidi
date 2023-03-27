@@ -221,6 +221,9 @@ where
 }
 
 /// Gets random secret
+///
+/// # Errors
+/// TODO
 #[must_use]
 pub fn secret() -> Result<Vec<u8>> {
     let mut buf = [0u8; 32];
@@ -236,6 +239,7 @@ pub fn generate(secret: &[u8], otp: Vec<u8>) -> Vec<u8> {
 }
 
 /// Verifys Token with a secret
+#[must_use]
 pub fn verify(secret: &[u8], raw_token: String) -> bool {
     if let Ok(token) = base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(raw_token) {
         return is_64(&token) && secret == unmask::<32>(token);

@@ -42,7 +42,8 @@ pub struct Config {
 
 impl Config {
     /// Creates a new Config
-    pub fn new(meter: Meter) -> Self {
+    #[must_use]
+    pub fn new(meter: &Meter) -> Self {
         let active_requests = meter
             .i64_up_down_counter(HTTP_SERVER_ACTIVE_REQUESTS)
             .with_description("HTTP concurrent in-flight requests per route")

@@ -37,13 +37,11 @@ async fn main() -> Result<()> {
         ExporterBuilder::new(controller).init()
     };
 
-    let meter = global::meter("viz");
-
     let app = Router::new()
         .get("/", index)
         .get("/:username", index)
         .get("/metrics", Prometheus::new(exporter))
-        .with(otel::metrics::Config::new(meter));
+        .with(otel::metrics::Config::new(&global::meter("viz")));
     let tree = Arc::new(Tree::from(app));
 
     loop {
