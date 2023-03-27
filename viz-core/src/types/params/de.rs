@@ -480,6 +480,7 @@ impl<'de> de::VariantAccess<'de> for UnitVariant {
     }
 }
 
+#[allow(clippy::items_after_statements)]
 #[cfg(test)]
 mod tests {
     use serde::de;

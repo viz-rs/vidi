@@ -36,7 +36,7 @@ impl<H, F, R, E> CatchError<H, F, R, E> {
 }
 
 #[async_trait]
-impl<H, F, I, O, R, E> Handler<I> for CatchError<H, F, E, R>
+impl<H, F, I, O, R, E> Handler<I> for CatchError<H, F, R, E>
 where
     I: Send + 'static,
     O: IntoResponse + Send,
