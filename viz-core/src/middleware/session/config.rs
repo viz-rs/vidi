@@ -18,16 +18,19 @@ pub struct Config<S, G, V>(Arc<(Store<S, G, V>, CookieOptions)>);
 
 impl<S, G, V> Config<S, G, V> {
     /// Creates a new configuration with the [`Store`] and [`CookieOptions`].
+    #[must_use]
     pub fn new(store: Store<S, G, V>, cookie: CookieOptions) -> Self {
         Self(Arc::new((store, cookie)))
     }
 
     /// Gets the store.
+    #[must_use]
     pub fn store(&self) -> &Store<S, G, V> {
         &self.0 .0
     }
 
     /// Gets the TTL.
+    #[must_use]
     pub fn ttl(&self) -> Option<Duration> {
         self.options().max_age
     }

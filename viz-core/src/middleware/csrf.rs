@@ -221,6 +221,7 @@ where
 }
 
 /// Gets random secret
+#[must_use]
 pub fn secret() -> Result<Vec<u8>> {
     let mut buf = [0u8; 32];
     getrandom::getrandom(&mut buf)
@@ -229,6 +230,7 @@ pub fn secret() -> Result<Vec<u8>> {
 }
 
 /// Generates Token
+#[must_use]
 pub fn generate(secret: &[u8], otp: Vec<u8>) -> Vec<u8> {
     mask(secret, otp)
 }

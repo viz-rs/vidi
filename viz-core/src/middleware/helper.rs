@@ -28,47 +28,55 @@ impl CookieOptions {
     pub const MAX_AGE: u64 = 3600 * 24;
 
     /// Creates new `CookieOptions`
+    #[must_use]
     pub fn new(name: &'static str) -> Self {
         Self::default().name(name)
     }
 
     /// Creates new `CookieOptions` with `name`
+    #[must_use]
     pub fn name(mut self, name: &'static str) -> Self {
         self.name = name;
         self
     }
 
     /// Creates new `CookieOptions` with `max_age`
+    #[must_use]
     pub fn max_age(mut self, max_age: Duration) -> Self {
         self.max_age.replace(max_age);
         self
     }
 
     /// Creates new `CookieOptions` with `domain`
+    #[must_use]
     pub fn domain(mut self, domain: &'static str) -> Self {
         self.domain.replace(domain);
         self
     }
 
     /// Creates new `CookieOptions` with `path`
+    #[must_use]
     pub fn path(mut self, path: &'static str) -> Self {
         self.path = path;
         self
     }
 
     /// Creates new `CookieOptions` with `secure`
+    #[must_use]
     pub fn secure(mut self, secure: bool) -> Self {
         self.secure = secure;
         self
     }
 
     /// Creates new `CookieOptions` with `http_only`
+    #[must_use]
     pub fn http_only(mut self, http_only: bool) -> Self {
         self.http_only = http_only;
         self
     }
 
     /// Creates new `CookieOptions` with `same_site`
+    #[must_use]
     pub fn same_site(mut self, same_site: SameSite) -> Self {
         self.same_site.replace(same_site);
         self
