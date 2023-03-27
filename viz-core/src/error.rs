@@ -38,6 +38,10 @@ impl Error {
     }
 
     /// Attempt to downcast the error object to a concrete type.
+    ///
+    /// # Errors
+    ///
+    /// Throws an `Error` if downcast fails.
     #[inline]
     pub fn downcast<T>(self) -> Result<T, Self>
     where

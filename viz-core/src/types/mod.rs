@@ -1,5 +1,7 @@
 //! Built-in Extractors types and traits.
 
+#![allow(clippy::module_name_repetitions)]
+
 #[cfg(feature = "cookie")]
 mod cookie;
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
