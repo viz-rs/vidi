@@ -76,6 +76,9 @@ impl<S, G, V> Config<S, G, V> {
     }
 
     /// Gets the CSRF token from cookies or session.
+    ///
+    /// # Errors
+    ///
     pub fn get(&self, req: &Request) -> Result<Option<Vec<u8>>> {
         let inner = self.as_ref();
         match inner.store {
@@ -85,15 +88,15 @@ impl<S, G, V> Config<S, G, V> {
                     .map(|c| c.value().to_string())
                 {
                     None => Ok(None),
-                    Some(raw_token) => {
-                        match base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(raw_token) {
-                            Ok(masked_token) if is_64(&masked_token) => {
-                                Ok(Some(unmask::<32>(masked_token)))
-                            }
-                            _ => Err((StatusCode::INTERNAL_SERVER_ERROR, "Invalid csrf token")
-                                .into_error()),
-                        }
-                    }
+                    Some(raw_token) => base64::engine::general_purpose::URL_SAFE_NO_PAD
+                        .decode(raw_token)
+                        .ok()
+                        .filter(is_64)
+                        .map(unmask::<32>)
+                        .map(Option::Some)
+                        .ok_or_else(|| {
+                            (StatusCode::INTERNAL_SERVER_ERROR, "Invalid csrf token").into_error()
+                        }),
                 }
             }
             #[cfg(feature = "session")]
@@ -102,6 +105,9 @@ impl<S, G, V> Config<S, G, V> {
     }
 
     /// Sets the CSRF token to cookies or session.
+    ///
+    /// # Errors
+    /// TODO
     #[allow(unused)]
     pub fn set(&self, req: &Request, token: String, secret: Vec<u8>) -> Result<()> {
         let inner = self.as_ref();
