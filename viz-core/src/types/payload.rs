@@ -104,6 +104,12 @@ pub trait Payload {
     }
 
     /// Checks `Content-Type` & `Content-Length`
+    ///
+    /// # Errors
+    ///
+    /// 1. unsupported media type
+    /// 2. content-length is required
+    /// 3. payload is too large
     #[inline]
     fn check_header(
         m: Option<mime::Mime>,

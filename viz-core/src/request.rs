@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 use std::{mem::replace, sync::Arc};
 
 use crate::{

@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 #[cfg(feature = "json")]
 use bytes::{BufMut, BytesMut};
 use http_body_util::Full;
