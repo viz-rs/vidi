@@ -114,7 +114,10 @@ where
                 span.add_event("request.completed".to_string(), vec![]);
                 span.set_attribute(HTTP_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
                 if let Some(content_length) = resp.headers().typed_get::<headers::ContentLength>() {
-                    span.set_attribute(HTTP_RESPONSE_CONTENT_LENGTH.i64(content_length.0 as i64));
+                    span.set_attribute(
+                        HTTP_RESPONSE_CONTENT_LENGTH
+                            .i64(i64::try_from(content_length.0).unwrap_or(i64::MAX)),
+                    );
                 }
                 if resp.status().is_server_error() {
                     span.set_status(Status::error(

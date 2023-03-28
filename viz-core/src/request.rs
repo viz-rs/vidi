@@ -235,7 +235,7 @@ impl RequestExt for Request {
     async fn bytes_with(&mut self, name: &str, max: u64) -> Result<Bytes, PayloadError> {
         Limited::new(
             self.incoming().ok_or(PayloadError::Used)?,
-            self.limits().get(name).unwrap_or(max) as usize,
+            usize::try_from(self.limits().get(name).unwrap_or(max)).unwrap_or(usize::MAX),
         )
         .collect()
         .await

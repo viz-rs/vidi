@@ -145,7 +145,7 @@ impl From<ContentCoding> for &'static str {
     }
 }
 
-#[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::cast_sign_loss)]
 fn parse_accept_encoding(s: &str) -> Option<ContentCoding> {
     s.split(',')
         .map(str::trim)
