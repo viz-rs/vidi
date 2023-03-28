@@ -288,7 +288,8 @@ async fn swagger_ui(req: Request) -> Result<Response> {
             let content_type = HeaderValue::from_str(&file.content_type).map_err(Error::normal)?;
 
             let mut resp = Response::new(Full::from(file.bytes).into());
-            resp.headers_mut().insert(header::CONTENT_TYPE, content_type);
+            resp.headers_mut()
+                .insert(header::CONTENT_TYPE, content_type);
             resp
         }),
         None => Err(StatusCode::NOT_FOUND.into_error()),
