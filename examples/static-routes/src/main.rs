@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 use hyper::service::service_fn;
 use once_cell::sync::Lazy;
@@ -48,7 +49,7 @@ async fn main() -> Result<()> {
 
 /// Serves a request and returns a response.
 async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Response, hyper::Error> {
-    let method = req.method().to_owned();
+    let method = req.method().clone();
     let path = req.path().to_owned();
     let responded = Ok(
         match TREE.find(&method, &path).or_else(|| {

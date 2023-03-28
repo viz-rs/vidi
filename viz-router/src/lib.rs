@@ -17,6 +17,7 @@
     )
 ))]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![allow(clippy::needless_pass_by_value)]
 
 #[macro_use]
 pub(crate) mod macros;

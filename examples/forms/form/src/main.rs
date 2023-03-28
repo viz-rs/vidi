@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, sync::Arc};

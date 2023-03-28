@@ -1,4 +1,6 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
+#![allow(clippy::needless_pass_by_value)]
 
 use std::{
     net::SocketAddr,
@@ -257,7 +259,7 @@ impl Modify for SecurityAddon {
             components.add_security_scheme(
                 "api_key",
                 SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("todo_apikey"))),
-            )
+            );
         }
     }
 }
@@ -277,8 +279,7 @@ async fn swagger_ui(req: Request) -> Result<Response> {
         .route_info()
         .params
         .first()
-        .map(|(_, p)| p.as_str())
-        .unwrap_or_else(|| "");
+        .map_or_else(|| "", |(_, p)| p.as_str());
 
     match utoipa_swagger_ui::serve(tail, config)
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_error())?
@@ -286,9 +287,9 @@ async fn swagger_ui(req: Request) -> Result<Response> {
         Some(file) => Ok({
             let content_type = HeaderValue::from_str(&file.content_type).map_err(Error::normal)?;
 
-            let mut res = Response::new(Full::from(file.bytes).into());
-            res.headers_mut().insert(header::CONTENT_TYPE, content_type);
-            res
+            let mut resp = Response::new(Full::from(file.bytes).into());
+            resp.headers_mut().insert(header::CONTENT_TYPE, content_type);
+            resp
         }),
         None => Err(StatusCode::NOT_FOUND.into_error()),
     }

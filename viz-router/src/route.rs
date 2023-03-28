@@ -10,6 +10,7 @@ use viz_core::{
 macro_rules! export_internal_verb {
     ($name:ident $verb:tt) => {
         #[doc = concat!(" Appends a handler buy the HTTP `", stringify!($verb), "` verb into the route.")]
+        #[must_use]
         pub fn $name<H, O>(self, handler: H) -> Self
         where
             H: Handler<Request, Output = Result<O>> + Clone,
@@ -23,6 +24,7 @@ macro_rules! export_internal_verb {
 macro_rules! export_verb {
     ($name:ident $verb:ty) => {
         #[doc = concat!(" Creates a route with a handler and HTTP `", stringify!($verb), "` verb pair.")]
+        #[must_use]
         pub fn $name<H, O>(handler: H) -> Route
         where
             H: Handler<Request, Output = Result<O>> + Clone,
@@ -41,6 +43,7 @@ pub struct Route {
 
 impl Route {
     /// Creates a new route.
+    #[must_use]
     pub fn new() -> Self {
         Self {
             methods: Vec::new(),
@@ -48,6 +51,7 @@ impl Route {
     }
 
     /// Appends a HTTP verb and handler pair into the route.
+    #[must_use]
     pub fn push(mut self, method: Method, handler: BoxHandler) -> Self {
         match self
             .methods
@@ -63,6 +67,7 @@ impl Route {
     }
 
     /// Appends a handler by the specified HTTP verb into the route.
+    #[must_use]
     pub fn on<H, O>(self, method: Method, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -72,6 +77,7 @@ impl Route {
     }
 
     /// Appends a handler by any HTTP verbs into the route.
+    #[must_use]
     pub fn any<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -106,6 +112,7 @@ impl Route {
     );
 
     /// Takes a closure and creates an iterator which calls that closure on each handler.
+    #[must_use]
     pub fn map_handler<F>(self, f: F) -> Self
     where
         F: Fn(BoxHandler) -> BoxHandler,
@@ -116,6 +123,7 @@ impl Route {
     }
 
     /// Transforms the types to a middleware and adds it.
+    #[must_use]
     pub fn with<T>(self, t: T) -> Self
     where
         T: Transform<BoxHandler>,
@@ -125,6 +133,7 @@ impl Route {
     }
 
     /// Adds a middleware for the routes.
+    #[must_use]
     pub fn with_handler<F>(self, f: F) -> Self
     where
         F: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Clone,
@@ -202,6 +211,8 @@ impl fmt::Debug for Route {
 
 #[cfg(test)]
 #[allow(dead_code)]
+#[allow(clippy::unused_async)]
+#[allow(clippy::too_many_lines)]
 mod tests {
     use super::Route;
     use http_body_util::BodyExt;
@@ -404,11 +415,11 @@ mod tests {
             .find(|(m, _)| m == Method::GET)
             .unwrap();
 
-        let res = match h.call(Request::default()).await {
+        let resp = match h.call(Request::default()).await {
             Ok(r) => r,
             Err(e) => e.into_response(),
         };
-        assert_eq!(res.into_body().collect().await?.to_bytes(), "");
+        assert_eq!(resp.into_body().collect().await?.to_bytes(), "");
 
         let (_, h) = route
             .methods
@@ -419,12 +430,12 @@ mod tests {
         let mut req = Request::default();
         *req.uri_mut() = "/?c=1".parse().unwrap();
 
-        let res = match h.call(req).await {
+        let resp = match h.call(req).await {
             Ok(r) => r,
             Err(e) => e.into_response(),
         };
         assert_eq!(
-            res.into_body().collect().await?.to_bytes().to_vec(),
+            resp.into_body().collect().await?.to_bytes().to_vec(),
             vec![98, 101, 102, 111, 114, 101, 1]
         );
 

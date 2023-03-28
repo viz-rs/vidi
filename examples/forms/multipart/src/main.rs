@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 use futures_util::TryStreamExt;
 use std::{fs::File, net::SocketAddr, sync::Arc};

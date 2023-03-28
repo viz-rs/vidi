@@ -12,6 +12,7 @@ pub struct Tree(Vec<(Method, PathTree<BoxHandler>)>);
 
 impl Tree {
     /// Find a handler by the HTTP method and the URI's path.
+    #[must_use]
     pub fn find<'a, 'b>(
         &'a self,
         method: &'b Method,
@@ -23,6 +24,7 @@ impl Tree {
     }
 
     /// Consumes the Tree, returning the wrapped value.
+    #[must_use]
     pub fn into_inner(self) -> Vec<(Method, PathTree<BoxHandler>)> {
         self.0
     }
@@ -49,21 +51,22 @@ impl From<Router> for Tree {
                     path.insert(0, '/');
                 }
                 for (method, handler) in methods {
-                    match tree.as_mut().iter_mut().find_map(|(m, t)| {
-                        if *m == method {
-                            Some(t)
-                        } else {
-                            None
-                        }
-                    }) {
-                        Some(t) => {
-                            t.insert(&path, handler);
-                        }
-                        None => {
-                            let mut t = PathTree::new();
-                            t.insert(&path, handler);
-                            tree.as_mut().push((method, t));
-                        }
+                    if let Some(t) =
+                        tree.as_mut().iter_mut().find_map(
+                            |(m, t)| {
+                                if *m == method {
+                                    Some(t)
+                                } else {
+                                    None
+                                }
+                            },
+                        )
+                    {
+                        t.insert(&path, handler);
+                    } else {
+                        let mut t = PathTree::new();
+                        t.insert(&path, handler);
+                        tree.as_mut().push((method, t));
                     }
                 }
             }

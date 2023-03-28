@@ -45,6 +45,7 @@ impl Default for Config {
 
 impl Config {
     /// Create a new Tls config
+    #[must_use]
     pub fn new() -> Self {
         Self {
             cert: Vec::new(),
@@ -55,37 +56,50 @@ impl Config {
     }
 
     /// sets the Tls certificate
+    #[must_use]
     pub fn cert(mut self, cert: impl Into<Vec<u8>>) -> Self {
         self.cert = cert.into();
         self
     }
 
     /// sets the Tls key
+    #[must_use]
     pub fn key(mut self, key: impl Into<Vec<u8>>) -> Self {
         self.key = key.into();
         self
     }
 
     /// Sets the trust anchor for optional Tls client authentication
+    #[must_use]
     pub fn client_auth_optional(mut self, trust_anchor: impl Into<Vec<u8>>) -> Self {
         self.client_auth = ClientAuth::Optional(trust_anchor.into());
         self
     }
 
     /// Sets the trust anchor for required Tls client authentication
+    #[must_use]
     pub fn client_auth_required(mut self, trust_anchor: impl Into<Vec<u8>>) -> Self {
         self.client_auth = ClientAuth::Required(trust_anchor.into());
         self
     }
 
     /// sets the DER-encoded OCSP response
+    #[must_use]
     pub fn ocsp_resp(mut self, ocsp_resp: impl Into<Vec<u8>>) -> Self {
         self.ocsp_resp = ocsp_resp.into();
         self
     }
 
-    /// builds the Tls ServerConfig
+    /// builds the Tls `ServerConfig`
+    ///
+    /// # Errors
     pub fn build(self) -> Result<ServerConfig> {
+        fn read_trust_anchor(trust_anchor: &Certificate) -> Result<RootCertStore> {
+            let mut store = RootCertStore::empty();
+            store.add(trust_anchor).map_err(Error::normal)?;
+            Ok(store)
+        }
+
         let certs = rustls_pemfile::certs(&mut self.cert.as_slice())
             .map(|mut certs| certs.drain(..).map(Certificate).collect())
             .map_err(Error::normal)?;
@@ -95,30 +109,23 @@ impl Config {
                 rustls_pemfile::pkcs8_private_keys(&mut self.key.as_slice())
                     .map(|mut keys| keys.drain(..).map(PrivateKey).collect())
                     .map_err(Error::normal)?;
-            if !pkcs8.is_empty() {
-                pkcs8.remove(0)
-            } else {
+            if pkcs8.is_empty() {
                 let mut rsa: Vec<PrivateKey> =
                     rustls_pemfile::rsa_private_keys(&mut self.key.as_slice())
                         .map(|mut keys| keys.drain(..).map(PrivateKey).collect())
                         .map_err(Error::normal)?;
 
-                if !rsa.is_empty() {
-                    rsa.remove(0)
-                } else {
+                if rsa.is_empty() {
                     return Err(Error::normal(IoError::new(
                         ErrorKind::InvalidData,
                         "failed to parse tls private keys",
                     )));
                 }
+                rsa.remove(0)
+            } else {
+                pkcs8.remove(0)
             }
         };
-
-        fn read_trust_anchor(trust_anchor: &Certificate) -> Result<RootCertStore> {
-            let mut store = RootCertStore::empty();
-            store.add(trust_anchor).map_err(Error::normal)?;
-            Ok(store)
-        }
 
         let client_auth = match self.client_auth {
             ClientAuth::Off => NoClientAuth::new(),
@@ -139,7 +146,13 @@ impl Config {
 }
 
 impl Listener<TcpListener, TlsAcceptor> {
-    /// A [`TlsStream`] and [`SocketAddr] part for accepting TLS.
+    /// Accepts a new incoming connection from this listener.
+    ///
+    /// Returns a [`TlsStream`] and [`SocketAddr`] part.
+    ///
+    /// # Errors
+    ///
+    /// This function throws if it is not accepted from the listener.
     pub async fn accept(&self) -> Result<(TlsStream<TcpStream>, SocketAddr)> {
         let (stream, addr) = self.inner.accept().await?;
         let tls_stream = self.acceptor.accept(stream).await?;

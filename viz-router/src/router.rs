@@ -7,6 +7,7 @@ use crate::{Resources, Route};
 macro_rules! export_verb {
     ($name:ident $verb:ty) => {
         #[doc = concat!(" Adds a handler with a path and HTTP `", stringify!($verb), "` verb pair.")]
+        #[must_use]
         pub fn $name<S, H, O>(self, path: S, handler: H) -> Self
         where
             S: AsRef<str>,
@@ -26,6 +27,7 @@ pub struct Router {
 
 impl Router {
     /// Creates an empty `Router`.
+    #[must_use]
     pub fn new() -> Self {
         Self { routes: None }
     }
@@ -51,6 +53,7 @@ impl Router {
     }
 
     /// Inserts a path-route pair into the router.
+    #[must_use]
     pub fn route<S>(mut self, path: S, route: Route) -> Self
     where
         S: AsRef<str>,
@@ -64,6 +67,7 @@ impl Router {
     }
 
     /// Nested resources with a path.
+    #[must_use]
     pub fn resources<S>(self, path: S, resource: Resources) -> Self
     where
         S: AsRef<str>,
@@ -84,6 +88,8 @@ impl Router {
     }
 
     /// Nested sub-router with a path.
+    #[allow(clippy::similar_names)]
+    #[must_use]
     pub fn nest<S>(self, path: S, router: Self) -> Self
     where
         S: AsRef<str>,
@@ -120,6 +126,7 @@ impl Router {
     );
 
     /// Adds a handler with a path and any HTTP verbs."
+    #[must_use]
     pub fn any<S, H, O>(self, path: S, handler: H) -> Self
     where
         S: AsRef<str>,
@@ -130,6 +137,7 @@ impl Router {
     }
 
     /// Takes a closure and creates an iterator which calls that closure on each handler.
+    #[must_use]
     pub fn map_handler<F>(self, f: F) -> Self
     where
         F: Fn(BoxHandler) -> BoxHandler,
@@ -153,6 +161,7 @@ impl Router {
     }
 
     /// Transforms the types to a middleware and adds it.
+    #[must_use]
     pub fn with<T>(self, t: T) -> Self
     where
         T: Transform<BoxHandler>,
@@ -162,6 +171,7 @@ impl Router {
     }
 
     /// Adds a middleware for the routes.
+    #[must_use]
     pub fn with_handler<F>(self, f: F) -> Self
     where
         F: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Clone,
@@ -171,6 +181,8 @@ impl Router {
 }
 
 #[cfg(test)]
+#[allow(clippy::unused_async)]
+#[allow(clippy::too_many_lines)]
 mod tests {
     use http_body_util::{BodyExt, Full};
     use std::sync::Arc;
@@ -464,7 +476,7 @@ mod tests {
     }
 
     #[test]
-    fn debug() -> Result<()> {
+    fn debug() {
         let search = Route::new().get(|_: Request| async { Ok(Response::text("search")) });
 
         let orgs = Resources::default()
@@ -478,14 +490,12 @@ mod tests {
                 Ok(Response::text("setting page"))
             });
 
-        let api = Router::new().route("/search", search.clone());
-
         let app = Router::new()
             .get("/", |_: Request| async { Ok(Response::text("index")) })
-            .route("search", search)
+            .route("search", search.clone())
             .resources(":org", orgs)
             .nest("settings", settings)
-            .nest("api", api);
+            .nest("api", Router::new().route("/search", search));
 
         let tree: Tree = app.into();
 
@@ -512,14 +522,12 @@ mod tests {
     ,
 }"
         );
-
-        Ok(())
     }
 
     fn client(method: Method, path: &str) -> (Request, Method, String) {
         (
             Request::builder()
-                .method(method.to_owned())
+                .method(method.clone())
                 .uri(path.to_owned())
                 .body(IncomingBody::Empty)
                 .unwrap(),

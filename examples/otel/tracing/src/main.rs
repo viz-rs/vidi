@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 use opentelemetry::{
     global,

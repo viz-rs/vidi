@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 use futures_util::StreamExt;
 use std::{net::SocketAddr, sync::Arc};
@@ -27,7 +28,7 @@ async fn stats(req: Request) -> Result<impl IntoResponse> {
     // check request `Accept` header
     if !matches!(req.header::<_, String>(ACCEPT), Some(ts) if ts == mime::TEXT_EVENT_STREAM.as_ref())
     {
-        Err(StatusCode::BAD_REQUEST.into_error())?
+        Err(StatusCode::BAD_REQUEST.into_error())?;
     }
 
     let sys = req

@@ -14,6 +14,7 @@ pub struct Responder {
 
 impl Responder {
     /// Creates a Responder for handling the [`Request`].
+    #[must_use]
     pub fn new(tree: Arc<Tree>, addr: Option<SocketAddr>) -> Self {
         Self { tree, addr }
     }
@@ -24,7 +25,7 @@ impl Responder {
         tree: Arc<Tree>,
         addr: Option<SocketAddr>,
     ) -> Result<Response, Infallible> {
-        let method = req.method().to_owned();
+        let method = req.method().clone();
         let path = req.uri().path().to_owned();
         let responded = Ok(
             match tree.find(&method, &path).or_else(|| {

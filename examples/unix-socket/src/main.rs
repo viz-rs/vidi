@@ -4,6 +4,7 @@
 //! curl --unix-socket /tmp/viz.sock http://localhost/
 //! ```
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 #[cfg(unix)]
 #[tokio::main]

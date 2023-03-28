@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(clippy::unused_async)]
 
 use futures_util::{SinkExt, StreamExt};
 use std::{net::SocketAddr, sync::Arc};

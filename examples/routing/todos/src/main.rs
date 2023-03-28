@@ -20,6 +20,7 @@ type DB = Arc<Mutex<Vec<Todo>>>;
 
 const LIMIT: usize = 10;
 
+#[allow(clippy::needless_pass_by_value)]
 fn into_error<T>(e: PoisonError<T>) -> Error {
     e.to_string().into_error()
 }

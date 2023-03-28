@@ -32,6 +32,7 @@ pub struct Resources {
 
 impl Resources {
     /// Named for the resources.
+    #[must_use]
     pub fn named<S>(mut self, name: S) -> Self
     where
         S: AsRef<str>,
@@ -41,12 +42,14 @@ impl Resources {
     }
 
     /// Without referencing an ID for a resource.
+    #[must_use]
     pub fn singular(mut self) -> Self {
         self.singular = true;
         self
     }
 
     /// Inserts a path-route pair into the resources.
+    #[must_use]
     pub fn route<S>(mut self, path: S, route: Route) -> Self
     where
         S: AsRef<str>,
@@ -58,7 +61,7 @@ impl Resources {
             .find(|(p, _)| p == &kind)
             .map(|(_, r)| r)
         {
-            Some(r) => *r = route.into_iter().fold(r.to_owned(), |r, (m, h)| r.on(m, h)),
+            Some(r) => *r = route.into_iter().fold(r.clone(), |r, (m, h)| r.on(m, h)),
             None => {
                 self.routes.push((kind, route));
             }
@@ -78,7 +81,7 @@ impl Resources {
             .map(|(_, r)| r)
         {
             Some(r) => {
-                *r = r.to_owned().on(method, handler);
+                *r = r.clone().on(method, handler);
             }
             None => {
                 self.routes.push((kind, Route::new().on(method, handler)));
@@ -88,6 +91,7 @@ impl Resources {
     }
 
     /// Displays a list of the resources.
+    #[must_use]
     pub fn index<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -97,6 +101,7 @@ impl Resources {
     }
 
     /// Returens an HTML form for creating the resources.
+    #[must_use]
     pub fn new<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -106,6 +111,7 @@ impl Resources {
     }
 
     /// Creates the resources.
+    #[must_use]
     pub fn create<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -115,6 +121,7 @@ impl Resources {
     }
 
     /// Displays the resources.
+    #[must_use]
     pub fn show<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -124,6 +131,7 @@ impl Resources {
     }
 
     /// Returens an HTML form for editing the resources.
+    #[must_use]
     pub fn edit<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -133,6 +141,7 @@ impl Resources {
     }
 
     /// Updates the resources, by default the `PUT` verb.
+    #[must_use]
     pub fn update<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -142,6 +151,7 @@ impl Resources {
     }
 
     /// Updates the resources, by the `PATCH` verb.
+    #[must_use]
     pub fn update_with_patch<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -151,6 +161,7 @@ impl Resources {
     }
 
     /// Deletes the resources.
+    #[must_use]
     pub fn destroy<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
@@ -160,6 +171,7 @@ impl Resources {
     }
 
     /// Takes a closure and creates an iterator which calls that closure on each handler.
+    #[must_use]
     pub fn map_handler<F>(self, f: F) -> Self
     where
         F: Fn(BoxHandler) -> BoxHandler,
@@ -184,6 +196,7 @@ impl Resources {
     }
 
     /// Transforms the types to a middleware and adds it.
+    #[must_use]
     pub fn with<T>(self, t: T) -> Self
     where
         T: Transform<BoxHandler>,
@@ -193,6 +206,7 @@ impl Resources {
     }
 
     /// Adds a middleware for the resources.
+    #[must_use]
     pub fn with_handler<F>(self, f: F) -> Self
     where
         F: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Clone,
@@ -212,11 +226,11 @@ impl IntoIterator for Resources {
             .map(|(kind, route)| {
                 (
                     match kind {
-                        Kind::Empty => "".to_string(),
+                        Kind::Empty => String::new(),
                         Kind::New => "new".to_string(),
                         Kind::Id => {
                             if self.singular {
-                                "".to_string()
+                                String::new()
                             } else {
                                 format!(":{}_id", &self.name)
                             }
@@ -239,6 +253,8 @@ impl IntoIterator for Resources {
 }
 
 #[cfg(test)]
+#[allow(clippy::unused_async)]
+#[allow(clippy::too_many_lines)]
 mod tests {
     use super::Kind;
     use crate::{get, Resources};
