@@ -3,12 +3,12 @@
 //! <https://github.com/vercel/serve-handler> MIT
 
 use std::{
+    ffi::OsStr,
     fmt::{Display, Formatter, Result},
     fs::read_dir,
     path::PathBuf,
     str::FromStr,
-    ffi::OsStr,
-    string::ToString
+    string::ToString,
 };
 
 use viz_core::{IntoResponse, Response, ResponseExt};
@@ -77,8 +77,7 @@ impl Directory {
         let mut paths = Vec::new();
 
         for a in curr.ancestors() {
-            if let (Some(u), Some(n)) =
-                (a.join("").to_str(), a.file_name().and_then(OsStr::to_str))
+            if let (Some(u), Some(n)) = (a.join("").to_str(), a.file_name().and_then(OsStr::to_str))
             {
                 paths.push((u.to_string(), n.to_owned() + "/"));
             }
