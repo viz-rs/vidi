@@ -553,8 +553,8 @@ mod tests {
         check_single_value!(u16, "123", 123);
         check_single_value!(u32, "123", 123);
         check_single_value!(u64, "123", 123);
-        check_single_value!(f32, "123", 123);
-        check_single_value!(f64, "123", 123);
+        check_single_value!(f32, "123", 123f32);
+        check_single_value!(f64, "123", 123f64);
         check_single_value!(String, "abc", "abc");
         check_single_value!(String, "one%20two", "one%20two");
         check_single_value!(&str, "abc", "abc");
