@@ -23,6 +23,7 @@ impl<E> Clone for File<E> {
 
 impl<E> File<E> {
     /// Serve a new file by the specified path.
+    #[must_use]
     pub fn new(path: &'static str) -> Self {
         Self(path.into(), PhantomData)
     }
@@ -36,7 +37,7 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, req: Request) -> Self::Output {
-        serve::<E>(&self.0, req.method(), req.headers()).await
+        serve::<E>(&self.0, req.method(), req.headers())
     }
 }
 
@@ -73,11 +74,11 @@ where
             None => "index.html",
         };
 
-        serve::<E>(path, req.method(), req.headers()).await
+        serve::<E>(path, req.method(), req.headers())
     }
 }
 
-async fn serve<E>(path: &str, method: &Method, headers: &HeaderMap) -> Result<Response>
+fn serve<E>(path: &str, method: &Method, headers: &HeaderMap) -> Result<Response>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
@@ -91,8 +92,7 @@ where
 
             if headers
                 .get(IF_NONE_MATCH)
-                .map(|etag| etag.to_str().unwrap_or("000000").eq(&hash))
-                .unwrap_or(false)
+                .map_or(false, |etag| etag.to_str().unwrap_or("000000").eq(&hash))
             {
                 Err(StatusCode::NOT_MODIFIED.into_error())?;
             }

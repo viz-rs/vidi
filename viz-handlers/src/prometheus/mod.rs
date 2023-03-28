@@ -25,6 +25,7 @@ pub struct Prometheus {
 
 impl Prometheus {
     /// Creates a new Prometheus.
+    #[must_use]
     pub fn new(exporter: PrometheusExporter) -> Self {
         Self { exporter }
     }
@@ -42,7 +43,7 @@ impl Handler<Request> for Prometheus {
         if let Err(err) = encoder.encode(&metric_families, &mut body) {
             let text = err.to_string();
             handle_error(MetricsError::Other(text.clone()));
-            Err((StatusCode::INTERNAL_SERVER_ERROR, text).into_error())?
+            Err((StatusCode::INTERNAL_SERVER_ERROR, text).into_error())?;
         }
 
         let mut res = Response::new(Full::from(body).into());
