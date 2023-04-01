@@ -7,6 +7,7 @@ use crate::{
     types::{PayloadError, RouteInfo},
     Bytes, FromRequest, Incoming, IncomingBody, Request, Result,
 };
+use headers::HeaderMapExt;
 use http_body_util::{BodyExt, Collected};
 
 #[cfg(feature = "limits")]
@@ -53,11 +54,16 @@ pub trait RequestExt: Sized {
     where
         T: serde::de::DeserializeOwned;
 
-    /// Get a header with the specified type by the key.
+    /// Get a header with the key.
     fn header<K, T>(&self, key: K) -> Option<T>
     where
         K: header::AsHeaderName,
         T: std::str::FromStr;
+
+    /// Get a header with the specified type.
+    fn header_typed<H>(&self) -> Option<H>
+    where
+        H: headers::Header;
 
     /// Get the size of this request's body.
     fn content_length(&self) -> Option<u64>;
@@ -198,6 +204,14 @@ impl RequestExt for Request {
             .get(key)
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.parse::<T>().ok())
+    }
+
+    /// Get a header with the specified type.
+    fn header_typed<H>(&self) -> Option<H>
+    where
+        H: headers::Header,
+    {
+        self.headers().typed_get()
     }
 
     fn content_length(&self) -> Option<u64> {

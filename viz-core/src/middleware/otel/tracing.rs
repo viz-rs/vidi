@@ -33,8 +33,8 @@ use super::HTTP_HOST;
 
 use crate::{
     async_trait,
-    header::{HeaderMap, HeaderName, USER_AGENT},
-    headers::{self, HeaderMapExt},
+    header::{HeaderMap, HeaderName},
+    headers::{self, HeaderMapExt, UserAgent},
     types::RealIp,
     Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
 };
@@ -182,7 +182,11 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
     if let Some(host) = req.uri().host() {
         attributes.insert(HTTP_HOST, host.to_string().into());
     }
-    if let Some(user_agent) = req.headers().get(USER_AGENT).and_then(|s| s.to_str().ok()) {
+    if let Some(user_agent) = req
+        .header_typed::<UserAgent>()
+        .as_ref()
+        .map(UserAgent::as_str)
+    {
         attributes.insert(HTTP_USER_AGENT, user_agent.to_string().into());
     }
     let realip = RealIp::parse(req);

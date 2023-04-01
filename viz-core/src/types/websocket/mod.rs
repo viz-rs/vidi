@@ -12,7 +12,7 @@ use crate::{
         Connection, HeaderMapExt, HeaderValue, SecWebsocketAccept, SecWebsocketKey,
         SecWebsocketVersion, Upgrade,
     },
-    FromRequest, IntoResponse, OutgoingBody, Request, Response, Result, StatusCode,
+    FromRequest, IntoResponse, OutgoingBody, Request, RequestExt, Response, Result, StatusCode,
 };
 
 mod error;
@@ -105,8 +105,7 @@ impl FromRequest for WebSocket {
 
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         // check connection header
-        req.headers()
-            .typed_get::<Connection>()
+        req.header_typed::<Connection>()
             .ok_or(WebSocketError::MissingConnectUpgrade)
             .and_then(|h| {
                 if h.contains(UPGRADE) {
@@ -129,8 +128,7 @@ impl FromRequest for WebSocket {
             })?;
 
         // check sec-websocket-version header
-        req.headers()
-            .typed_get::<SecWebsocketVersion>()
+        req.header_typed::<SecWebsocketVersion>()
             .ok_or(WebSocketError::MissingWebSocketVersion)
             .and_then(|h| {
                 if h == SecWebsocketVersion::V13 {
@@ -141,8 +139,7 @@ impl FromRequest for WebSocket {
             })?;
 
         let key = req
-            .headers()
-            .typed_get::<SecWebsocketKey>()
+            .header_typed::<SecWebsocketKey>()
             .ok_or(WebSocketError::MissingWebSocketKey)?;
 
         let on_upgrade = req.extensions_mut().remove::<OnUpgrade>();
