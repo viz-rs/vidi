@@ -18,7 +18,7 @@ pub enum PayloadError {
     MissingBoundary,
 
     /// 400
-    #[error("parse utf8: {0}")]
+    #[error("parse utf8 failed, {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
 
     /// 400
@@ -27,12 +27,12 @@ pub enum PayloadError {
 
     #[cfg(feature = "json")]
     /// 400
-    #[error("json: {0}")]
+    #[error("JSON serialize or deserialize faild, {0}")]
     Json(#[from] serde_json::Error),
 
     #[cfg(any(feature = "form", feature = "query"))]
     /// 400
-    #[error("url decode: {0}")]
+    #[error("url decode failed, {0}")]
     UrlDecode(#[from] serde_urlencoded::de::Error),
 
     /// 411
