@@ -3,14 +3,14 @@ use http::uri::Scheme;
 use serde::Deserialize;
 use viz_core::{header::CONTENT_TYPE, IncomingBody, Request, RequestExt, Result};
 
+#[derive(Debug, Deserialize, PartialEq)]
+struct Page {
+    p: u8,
+}
+
 #[tokio::test]
 async fn request_ext() -> Result<()> {
     let req = Request::builder().uri("viz.rs").body(IncomingBody::Empty)?;
-
-    #[derive(Debug, Deserialize, PartialEq)]
-    struct Page {
-        p: u8,
-    }
 
     assert_eq!(req.schema(), None);
     assert_eq!(req.uri(), "viz.rs");
