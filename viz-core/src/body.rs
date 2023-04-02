@@ -65,7 +65,8 @@ impl Body for IncomingBody {
         cx: &mut Context<'_>,
     ) -> Poll<Option<Result<Frame<Self::Data>, Self::Error>>> {
         match self.get_mut() {
-            Self::Incoming(s) if s.is_some() => {
+            Self::Empty | Self::Incoming(None) => Poll::Ready(None),
+            Self::Incoming(s) => {
                 match Pin::new(s.as_mut().unwrap()).poll_frame(cx)? {
                     Poll::Ready(Some(f)) => Poll::Ready(Some(Ok(f))),
                     Poll::Ready(None) => {
@@ -76,21 +77,20 @@ impl Body for IncomingBody {
                     Poll::Pending => Poll::Pending,
                 }
             }
-            _ => Poll::Ready(None),
         }
     }
 
     fn is_end_stream(&self) -> bool {
         match self {
+            Self::Empty | Self::Incoming(None) => true,
             Self::Incoming(Some(inner)) => inner.is_end_stream(),
-            _ => true,
         }
     }
 
     fn size_hint(&self) -> SizeHint {
         match self {
+            Self::Empty | Self::Incoming(None) => SizeHint::with_exact(0),
             Self::Incoming(Some(inner)) => inner.size_hint(),
-            _ => SizeHint::with_exact(0),
         }
     }
 }
@@ -100,18 +100,19 @@ impl Stream for IncomingBody {
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         match self.get_mut() {
+            Self::Empty | Self::Incoming(None) => Poll::Ready(None),
             Self::Incoming(Some(inner)) => match Pin::new(inner).poll_frame(cx)? {
                 Poll::Ready(Some(f)) => Poll::Ready(f.into_data().map(Ok).ok()),
                 Poll::Ready(None) => Poll::Ready(None),
                 Poll::Pending => Poll::Pending,
             },
-            _ => Poll::Ready(None),
         }
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
+            Self::Empty | Self::Incoming(None) => (0, None),
             Self::Incoming(Some(inner)) => {
                 let sh = inner.size_hint();
                 (
@@ -119,7 +120,6 @@ impl Stream for IncomingBody {
                     sh.upper().map(|v| usize::try_from(v).unwrap_or(usize::MAX)),
                 )
             }
-            _ => (0, None),
         }
     }
 }

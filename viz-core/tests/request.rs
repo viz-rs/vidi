@@ -10,7 +10,7 @@ struct Page {
 
 #[tokio::test]
 async fn request_ext() -> Result<()> {
-    let req = Request::builder().uri("viz.rs").body(IncomingBody::Empty)?;
+    let mut req = Request::builder().uri("viz.rs").body(IncomingBody::Empty)?;
 
     assert_eq!(req.schema(), None);
     assert_eq!(req.uri(), "viz.rs");
@@ -22,6 +22,8 @@ async fn request_ext() -> Result<()> {
     );
     assert!(req.header::<_, String>(CONTENT_TYPE).is_none());
     assert!(req.header_typed::<ContentType>().is_none());
+    assert!(req.content_length().is_none());
+    assert!(req.incoming().is_none());
 
     let mut req = Request::builder()
         .uri("https://viz.rs?p=1")
