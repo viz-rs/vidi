@@ -14,6 +14,7 @@ use viz::{
         session::{self, Store},
     },
     server::conn::http1,
+    types::CookieKey,
     Request, RequestExt, Responder, Result, Router, Tree,
 };
 
@@ -39,7 +40,9 @@ async fn main() -> Result<()> {
             }),
             CookieOptions::default(),
         ))
-        .with(cookie::Config::new());
+        .with(cookie::Config::new(
+            CookieKey::try_generate().expect("cant generate key"),
+        ));
     let tree = Arc::new(Tree::from(app));
 
     loop {
