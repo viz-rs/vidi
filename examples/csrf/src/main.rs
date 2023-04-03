@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
             csrf::generate,
             csrf::verify,
         ))
-        .with(cookie::Config::new());
+        .with(cookie::Config::default());
     let tree = Arc::new(Tree::from(app));
 
     loop {

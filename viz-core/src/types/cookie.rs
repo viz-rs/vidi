@@ -90,12 +90,14 @@ impl Cookies {
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
 impl Cookies {
     /// A cryptographic master key for use with `Signed` and/or `Private` jars.
+    #[must_use]
     pub fn with_key(mut self, key: Arc<CookieKey>) -> Self {
         self.key.replace(key);
         self
     }
 
     /// Retures the cryptographic master [`Key`][CookieKey].
+    #[must_use]
     pub fn key(&self) -> &CookieKey {
         self.key.as_ref().expect("the `CookieKey` is required")
     }
@@ -156,7 +158,7 @@ impl Cookies {
     /// Adds `cookie` to the parent jar.
     pub fn signed_add(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
-            c.signed_mut(self.key()).add(cookie.into_owned())
+            c.signed_mut(self.key()).add(cookie.into_owned());
         }
     }
 
@@ -164,18 +166,19 @@ impl Cookies {
     pub fn signed_remove(&self, name: impl AsRef<str>) {
         if let Ok(mut c) = self.jar().lock() {
             c.signed_mut(self.key())
-                .remove(Cookie::named(name.as_ref().to_string()))
+                .remove(Cookie::named(name.as_ref().to_string()));
         }
     }
 
     /// Adds an "original" `cookie` to parent jar.
     pub fn signed_add_original(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
-            c.signed_mut(self.key()).add_original(cookie.into_owned())
+            c.signed_mut(self.key()).add_original(cookie.into_owned());
         }
     }
 
     /// Verifies the authenticity and integrity of `cookie` and returning the plain `cookie`.
+    #[must_use]
     pub fn signed_verify(&self, cookie: Cookie<'_>) -> Option<Cookie<'_>> {
         self.jar()
             .lock()

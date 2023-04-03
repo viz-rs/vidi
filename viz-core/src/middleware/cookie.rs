@@ -14,21 +14,22 @@ pub struct Config {
     key: std::sync::Arc<types::CookieKey>,
 }
 
-#[allow(clippy::new_without_default)]
 impl Config {
-    #[cfg(not(any(feature = "cookie-signed", feature = "cookie-private")))]
-    /// Creates a new config.
-    #[must_use]
-    pub fn new() -> Self {
-        Self {}
-    }
-
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     /// Creates a new config with the [`Key`][types::CookieKey].
     #[must_use]
-    pub fn new(key: types::CookieKey) -> Self {
+    pub fn with_key(key: types::CookieKey) -> Self {
         Self {
             key: std::sync::Arc::new(key),
+        }
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
+            key: std::sync::Arc::new(types::CookieKey::generate()),
         }
     }
 }

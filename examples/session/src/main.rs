@@ -40,9 +40,7 @@ async fn main() -> Result<()> {
             }),
             CookieOptions::default(),
         ))
-        .with(cookie::Config::new(
-            CookieKey::try_generate().expect("cant generate key"),
-        ));
+        .with(cookie::Config::with_key(CookieKey::generate()));
     let tree = Arc::new(Tree::from(app));
 
     loop {

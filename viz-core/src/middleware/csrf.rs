@@ -78,7 +78,7 @@ impl<S, G, V> Config<S, G, V> {
     /// Gets the CSRF token from cookies or session.
     ///
     /// # Errors
-    ///
+    /// TODO
     pub fn get(&self, req: &Request) -> Result<Option<Vec<u8>>> {
         let inner = self.as_ref();
         match inner.store {
