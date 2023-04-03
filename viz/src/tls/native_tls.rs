@@ -1,11 +1,12 @@
 use std::{fmt, net::SocketAddr};
 
 use tokio::net::{TcpListener, TcpStream};
-pub use tokio_native_tls::native_tls::Identity;
-use tokio_native_tls::{native_tls::TlsAcceptor as TlsAcceptorWrapper, TlsAcceptor, TlsStream};
+use tokio_native_tls::{native_tls::TlsAcceptor as TlsAcceptorWrapper, TlsStream};
 
 use super::Listener;
 use crate::{Error, Result};
+
+pub use tokio_native_tls::{native_tls::Identity, TlsAcceptor};
 
 /// `native-tls`'s config.
 pub struct Config {

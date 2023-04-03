@@ -12,8 +12,8 @@ use crate::{
 
 pub use ::cookie::{Cookie, CookieJar, SameSite};
 
-#[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
 /// A cryptographic master key for use with `Signed` and/or `Private` jars.
+#[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
 pub type CookieKey = ::cookie::Key;
 
 /// Extracts the cookies from the request.

@@ -3,7 +3,7 @@
 
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{get, server::conn::http1, tls, Error, Request, Responder, Result, Router, Tree};
+use viz::{get, server::conn::http1, tls, Request, Responder, Result, Router, Tree};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")
@@ -18,14 +18,13 @@ async fn main() -> Result<()> {
     let app = Router::new().route("/", get(index));
     let tree = Arc::new(Tree::from(app));
 
-    let listener = tls::Listener::new(
+    let listener = tls::Listener::<_, tls::rustls::TlsAcceptor>::new(
         listener,
         tls::rustls::Config::new()
             .cert(include_bytes!("../../tls/cert.pem").to_vec())
             .key(include_bytes!("../../tls/key.pem").to_vec())
             .build()
-            .map(Arc::new)
-            .map_err(Error::normal)?
+            .map(Arc::new)?
             .into(),
     );
 

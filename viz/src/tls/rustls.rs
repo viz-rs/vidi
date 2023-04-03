@@ -11,11 +11,13 @@ use tokio_rustls::{
         },
         Certificate, PrivateKey, RootCertStore, ServerConfig,
     },
-    {server::TlsStream, TlsAcceptor},
+    server::TlsStream,
 };
 
 use super::Listener;
 use crate::{Error, Result};
+
+pub use tokio_rustls::TlsAcceptor;
 
 /// Tls client authentication configuration.
 #[derive(Debug)]
