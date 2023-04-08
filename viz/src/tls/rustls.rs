@@ -130,12 +130,14 @@ impl Config {
         };
 
         let client_auth = match self.client_auth {
-            ClientAuth::Off => NoClientAuth::new(),
+            ClientAuth::Off => NoClientAuth::boxed(),
             ClientAuth::Optional(trust_anchor) => AllowAnyAnonymousOrAuthenticatedClient::new(
                 read_trust_anchor(&Certificate(trust_anchor))?,
-            ),
+            )
+            .boxed(),
             ClientAuth::Required(trust_anchor) => {
                 AllowAnyAuthenticatedClient::new(read_trust_anchor(&Certificate(trust_anchor))?)
+                    .boxed()
             }
         };
 
