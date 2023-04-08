@@ -76,29 +76,36 @@ pub trait ResponseExt: Sized {
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/ok>
     fn ok(&self) -> bool;
 
+    /// The [`Content-Disposition`][mdn] header indicating if the content is expected to be displayed inline in the browser, that is, as a Web page or as part of a Web page, or as an attachment, that is downloaded and saved locally.
+    ///
+    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
+    fn attachment(file: &str) -> Self;
+
     /// The [`Content-Location`][mdn] header indicates an alternate location for the returned data.
     ///
-    /// [mdn]: <https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Location>
-    fn location(location: &'static str) -> Self;
+    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Location>
+    fn location<T>(location: T) -> Self
+    where
+        T: AsRef<str>;
 
     /// The response redirects to the specified URL.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect>
-    fn redirect<T>(url: T) -> Response
+    fn redirect<T>(url: T) -> Self
     where
         T: AsRef<str>;
 
     /// The response redirects to the specified URL and the status code.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect>
-    fn redirect_with_status<T>(uri: T, status: StatusCode) -> Response
+    fn redirect_with_status<T>(uri: T, status: StatusCode) -> Self
     where
         T: AsRef<str>;
 
     /// The response redirects to the [`303`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303>
-    fn see_other<T>(url: T) -> Response
+    fn see_other<T>(url: T) -> Self
     where
         T: AsRef<str>,
     {
@@ -108,7 +115,7 @@ pub trait ResponseExt: Sized {
     /// The response redirects to the [`307`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307>
-    fn temporary<T>(url: T) -> Response
+    fn temporary<T>(url: T) -> Self
     where
         T: AsRef<str>,
     {
@@ -118,7 +125,7 @@ pub trait ResponseExt: Sized {
     /// The response redirects to the [`308`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/308>
-    fn permanent<T>(url: T) -> Response
+    fn permanent<T>(url: T) -> Self
     where
         T: AsRef<str>,
     {
@@ -131,30 +138,37 @@ impl ResponseExt for Response {
         self.status().is_success()
     }
 
-    fn location(location: &'static str) -> Self {
+    fn attachment(file: &str) -> Self {
         let mut res = Self::default();
-        res.headers_mut().insert(
-            header::CONTENT_LOCATION,
-            header::HeaderValue::from_static(location),
-        );
+        let val = header::HeaderValue::from_str(file)
+            .expect("content-disposition is not the correct value");
+        res.headers_mut().insert(header::CONTENT_DISPOSITION, val);
         res
     }
 
-    fn redirect<T>(url: T) -> Response
+    fn location<T>(location: T) -> Self
     where
         T: AsRef<str>,
     {
-        match header::HeaderValue::try_from(url.as_ref()) {
-            Ok(val) => {
-                let mut res = Self::default();
-                res.headers_mut().insert(header::LOCATION, val);
-                res
-            }
-            Err(err) => panic!("{}", err),
-        }
+        let val = header::HeaderValue::try_from(location.as_ref())
+            .expect("location is not the correct value");
+        let mut res = Self::default();
+        res.headers_mut().insert(header::CONTENT_LOCATION, val);
+        res
     }
 
-    fn redirect_with_status<T>(url: T, status: StatusCode) -> Response
+    fn redirect<T>(url: T) -> Self
+    where
+        T: AsRef<str>,
+    {
+        let val =
+            header::HeaderValue::try_from(url.as_ref()).expect("url is not the correct value");
+        let mut res = Self::default();
+        res.headers_mut().insert(header::LOCATION, val);
+        res
+    }
+
+    fn redirect_with_status<T>(url: T, status: StatusCode) -> Self
     where
         T: AsRef<str>,
     {

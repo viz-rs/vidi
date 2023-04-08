@@ -69,7 +69,7 @@ tokio-tungstenite = "0.18.0"
 tokio-stream = "0.1.12"
 tokio-util = "0.7.7"
 rustls-pemfile = "1.0.2"
-tokio-rustls = "0.23.4"
+tokio-rustls = "0.24.0"
 tokio-native-tls = "0.3.1"
 
 anyhow = "1.0"
@@ -94,6 +94,9 @@ tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 [workspace.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[profile.bench]
+debug = true
 
 [profile.dev]
 split-debuginfo = "unpacked"
