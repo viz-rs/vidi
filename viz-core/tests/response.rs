@@ -53,7 +53,10 @@ async fn response_ext() -> Result<()> {
     let mut body: OutgoingBody = resp.into_body();
 
     assert_eq!(body.size_hint().exact(), Some(7));
-    assert_eq!(body.frame().await.unwrap().unwrap().into_data().unwrap(), &"<html/>"[..]);
+    assert_eq!(
+        body.frame().await.unwrap().unwrap().into_data().unwrap(),
+        &"<html/>"[..]
+    );
     assert!(body.is_end_stream());
 
     Ok(())
