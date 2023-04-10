@@ -26,17 +26,17 @@ pub trait ResponseExt: Sized {
     /// The response with `text/plain; charset=utf-8` media type.
     fn text<B>(body: B) -> Response
     where
-        B: Into<Full<Bytes>>,
+        B: Into<OutgoingBody>,
     {
-        Self::with(body.into(), mime::TEXT_PLAIN_UTF_8.as_ref())
+        Self::with(body, mime::TEXT_PLAIN_UTF_8.as_ref())
     }
 
     /// The response with `text/html; charset=utf-8` media type.
     fn html<B>(body: B) -> Response
     where
-        B: Into<Full<Bytes>>,
+        B: Into<OutgoingBody>,
     {
-        Self::with(body.into(), mime::TEXT_HTML_UTF_8.as_ref())
+        Self::with(body, mime::TEXT_HTML_UTF_8.as_ref())
     }
 
     #[cfg(feature = "json")]
