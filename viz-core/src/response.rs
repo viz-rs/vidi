@@ -11,30 +11,32 @@ pub trait ResponseExt: Sized {
     /// The response with the specified [`Content-Type`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type>
-    fn with<B>(b: B, c: &'static str) -> Response
+    fn with<B>(body: B, content_type: &'static str) -> Response
     where
         B: Into<OutgoingBody>,
     {
-        let mut res = Response::new(b.into());
-        res.headers_mut()
-            .insert(header::CONTENT_TYPE, header::HeaderValue::from_static(c));
+        let mut res = Response::new(body.into());
+        res.headers_mut().insert(
+            header::CONTENT_TYPE,
+            header::HeaderValue::from_static(content_type),
+        );
         res
     }
 
     /// The response with `text/plain; charset=utf-8` media type.
-    fn text<B>(b: B) -> Response
+    fn text<B>(body: B) -> Response
     where
         B: Into<Full<Bytes>>,
     {
-        Self::with(b.into(), mime::TEXT_PLAIN_UTF_8.as_ref())
+        Self::with(body.into(), mime::TEXT_PLAIN_UTF_8.as_ref())
     }
 
     /// The response with `text/html; charset=utf-8` media type.
-    fn html<B>(b: B) -> Response
+    fn html<B>(body: B) -> Response
     where
         B: Into<Full<Bytes>>,
     {
-        Self::with(b.into(), mime::TEXT_HTML_UTF_8.as_ref())
+        Self::with(body.into(), mime::TEXT_HTML_UTF_8.as_ref())
     }
 
     #[cfg(feature = "json")]
@@ -76,7 +78,9 @@ pub trait ResponseExt: Sized {
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/ok>
     fn ok(&self) -> bool;
 
-    /// The [`Content-Disposition`][mdn] header indicating if the content is expected to be displayed inline in the browser, that is, as a Web page or as part of a Web page, or as an attachment, that is downloaded and saved locally.
+    /// The [`Content-Disposition`][mdn] header indicates if the content is expected to be
+    /// displayed inline in the browser, that is, as a Web page or as part of a Web page,
+    /// or as an attachment, that is downloaded and saved locally.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
     fn attachment(file: &str) -> Self;

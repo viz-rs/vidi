@@ -8,8 +8,8 @@ struct Page {
     p: u8,
 }
 
-#[tokio::test]
-async fn request_ext() -> Result<()> {
+#[test]
+fn request_ext() -> Result<()> {
     let mut req = Request::builder().uri("viz.rs").body(IncomingBody::Empty)?;
 
     assert_eq!(req.schema(), None);
