@@ -1,9 +1,12 @@
 use futures_util::{stream, Stream, StreamExt};
-use headers::{ContentType, HeaderMapExt, ContentDisposition};
+use headers::{ContentDisposition, ContentType, HeaderMapExt};
 use http_body_util::{BodyExt, Full};
 use hyper::body::Body;
 use serde::{Deserialize, Serialize};
-use viz_core::{Error, OutgoingBody, Response, ResponseExt, Result, StatusCode, header::{CONTENT_DISPOSITION, CONTENT_LOCATION, LOCATION}};
+use viz_core::{
+    header::{CONTENT_DISPOSITION, CONTENT_LOCATION, LOCATION},
+    Error, OutgoingBody, Response, ResponseExt, Result, StatusCode,
+};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 struct Page {
@@ -51,7 +54,7 @@ async fn response_ext() -> Result<()> {
     assert_eq!(Body::size_hint(&body).exact(), Some(7));
     assert_eq!(
         body.frame().await.unwrap().unwrap().into_data().unwrap(),
-        &"<html/>"[..]
+        "<html/>"
     );
     assert!(body.is_end_stream());
 
@@ -84,7 +87,10 @@ async fn response_ext() -> Result<()> {
 
     let resp = Response::attachment(r#"attachment; filename="filename.jpg""#);
     let content_disposition = resp.headers().get(CONTENT_DISPOSITION).unwrap();
-    assert_eq!(content_disposition, r#"attachment; filename="filename.jpg""#);
+    assert_eq!(
+        content_disposition,
+        r#"attachment; filename="filename.jpg""#
+    );
 
     let resp = Response::location("/login");
     let location = resp.headers().get(CONTENT_LOCATION).unwrap();
