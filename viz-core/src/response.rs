@@ -45,12 +45,12 @@ pub trait ResponseExt: Sized {
     /// # Errors
     ///
     /// Throws an error if serialization fails.
-    fn json<T>(t: T) -> Result<Response, crate::types::PayloadError>
+    fn json<T>(body: T) -> Result<Response, crate::types::PayloadError>
     where
         T: serde::Serialize,
     {
         let mut buf = BytesMut::new().writer();
-        serde_json::to_writer(&mut buf, &t)
+        serde_json::to_writer(&mut buf, &body)
             .map(|_| {
                 Self::with(
                     Full::new(buf.into_inner().freeze()),
@@ -61,13 +61,13 @@ pub trait ResponseExt: Sized {
     }
 
     /// Responds to a stream.
-    fn stream<S, D, E>(s: S) -> Response
+    fn stream<S, D, E>(stream: S) -> Response
     where
         S: futures_util::Stream<Item = Result<D, E>> + Send + Sync + 'static,
         D: Into<Bytes>,
         E: Into<Error> + 'static,
     {
-        Response::new(OutgoingBody::streaming(s))
+        Response::new(OutgoingBody::streaming(stream))
     }
 
     // TODO: Download transfers the file from path as an attachment.
