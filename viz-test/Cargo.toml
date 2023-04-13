@@ -1,0 +1,20 @@
+[package]
+name = "viz-test"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/viz-test"
+description = "The core traits and types in for Viz"
+keywords = ["async", "framework", "http", "service", "web"]
+categories = ["asynchronous", "network-programming", "web-programming"]
+publish = false
+
+[dependencies]
+viz.workspace = true
+
+reqwest = "0.11.16"
+tokio = { version = "1.27", features = ["full"] }

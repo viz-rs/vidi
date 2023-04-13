@@ -1,7 +1,7 @@
 use headers::{ContentType, HeaderValue};
 use http::uri::Scheme;
 use serde::Deserialize;
-use viz_core::{header::CONTENT_TYPE, IncomingBody, Request, RequestExt, Result};
+use viz_core::{header::CONTENT_TYPE, Error, IncomingBody, Request, RequestExt, Result};
 
 #[derive(Debug, Deserialize, PartialEq)]
 struct Page {
@@ -42,6 +42,25 @@ fn request_ext() -> Result<()> {
         req.header_typed::<ContentType>().unwrap(),
         ContentType::text()
     );
+    assert_eq!(req.content_type().unwrap(), mime::TEXT_PLAIN);
+    assert!(req.remote_addr().is_none());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn request_body() -> Result<()> {
+    use viz_test::{Router, TestServer};
+
+    let router = Router::new().get("/:id", |req: Request| async move {
+        let id = req.param::<String>("id")?;
+        Ok(id)
+    });
+
+    let client = TestServer::new(router).await?;
+
+    let resp = client.get("/7").send().await.map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "7");
 
     Ok(())
 }
