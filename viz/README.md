@@ -27,6 +27,10 @@
   <a href="https://crates.io/crates/viz">
     <img src="https://img.shields.io/crates/d/viz.svg?style=flat-square"
       alt="Download" /></a>
+  <!-- Codecov -->
+  <a href="/">
+    <img src="https://img.shields.io/codecov/c/github/viz-rs/viz?style=flat-square"
+      alt="Codecov" /></a>
   <!-- Discord -->
   <a href="https://discord.gg/m9yAsf6jg6">
      <img src="https://img.shields.io/discord/699908392105541722?logo=discord&style=flat-square"
