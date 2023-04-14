@@ -3,6 +3,8 @@ use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use viz::{server::conn::http1, Error, Responder, Result, Router, Tree};
 
+pub use reqwest::multipart;
+
 pub struct TestServer {
     addr: SocketAddr,
     client: Client,
@@ -10,7 +12,7 @@ pub struct TestServer {
 
 impl TestServer {
     /// Creates new test server
-    /// 
+    ///
     /// # Errors
     ///
     /// Will return `Err` if the server fails to start.

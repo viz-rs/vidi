@@ -1,12 +1,15 @@
+use std::collections::HashMap;
+
 use headers::{authorization::Bearer, Authorization, ContentType, HeaderValue};
 use http::uri::Scheme;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use viz_core::{
-    header::{AUTHORIZATION, CONTENT_TYPE},
-    types, Error, IncomingBody, Request, RequestExt, Result, StatusCode,
+    header::{AUTHORIZATION, CONTENT_TYPE, COOKIE},
+    types, Error, IncomingBody, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    StatusCode,
 };
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 struct Page {
     p: u8,
 }
@@ -51,9 +54,14 @@ fn request_ext() -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_lines)]
 #[tokio::test]
 async fn request_body() -> Result<()> {
-    use viz::{middleware::limits, Router};
+    use futures_util::stream::TryStreamExt;
+    use viz::{
+        middleware::{cookie, limits},
+        Router,
+    };
     use viz_test::TestServer;
 
     let router = Router::new()
@@ -69,6 +77,17 @@ async fn request_body() -> Result<()> {
             let header: types::Header<Authorization<Bearer>> = req.extract().await?;
             Ok(header.into_inner().token().to_string())
         })
+        .get("/cookies", |req: Request| async move {
+            let cookies = req.cookies()?;
+            let jar = cookies
+                .jar()
+                .lock()
+                .map_err(|e| Error::Responder(e.to_string().into_response()))?;
+            Ok(jar.iter().count().to_string())
+        })
+        .get("/cookie", |req: Request| async move {
+            Ok(req.cookie("viz").unwrap().value().to_string())
+        })
         .post("/bytes", |mut req: Request| async move {
             let data = req.bytes().await?;
             Ok(data)
@@ -77,6 +96,30 @@ async fn request_body() -> Result<()> {
             let data = req.bytes_with("text", 4).await?;
             Ok(data)
         })
+        .post("/text", |mut req: Request| async move {
+            let data = req.text().await?;
+            Ok(Response::text(data))
+        })
+        .post("/json", |mut req: Request| async move {
+            let data = req.json::<Page>().await?;
+            Ok(Response::json(data))
+        })
+        .post("/form", |mut req: Request| async move {
+            let data = req.form::<HashMap<String, u8>>().await?;
+            Ok(Response::json(data))
+        })
+        .post("/multipart", |mut req: Request| async move {
+            let mut multipart = req.multipart().await?;
+            let mut data = HashMap::new();
+
+            while let Some(mut field) = multipart.try_next().await? {
+                let buf = field.bytes().await?.to_vec();
+                data.insert(field.name, String::from_utf8(buf).map_err(Error::normal)?);
+            }
+
+            Ok(Response::json(data))
+        })
+        .with(cookie::Config::default())
         .with(limits::Config::new());
 
     let client = TestServer::new(router).await?;
@@ -98,6 +141,22 @@ async fn request_body() -> Result<()> {
         .await
         .map_err(Error::normal)?;
     assert_eq!(resp.text().await.map_err(Error::normal)?, "viz.rs");
+
+    let resp = client
+        .get("/cookie")
+        .header(COOKIE, "viz=crate")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "crate");
+
+    let resp = client
+        .get("/cookies")
+        .header(COOKIE, "auth=true;dark=false")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "2");
 
     let resp = client
         .post("/bytes")
@@ -126,6 +185,46 @@ async fn request_body() -> Result<()> {
     assert_eq!(
         resp.text().await.map_err(Error::normal)?,
         "payload is too large"
+    );
+
+    let resp = client
+        .post("/text")
+        .body("text")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "text");
+
+    let resp = client
+        .post("/json")
+        .json(&Page { p: 1 })
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(
+        resp.json::<Page>().await.map_err(Error::normal)?,
+        Page { p: 1 }
+    );
+
+    let form = viz_test::multipart::Form::new()
+        .text("key3", "3")
+        .text("key4", "4");
+    let resp = client
+        .post("/multipart")
+        .multipart(form)
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(
+        resp.json::<HashMap<String, String>>()
+            .await
+            .map_err(Error::normal)?,
+        {
+            let mut form = HashMap::new();
+            form.insert("key3".to_string(), "3".to_string());
+            form.insert("key4".to_string(), "4".to_string());
+            form
+        }
     );
 
     Ok(())
