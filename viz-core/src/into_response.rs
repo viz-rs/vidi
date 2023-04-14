@@ -83,6 +83,15 @@ impl IntoResponse for Vec<u8> {
     }
 }
 
+impl IntoResponse for bytes::Bytes {
+    fn into_response(self) -> Response {
+        Response::builder()
+            .header(CONTENT_TYPE, mime::APPLICATION_OCTET_STREAM.as_ref())
+            .body(Full::from(self).into())
+            .unwrap()
+    }
+}
+
 impl IntoResponse for StatusCode {
     fn into_response(self) -> Response {
         Response::builder().status(self).body(().into()).unwrap()

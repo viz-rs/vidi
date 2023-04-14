@@ -8,7 +8,7 @@ use std::{
 use crate::{
     async_trait, header,
     headers::{self, HeaderMapExt},
-    FromRequest, IntoResponse, Request, Response, Result, StatusCode, ThisError,
+    Error, FromRequest, IntoResponse, Request, Response, Result, StatusCode, ThisError,
 };
 
 /// Extracts a header from the headers of a request.
@@ -99,5 +99,11 @@ pub enum HeaderError {
 impl IntoResponse for HeaderError {
     fn into_response(self) -> Response {
         (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
+    }
+}
+
+impl From<HeaderError> for Error {
+    fn from(e: HeaderError) -> Self {
+        e.into_error()
     }
 }

@@ -1,9 +1,7 @@
 use reqwest::{Client, RequestBuilder};
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{server::conn::http1, Error, Responder, Result, Tree};
-
-pub use viz::Router;
+use viz::{server::conn::http1, Error, Responder, Result, Router, Tree};
 
 pub struct TestServer {
     addr: SocketAddr,
@@ -11,6 +9,11 @@ pub struct TestServer {
 }
 
 impl TestServer {
+    /// Creates new test server
+    /// 
+    /// # Errors
+    ///
+    /// Will return `Err` if the server fails to start.
     pub async fn new(router: Router) -> Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:0").await?;
         let tree = Arc::new(Tree::from(router));
@@ -29,6 +32,7 @@ impl TestServer {
         format!("http://{}{}", self.addr, url.as_ref())
     }
 
+    #[must_use]
     pub fn addr(&self) -> SocketAddr {
         self.addr
     }

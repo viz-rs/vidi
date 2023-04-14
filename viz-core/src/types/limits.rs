@@ -20,15 +20,15 @@ pub struct Limits {
 impl Default for Limits {
     fn default() -> Self {
         let limits = Limits::new()
-            .insert("bytes", Limits::NORMAL)
-            .insert("payload", Limits::NORMAL)
-            .insert("text", Limits::NORMAL);
+            .set("bytes", Limits::NORMAL)
+            .set("payload", Limits::NORMAL)
+            .set("text", Limits::NORMAL);
 
         #[cfg(feature = "json")]
-        let limits = limits.insert(<Json as Payload>::NAME, <Json as Payload>::LIMIT);
+        let limits = limits.set(<Json as Payload>::NAME, <Json as Payload>::LIMIT);
 
         #[cfg(feature = "form")]
-        let limits = limits.insert(<Form as Payload>::NAME, <Form as Payload>::LIMIT);
+        let limits = limits.set(<Form as Payload>::NAME, <Form as Payload>::LIMIT);
 
         limits.sort()
     }
@@ -53,10 +53,17 @@ impl Limits {
         self
     }
 
-    /// Inserts a name-limit pair into the Limits.
+    /// Sets a name-limit pair into the Limits.
     #[must_use]
-    pub fn insert(mut self, name: &'static str, limit: u64) -> Self {
-        Arc::make_mut(&mut self.inner).push((name, limit));
+    pub fn set(mut self, name: &'static str, limit: u64) -> Self {
+        if let Some(val) = self
+            .inner
+            .binary_search_by_key(&name, |&(a, _)| a)
+            .ok()
+            .and_then(|i| Arc::make_mut(&mut self.inner).get_mut(i))
+        {
+            val.1 = limit;
+        }
         self
     }
 

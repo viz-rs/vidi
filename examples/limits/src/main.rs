@@ -23,11 +23,11 @@ async fn echo(mut req: Request) -> Result<String> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let limits = types::Limits::new()
-        .insert("bytes", 1024 * 8) // 8KB
-        .insert("form", 1024 * 1024) // 1MB
-        .insert("json", 1024 * 1024) // 1MB
-        .insert("payload", 1024 * 8) // 8KB
-        .insert("text", 1024 * 8); // 8KB
+        .set("bytes", 1024 * 8) // 8KB
+        .set("form", 1024 * 1024) // 1MB
+        .set("json", 1024 * 1024) // 1MB
+        .set("payload", 1024 * 8) // 8KB
+        .set("text", 1024 * 8); // 8KB
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = TcpListener::bind(addr).await?;

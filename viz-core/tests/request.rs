@@ -1,7 +1,10 @@
-use headers::{ContentType, HeaderValue};
+use headers::{authorization::Bearer, Authorization, ContentType, HeaderValue};
 use http::uri::Scheme;
 use serde::Deserialize;
-use viz_core::{header::CONTENT_TYPE, Error, IncomingBody, Request, RequestExt, Result};
+use viz_core::{
+    header::{AUTHORIZATION, CONTENT_TYPE},
+    types, Error, IncomingBody, Request, RequestExt, Result, StatusCode,
+};
 
 #[derive(Debug, Deserialize, PartialEq)]
 struct Page {
@@ -50,17 +53,80 @@ fn request_ext() -> Result<()> {
 
 #[tokio::test]
 async fn request_body() -> Result<()> {
-    use viz_test::{Router, TestServer};
+    use viz::{middleware::limits, Router};
+    use viz_test::TestServer;
 
-    let router = Router::new().get("/:id", |req: Request| async move {
-        let id = req.param::<String>("id")?;
-        Ok(id)
-    });
+    let router = Router::new()
+        .get("/:id", |req: Request| async move {
+            let id = req.param::<String>("id")?;
+            Ok(id)
+        })
+        .get("/:username/:repo", |req: Request| async move {
+            let (username, repo): (String, String) = req.params()?;
+            Ok(format!("{username}/{repo}"))
+        })
+        .get("/extract-token", |mut req: Request| async move {
+            let header: types::Header<Authorization<Bearer>> = req.extract().await?;
+            Ok(header.into_inner().token().to_string())
+        })
+        .post("/bytes", |mut req: Request| async move {
+            let data = req.bytes().await?;
+            Ok(data)
+        })
+        .post("/bytes-with-limit", |mut req: Request| async move {
+            let data = req.bytes_with("text", 4).await?;
+            Ok(data)
+        })
+        .with(limits::Config::new());
 
     let client = TestServer::new(router).await?;
 
     let resp = client.get("/7").send().await.map_err(Error::normal)?;
     assert_eq!(resp.text().await.map_err(Error::normal)?, "7");
+
+    let resp = client
+        .get("/viz-rs/viz")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "viz-rs/viz");
+
+    let resp = client
+        .get("/extract-token")
+        .header(AUTHORIZATION, "Bearer viz.rs")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "viz.rs");
+
+    let resp = client
+        .post("/bytes")
+        .body("bytes")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "bytes");
+
+    let resp = client
+        .post("/bytes-with-limit")
+        .body("rust")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(resp.text().await.map_err(Error::normal)?, "rust");
+
+    let resp = client
+        .post("/bytes-with-limit")
+        .body("crate")
+        .send()
+        .await
+        .map_err(Error::normal)?;
+    assert_eq!(resp.status(), StatusCode::PAYLOAD_TOO_LARGE);
+    assert_eq!(
+        resp.text().await.map_err(Error::normal)?,
+        "payload is too large"
+    );
 
     Ok(())
 }
