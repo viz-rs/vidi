@@ -112,7 +112,7 @@ impl Stream for IncomingBody {
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
-            Self::Empty | Self::Incoming(None) => (0, None),
+            Self::Empty | Self::Incoming(None) => (0, Some(0)),
             Self::Incoming(Some(inner)) => {
                 let sh = inner.size_hint();
                 (
@@ -124,6 +124,7 @@ impl Stream for IncomingBody {
     }
 }
 
+#[derive(Debug)]
 /// Outgoing Body to response.
 pub enum OutgoingBody<D = Bytes> {
     /// A empty body.
@@ -153,12 +154,6 @@ impl OutgoingBody {
 impl Default for OutgoingBody {
     fn default() -> Self {
         Self::Empty
-    }
-}
-
-impl fmt::Debug for OutgoingBody {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("OutgoingBody").finish()
     }
 }
 
@@ -217,7 +212,7 @@ impl Stream for OutgoingBody {
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let sh = match self {
-            Self::Empty => return (0, None),
+            Self::Empty => return (0, Some(0)),
             Self::Full(f) => f.size_hint(),
             Self::Boxed(b) => b.size_hint(),
         };

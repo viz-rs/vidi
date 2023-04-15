@@ -115,6 +115,12 @@ impl From<hyper::Error> for Error {
     }
 }
 
+impl From<std::convert::Infallible> for Error {
+    fn from(e: std::convert::Infallible) -> Self {
+        Self::normal(e)
+    }
+}
+
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
         Self::normal(e)
