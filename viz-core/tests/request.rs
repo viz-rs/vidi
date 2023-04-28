@@ -5,7 +5,8 @@ use http::uri::Scheme;
 use serde::{Deserialize, Serialize};
 use viz_core::{
     header::{AUTHORIZATION, CONTENT_TYPE, COOKIE, SET_COOKIE},
-    types, Error, IncomingBody, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    types::{self, PayloadError},
+    Error, IncomingBody, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
     StatusCode,
 };
 
@@ -29,7 +30,14 @@ fn request_ext() -> Result<()> {
     assert!(req.header::<_, String>(CONTENT_TYPE).is_none());
     assert!(req.header_typed::<ContentType>().is_none());
     assert!(req.content_length().is_none());
-    assert!(req.incoming().is_err());
+    assert_eq!(
+        req.incoming().unwrap_err().to_string(),
+        PayloadError::Empty.to_string()
+    );
+    assert_eq!(
+        req.incoming().unwrap_err().to_string(),
+        PayloadError::Used.to_string()
+    );
 
     let mut req = Request::builder()
         .uri("https://viz.rs?p=1")

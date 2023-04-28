@@ -234,10 +234,9 @@ impl RequestExt for Request {
     }
 
     fn incoming(&mut self) -> Result<Incoming, PayloadError> {
-        let body = self.incoming_body();
-        match body {
-            IncomingBody::Empty => return Err(PayloadError::Empty),
-            IncomingBody::Incoming(None) => return Err(PayloadError::Used),
+        match self.incoming_body() {
+            IncomingBody::Empty => Err(PayloadError::Empty),
+            IncomingBody::Incoming(None) => Err(PayloadError::Used),
             IncomingBody::Incoming(Some(incoming)) => Ok(incoming),
         }
     }
