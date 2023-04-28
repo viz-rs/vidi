@@ -9,7 +9,7 @@ use futures_util::{stream::Stream, TryStreamExt};
 use http_body_util::{combinators::BoxBody, BodyExt, Full, StreamBody};
 use hyper::body::{Body, Frame, Incoming, SizeHint};
 
-use crate::{Bytes, Error};
+use crate::{Bytes, Error, Result};
 
 #[derive(Debug)]
 /// Incoming Body from request.
@@ -31,15 +31,6 @@ impl IncomingBody {
     #[must_use]
     pub fn used() -> Self {
         Self::Incoming(None)
-    }
-
-    /// Into incoming
-    #[must_use]
-    pub fn into_incoming(self) -> Option<Incoming> {
-        match self {
-            Self::Empty => None,
-            Self::Incoming(inner) => inner,
-        }
     }
 }
 

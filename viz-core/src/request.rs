@@ -80,7 +80,7 @@ pub trait RequestExt: Sized {
     fn incoming_body(&mut self) -> IncomingBody;
 
     /// Get Incoming.
-    fn incoming(&mut self) -> Option<Incoming>;
+    fn incoming(&mut self) -> Result<Incoming, PayloadError>;
 
     /// Return with a [Bytes][mdn] representation of the request body.
     ///
@@ -233,14 +233,18 @@ impl RequestExt for Request {
         replace(self.body_mut(), IncomingBody::used())
     }
 
-    fn incoming(&mut self) -> Option<Incoming> {
-        self.incoming_body().into_incoming()
+    fn incoming(&mut self) -> Result<Incoming, PayloadError> {
+        let body = self.incoming_body();
+        match body {
+            IncomingBody::Empty => return Err(PayloadError::Empty),
+            IncomingBody::Incoming(None) => return Err(PayloadError::Used),
+            IncomingBody::Incoming(Some(incoming)) => Ok(incoming),
+        }
     }
 
     async fn bytes(&mut self) -> Result<Bytes, PayloadError> {
         // self.body_mut()
-        self.incoming()
-            .ok_or(PayloadError::Used)?
+        self.incoming()?
             .collect()
             .await
             .map_err(|_| PayloadError::Read)
@@ -250,7 +254,7 @@ impl RequestExt for Request {
     #[cfg(feature = "limits")]
     async fn bytes_with(&mut self, name: &str, max: u64) -> Result<Bytes, PayloadError> {
         Limited::new(
-            self.incoming().ok_or(PayloadError::Used)?,
+            self.incoming()?,
             usize::try_from(self.limits().get(name).unwrap_or(max)).unwrap_or(usize::MAX),
         )
         .collect()

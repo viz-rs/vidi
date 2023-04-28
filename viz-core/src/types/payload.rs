@@ -6,6 +6,10 @@ use crate::{Error, IntoResponse, Response, Result, StatusCode, ThisError};
 #[derive(ThisError, Debug)]
 pub enum PayloadError {
     /// 400
+    #[error("payload is empty")]
+    Empty,
+
+    /// 400
     #[error("failed to read payload")]
     Read,
 
@@ -56,7 +60,8 @@ impl IntoResponse for PayloadError {
     fn into_response(self) -> Response {
         (
             match self {
-                PayloadError::Read
+                PayloadError::Empty
+                | PayloadError::Read
                 | PayloadError::Parse
                 | PayloadError::MissingBoundary
                 | PayloadError::Utf8(_)

@@ -29,7 +29,7 @@ fn request_ext() -> Result<()> {
     assert!(req.header::<_, String>(CONTENT_TYPE).is_none());
     assert!(req.header_typed::<ContentType>().is_none());
     assert!(req.content_length().is_none());
-    assert!(req.incoming().is_none());
+    assert!(req.incoming().is_err());
 
     let mut req = Request::builder()
         .uri("https://viz.rs?p=1")
