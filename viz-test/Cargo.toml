@@ -19,5 +19,5 @@ viz.workspace = true
 sessions = { version = "0.4.0", features = ["memory"] }
 nano-id = "0.3"
 
-reqwest = { version = "0.11.17", features = ["cookies", "json", "multipart"]}
+reqwest = { version = "0.11.18", features = ["cookies", "json", "multipart"]}
 tokio = { version = "1.28", features = ["full"] }
