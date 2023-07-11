@@ -1,8 +1,18 @@
 //! `WebSocket` Extractor
 
-use std::{borrow::Cow, future::Future, str};
+use std::{
+    borrow::Cow,
+    future::Future,
+    pin::Pin,
+    str,
+    task::{Context, Poll},
+};
 
-use hyper::upgrade::{OnUpgrade, Upgraded};
+use hyper::{
+    rt::{Read, Write},
+    upgrade::{OnUpgrade, Upgraded},
+};
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio_tungstenite::tungstenite::protocol::Role;
 
 use crate::{
@@ -21,7 +31,7 @@ pub use error::WebSocketError;
 pub use tokio_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
 
 /// A wrapper around an underlying raw stream which implements the `WebSocket` protocol.
-pub type WebSocketStream<T = Upgraded> = tokio_tungstenite::WebSocketStream<T>;
+pub type WebSocketStream<T = UpgradedWrapper> = tokio_tungstenite::WebSocketStream<T>;
 
 /// Then `WebSocket` provides the API for creating and managing a [`WebSocket`][mdn] connection,
 /// as well as for sending and receiving data on the connection.
@@ -81,7 +91,9 @@ impl WebSocket {
                 Err(_) => return,
             };
 
-            let socket = WebSocketStream::from_raw_socket(upgraded, Role::Server, config).await;
+            let socket =
+                WebSocketStream::from_raw_socket(UpgradedWrapper(upgraded), Role::Server, config)
+                    .await;
 
             (callback)(socket).await;
         });
@@ -187,5 +199,53 @@ impl IntoResponse for WebSocket {
         }
 
         res
+    }
+}
+
+#[derive(Debug)]
+pub struct UpgradedWrapper(Upgraded);
+
+impl AsyncRead for UpgradedWrapper {
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut ReadBuf<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        Pin::new(&mut self.get_mut().0).poll_read(
+            cx,
+            hyper::rt::ReadBuf::uninit(unsafe { buf.inner_mut() }).unfilled(),
+        )
+    }
+}
+
+impl AsyncWrite for UpgradedWrapper {
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<std::result::Result<usize, std::io::Error>> {
+        Pin::new(&mut self.get_mut().0).poll_write(cx, buf)
+    }
+
+    fn poll_write_vectored(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        bufs: &[std::io::IoSlice<'_>],
+    ) -> Poll<std::result::Result<usize, std::io::Error>> {
+        Pin::new(&mut self.get_mut().0).poll_write_vectored(cx, bufs)
+    }
+
+    fn poll_flush(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<std::result::Result<(), std::io::Error>> {
+        Pin::new(&mut self.get_mut().0).poll_flush(cx)
+    }
+
+    fn poll_shutdown(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<std::result::Result<(), std::io::Error>> {
+        Pin::new(&mut self.get_mut().0).poll_shutdown(cx)
     }
 }

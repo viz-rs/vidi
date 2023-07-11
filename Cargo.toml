@@ -60,11 +60,11 @@ thiserror = "1.0"
 path-tree = "0.7.1"
 
 # http
-hyper = { version = "1.0.0-rc.3", features = ["server"] }
 headers = "0.3.8"
 http = "0.2.9"
-http-body = "1.0.0-rc.2"
-http-body-util = "0.1.0-rc.2"
+http-body = "=1.0.0-rc.2"
+http-body-util = "=0.1.0-rc.3"
+hyper = { version = "=1.0.0-rc.4", features = ["server"] }
 
 futures-util = "0.3.28"
 tokio = { version = "1.29", features = ["net"] }
