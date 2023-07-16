@@ -20,7 +20,7 @@
 //! use std::{net::SocketAddr, sync::Arc};
 //! use hyper::server::conn::http1;
 //! use tokio::net::TcpListener;
-//! use viz::{Request, Result, Router, Responder, Tree};
+//! use viz::{Io, Request, Result, Router, Responder, Tree};
 //!
 //! async fn index(_: Request) -> Result<&'static str> {
 //!     Ok("Hello Viz")
@@ -41,7 +41,7 @@
 //!         tokio::task::spawn(async move {
 //!             if let Err(err) = http1::Builder::new()
 //!                     .keep_alive(true)
-//!                     .serve_connection(stream, Responder::new(tree, Some(addr)))
+//!                     .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
 //!                     .await {
 //!                 eprintln!("Error while serving HTTP connection: {err}");
 //!             }
