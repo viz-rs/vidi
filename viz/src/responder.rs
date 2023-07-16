@@ -61,7 +61,7 @@ impl hyper::service::Service<Request<Incoming>> for Responder {
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     #[inline]
-    fn call(&mut self, req: Request<Incoming>) -> Self::Future {
+    fn call(&self, req: Request<Incoming>) -> Self::Future {
         Box::pin(Self::serve(req, self.tree.clone(), self.addr))
     }
 }

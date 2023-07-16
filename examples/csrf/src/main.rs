@@ -11,7 +11,7 @@ use viz::{
         helper::CookieOptions,
     },
     server::conn::http1,
-    Method, Request, RequestExt, Responder, Result, Router, Tree,
+    Io, Method, Request, RequestExt, Responder, Result, Router, Tree,
 };
 
 async fn index(mut req: Request) -> Result<String> {
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

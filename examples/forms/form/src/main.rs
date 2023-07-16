@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use viz::{
-    get, middleware::limits, server::conn::http1, types::Form, IntoHandler, Request, Responder,
+    get, middleware::limits, server::conn::http1, types::Form, IntoHandler, Io, Request, Responder,
     Response, ResponseExt, Result, Router, Tree,
 };
 
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

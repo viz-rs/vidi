@@ -9,7 +9,7 @@ use viz::{
     middleware::limits,
     server::conn::http1,
     types::{Multipart, PayloadError},
-    IntoHandler, IntoResponse, Request, Responder, Response, ResponseExt, Result, Router, Tree,
+    IntoHandler, IntoResponse, Io, Request, Responder, Response, ResponseExt, Result, Router, Tree,
 };
 
 // HTML form for uploading photos
@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

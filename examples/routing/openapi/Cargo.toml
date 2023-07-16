@@ -12,5 +12,5 @@ serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
-utoipa = "3.3"
-utoipa-swagger-ui = "3.1"
+utoipa = "3.4.0"
+utoipa-swagger-ui = "3.1.4"

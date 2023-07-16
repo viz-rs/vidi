@@ -1,7 +1,7 @@
 use reqwest::Client;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{server::conn::http1, Error, Responder, Result, Router, Tree};
+use viz::{server::conn::http1, Error, Io, Responder, Result, Router, Tree};
 
 pub use nano_id;
 pub use sessions;
@@ -65,7 +65,7 @@ async fn run(listener: TcpListener, tree: Arc<Tree>) -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

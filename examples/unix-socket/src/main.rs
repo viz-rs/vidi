@@ -12,7 +12,7 @@ async fn main() -> viz::Result<()> {
     use std::sync::Arc;
 
     use tokio::net::UnixListener;
-    use viz::{get, server::conn::http1, IntoHandler, Responder, Result, Router, Tree};
+    use viz::{get, server::conn::http1, IntoHandler, Io, Responder, Result, Router, Tree};
 
     async fn index() -> Result<&'static str> {
         Ok("Hello world!")
@@ -31,7 +31,7 @@ async fn main() -> viz::Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, None))
+                .serve_connection(Io::new(stream), Responder::new(tree, None))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

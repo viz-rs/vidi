@@ -3,7 +3,7 @@
 
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{get, server::conn::http1, tls, Request, Responder, Result, Router, Tree};
+use viz::{get, server::conn::http1, tls, Io, Request, Responder, Result, Router, Tree};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")
@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

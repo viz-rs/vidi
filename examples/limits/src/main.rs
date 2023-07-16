@@ -8,6 +8,7 @@ use viz::{
     server::conn::http1,
     // types::{Multipart, PayloadError},
     types,
+    Io,
     Request,
     RequestExt,
     Responder,
@@ -44,7 +45,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

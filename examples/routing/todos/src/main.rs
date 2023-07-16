@@ -11,7 +11,7 @@ use viz::{
     middleware,
     server::conn::http1,
     types::{Json, Params, Query, State},
-    Error, IntoResponse, Request, RequestExt, Responder, Response, ResponseExt, Result, Router,
+    Error, IntoResponse, Io, Request, RequestExt, Responder, Response, ResponseExt, Result, Router,
     StatusCode, Tree,
 };
 

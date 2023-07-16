@@ -48,7 +48,7 @@ viz-macros = { version = "0.1.0", path = "viz-macros" }
 viz-test = { version = "0.1.0", path = "viz-test" }
 
 async-trait = "0.1.71"
-dyn-clone = "1.0.11"
+dyn-clone = "1.0.12"
 bytes = "1.4.0"
 serde = "1.0"
 serde_derive = "1.0"
@@ -93,6 +93,8 @@ opentelemetry-semantic-conventions = { version = "0.11.0" }
 # Tracing
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+
+pin-project-lite = "0.2.10"
 
 [workspace.metadata.docs.rs]
 all-features = true

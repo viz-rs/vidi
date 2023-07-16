@@ -8,7 +8,7 @@ use opentelemetry::{
 };
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{middleware::otel, server::conn::http1, Request, Responder, Result, Router, Tree};
+use viz::{middleware::otel, server::conn::http1, Io, Request, Responder, Result, Router, Tree};
 
 fn init_tracer() -> Tracer {
     global::set_text_map_propagator(TraceContextPropagator::new());
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 eprintln!("Error while serving HTTP connection: {err}");

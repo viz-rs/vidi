@@ -207,45 +207,65 @@ pub struct UpgradedWrapper(Upgraded);
 
 impl AsyncRead for UpgradedWrapper {
     fn poll_read(
-        self: Pin<&mut Self>,
+        mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-        buf: &mut ReadBuf<'_>,
+        tempbuf: &mut ReadBuf<'_>,
     ) -> Poll<std::io::Result<()>> {
-        Pin::new(&mut self.get_mut().0).poll_read(
-            cx,
-            hyper::rt::ReadBuf::uninit(unsafe { buf.inner_mut() }).unfilled(),
-        )
+        //let init = tempbuf.initialized().len();
+        let filled = tempbuf.filled().len();
+        let sub_filled = unsafe {
+            let mut buf = hyper::rt::ReadBuf::uninit(tempbuf.unfilled_mut());
+
+            match Read::poll_read(Pin::new(&mut self.0), cx, buf.unfilled()) {
+                Poll::Ready(Ok(())) => buf.filled().len(),
+                other => return other,
+            }
+        };
+
+        let n_filled = filled + sub_filled;
+        // At least sub_filled bytes had to have been initialized.
+        let n_init = sub_filled;
+        unsafe {
+            tempbuf.assume_init(n_init);
+            tempbuf.set_filled(n_filled);
+        }
+
+        Poll::Ready(Ok(()))
     }
 }
 
 impl AsyncWrite for UpgradedWrapper {
     fn poll_write(
-        self: Pin<&mut Self>,
+        mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<std::result::Result<usize, std::io::Error>> {
-        Pin::new(&mut self.get_mut().0).poll_write(cx, buf)
-    }
-
-    fn poll_write_vectored(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        bufs: &[std::io::IoSlice<'_>],
-    ) -> Poll<std::result::Result<usize, std::io::Error>> {
-        Pin::new(&mut self.get_mut().0).poll_write_vectored(cx, bufs)
+        Pin::new(&mut self.0).poll_write(cx, buf)
     }
 
     fn poll_flush(
-        self: Pin<&mut Self>,
+        mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<std::result::Result<(), std::io::Error>> {
-        Pin::new(&mut self.get_mut().0).poll_flush(cx)
+        Pin::new(&mut self.0).poll_flush(cx)
     }
 
     fn poll_shutdown(
-        self: Pin<&mut Self>,
+        mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<std::result::Result<(), std::io::Error>> {
-        Pin::new(&mut self.get_mut().0).poll_shutdown(cx)
+        Pin::new(&mut self.0).poll_shutdown(cx)
+    }
+
+    fn is_write_vectored(&self) -> bool {
+        self.0.is_write_vectored()
+    }
+
+    fn poll_write_vectored(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        bufs: &[std::io::IoSlice<'_>],
+    ) -> Poll<std::result::Result<usize, std::io::Error>> {
+        Pin::new(&mut self.0).poll_write_vectored(cx, bufs)
     }
 }

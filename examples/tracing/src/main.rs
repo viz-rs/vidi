@@ -5,7 +5,7 @@ use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{server::conn::http1, Request, RequestExt, Responder, Result, Router, Tree};
+use viz::{server::conn::http1, Io, Request, RequestExt, Responder, Result, Router, Tree};
 
 #[instrument]
 async fn index(req: Request) -> Result<&'static str> {
@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .await
             {
                 error!("Error while serving HTTP connection: {err}");

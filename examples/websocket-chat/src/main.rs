@@ -9,8 +9,8 @@ use viz::{
     get,
     server::conn::http1,
     types::{Message, Params, State, WebSocket},
-    HandlerExt, IntoHandler, IntoResponse, Request, RequestExt, Responder, Response, ResponseExt,
-    Result, Router, Tree,
+    HandlerExt, IntoHandler, IntoResponse, Io, Request, RequestExt, Responder, Response,
+    ResponseExt, Result, Router, Tree,
 };
 
 async fn index() -> Result<Response> {
@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
         let tree = tree.clone();
         tokio::task::spawn(async move {
             if let Err(err) = http1::Builder::new()
-                .serve_connection(stream, Responder::new(tree, Some(addr)))
+                .serve_connection(Io::new(stream), Responder::new(tree, Some(addr)))
                 .with_upgrades()
                 .await
             {
