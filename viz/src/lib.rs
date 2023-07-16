@@ -538,7 +538,6 @@
 ))]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
-mod io;
 mod responder;
 
 /// TLS
@@ -546,8 +545,6 @@ pub mod tls;
 pub use responder::Responder;
 pub use viz_core::*;
 pub use viz_router::*;
-
-pub use io::Io;
 
 #[cfg(feature = "handlers")]
 #[cfg_attr(docsrs, doc(cfg(feature = "handlers")))]

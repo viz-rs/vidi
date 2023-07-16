@@ -42,6 +42,7 @@ mod body;
 mod error;
 mod from_request;
 mod into_response;
+mod io;
 mod request;
 mod response;
 
@@ -49,6 +50,7 @@ pub use body::{IncomingBody, OutgoingBody};
 pub use error::Error;
 pub use from_request::FromRequest;
 pub use into_response::IntoResponse;
+pub use io::Io;
 pub use request::RequestExt;
 pub use response::ResponseExt;
 

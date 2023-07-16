@@ -1,18 +1,8 @@
 //! `WebSocket` Extractor
 
-use std::{
-    borrow::Cow,
-    future::Future,
-    pin::Pin,
-    str,
-    task::{Context, Poll},
-};
+use std::{borrow::Cow, future::Future, str};
 
-use hyper::{
-    rt::{Read, Write},
-    upgrade::{OnUpgrade, Upgraded},
-};
-use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+use hyper::upgrade::{OnUpgrade, Upgraded};
 use tokio_tungstenite::tungstenite::protocol::Role;
 
 use crate::{
@@ -22,7 +12,7 @@ use crate::{
         Connection, HeaderMapExt, HeaderValue, SecWebsocketAccept, SecWebsocketKey,
         SecWebsocketVersion, Upgrade,
     },
-    FromRequest, IntoResponse, OutgoingBody, Request, RequestExt, Response, Result, StatusCode,
+    FromRequest, IntoResponse, Io, OutgoingBody, Request, RequestExt, Response, Result, StatusCode,
 };
 
 mod error;
@@ -31,7 +21,7 @@ pub use error::WebSocketError;
 pub use tokio_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
 
 /// A wrapper around an underlying raw stream which implements the `WebSocket` protocol.
-pub type WebSocketStream<T = UpgradedWrapper> = tokio_tungstenite::WebSocketStream<T>;
+pub type WebSocketStream<T = Io<Upgraded>> = tokio_tungstenite::WebSocketStream<T>;
 
 /// Then `WebSocket` provides the API for creating and managing a [`WebSocket`][mdn] connection,
 /// as well as for sending and receiving data on the connection.
@@ -92,8 +82,7 @@ impl WebSocket {
             };
 
             let socket =
-                WebSocketStream::from_raw_socket(UpgradedWrapper(upgraded), Role::Server, config)
-                    .await;
+                WebSocketStream::from_raw_socket(Io::new(upgraded), Role::Server, config).await;
 
             (callback)(socket).await;
         });
@@ -199,73 +188,5 @@ impl IntoResponse for WebSocket {
         }
 
         res
-    }
-}
-
-#[derive(Debug)]
-pub struct UpgradedWrapper(Upgraded);
-
-impl AsyncRead for UpgradedWrapper {
-    fn poll_read(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        tempbuf: &mut ReadBuf<'_>,
-    ) -> Poll<std::io::Result<()>> {
-        //let init = tempbuf.initialized().len();
-        let filled = tempbuf.filled().len();
-        let sub_filled = unsafe {
-            let mut buf = hyper::rt::ReadBuf::uninit(tempbuf.unfilled_mut());
-
-            match Read::poll_read(Pin::new(&mut self.0), cx, buf.unfilled()) {
-                Poll::Ready(Ok(())) => buf.filled().len(),
-                other => return other,
-            }
-        };
-
-        let n_filled = filled + sub_filled;
-        // At least sub_filled bytes had to have been initialized.
-        let n_init = sub_filled;
-        unsafe {
-            tempbuf.assume_init(n_init);
-            tempbuf.set_filled(n_filled);
-        }
-
-        Poll::Ready(Ok(()))
-    }
-}
-
-impl AsyncWrite for UpgradedWrapper {
-    fn poll_write(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &[u8],
-    ) -> Poll<std::result::Result<usize, std::io::Error>> {
-        Pin::new(&mut self.0).poll_write(cx, buf)
-    }
-
-    fn poll_flush(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<std::result::Result<(), std::io::Error>> {
-        Pin::new(&mut self.0).poll_flush(cx)
-    }
-
-    fn poll_shutdown(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<std::result::Result<(), std::io::Error>> {
-        Pin::new(&mut self.0).poll_shutdown(cx)
-    }
-
-    fn is_write_vectored(&self) -> bool {
-        self.0.is_write_vectored()
-    }
-
-    fn poll_write_vectored(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        bufs: &[std::io::IoSlice<'_>],
-    ) -> Poll<std::result::Result<usize, std::io::Error>> {
-        Pin::new(&mut self.0).poll_write_vectored(cx, bufs)
     }
 }
