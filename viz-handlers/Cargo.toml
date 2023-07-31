@@ -46,8 +46,8 @@ hex = { version = "0.4", optional = true }
 rust-embed = { version = "6.6.1", features = ["compression"], optional = true }
 
 # OpenTelemetry
-opentelemetry = { version = "0.19.0", default-features = false, optional = true }
-opentelemetry-prometheus = { version = "0.12.0",  features = ["prometheus-encoding"], optional = true }
+opentelemetry = { version = "0.20.0", default-features = false, optional = true }
+opentelemetry-prometheus = { version = "0.13.0",  features = ["prometheus-encoding"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt"] }

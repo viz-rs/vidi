@@ -47,7 +47,7 @@ impl RealIp {
             .and_then(|value| {
                 value
                     .split(',')
-                    .map(|value| value.trim())
+                    .map(str::trim)
                     .find_map(|value| value.parse::<IpAddr>().ok())
             })
         {

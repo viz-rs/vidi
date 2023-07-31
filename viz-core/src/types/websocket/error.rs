@@ -1,6 +1,6 @@
 use crate::{Error, IntoResponse, Response, StatusCode, ThisError};
 
-/// Rejects with an error when [WebSocket][super::WebSocket] extraction fails.
+/// Rejects with an error when [`WebSocket`][super::WebSocket] extraction fails.
 #[derive(ThisError, Debug)]
 pub enum WebSocketError {
     /// Missing `Connection` upgrade header.

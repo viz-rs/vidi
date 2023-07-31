@@ -8,7 +8,7 @@ use crate::{
     types, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
-/// A configure for [CookieMiddleware].
+/// A configure for [`CookieMiddleware`].
 pub struct Config {
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     key: std::sync::Arc<types::CookieKey>,
@@ -16,8 +16,9 @@ pub struct Config {
 
 #[allow(clippy::new_without_default)]
 impl Config {
-    #[cfg(not(any(feature = "cookie-signed", feature = "cookie-private")))]
     /// Creates a new config.
+    #[cfg(not(any(feature = "cookie-signed", feature = "cookie-private")))]
+    #[must_use]
     pub fn new() -> Self {
         Self {}
     }

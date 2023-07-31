@@ -1,4 +1,4 @@
-//! WebSocket Extractor
+//! `WebSocket` Extractor
 
 use std::{borrow::Cow, future::Future};
 
@@ -20,10 +20,10 @@ mod error;
 pub use error::WebSocketError;
 pub use tokio_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
 
-/// A wrapper around an underlying raw stream which implements the WebSocket protocol.
+/// A wrapper around an underlying raw stream which implements the `WebSocket` protocol.
 pub type WebSocketStream<T = Upgraded> = tokio_tungstenite::WebSocketStream<T>;
 
-/// Then WebSocket provides the API for creating and managing a [WebSocket][mdn] connection,
+/// Then `WebSocket` provides the API for creating and managing a [WebSocket][mdn] connection,
 /// as well as for sending and receiving data on the connection.
 ///
 /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/WebSocket>
@@ -42,6 +42,7 @@ impl WebSocket {
     ///
     /// In order of preference. The first one that is supported by the server will be
     /// selected and responsed.
+    #[must_use]
     pub fn protocols<I>(mut self, protocols: I) -> Self
     where
         I: IntoIterator,
@@ -167,7 +168,7 @@ impl IntoResponse for WebSocket {
                 let protocols = self.protocols.as_ref()?;
                 req_protocols
                     .split(',')
-                    .map(|req_p| req_p.trim())
+                    .map(str::trim)
                     .find(|req_p| protocols.iter().any(|p| p == req_p))
                     .and_then(|v| HeaderValue::from_str(v).ok())
             });
