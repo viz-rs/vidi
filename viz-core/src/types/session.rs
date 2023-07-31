@@ -101,6 +101,7 @@ impl Session {
     }
 
     /// Removes a value and deserialize
+    #[must_use]
     pub fn remove_as<T>(&self, key: &str) -> Option<T>
     where
         T: DeserializeOwned,

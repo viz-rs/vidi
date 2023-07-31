@@ -105,21 +105,15 @@ where
             .await
             .map(IntoResponse::into_response)
             .map(|mut res| {
-                #[allow(clippy::single_match)]
-                match cookies.jar().lock() {
-                    Ok(c) => {
-                        c.delta()
-                            .filter_map(|cookie| {
-                                HeaderValue::from_str(&cookie.encoded().to_string()).ok()
-                            })
-                            .fold(res.headers_mut(), |headers, cookie| {
-                                headers.append(SET_COOKIE, cookie);
-                                headers
-                            });
-                    }
-                    Err(_) => {
-                        // TODO: trace error
-                    }
+                if let Ok(c) = cookies.jar().lock() {
+                    c.delta()
+                        .filter_map(|cookie| {
+                            HeaderValue::from_str(&cookie.encoded().to_string()).ok()
+                        })
+                        .fold(res.headers_mut(), |headers, cookie| {
+                            headers.append(SET_COOKIE, cookie);
+                            headers
+                        });
                 }
                 res
             })
