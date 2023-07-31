@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use crate::{async_trait, types, Handler, IntoResponse, Request, Response, Result, Transform};
 
-/// A configuration for [LimitsMiddleware].
+/// A configuration for [`LimitsMiddleware`].
 #[derive(Debug, Clone)]
 pub struct Config {
     limits: types::Limits,
@@ -15,18 +15,21 @@ pub struct Config {
 
 impl Config {
     /// Creates a new Config.
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Sets a limits for the Text/Bytes/Form.
+    #[must_use]
     pub fn limits(mut self, limits: types::Limits) -> Self {
         self.limits = limits.sort();
         self
     }
 
-    #[cfg(feature = "multipart")]
     /// Sets a limits for the Multipart Form.
+    #[cfg(feature = "multipart")]
+    #[must_use]
     pub fn multipart(mut self, limits: types::MultipartLimits) -> Self {
         *Arc::make_mut(&mut self.multipart) = limits;
         self

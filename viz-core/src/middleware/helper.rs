@@ -124,12 +124,12 @@ pub trait Cookieable {
 
     /// Deletes a cookie from the cookies.
     fn remove_cookie<'a>(&'a self, cookies: &'a Cookies) {
-        cookies.remove(self.options().name)
+        cookies.remove(self.options().name);
     }
 
     /// Sets a cookie from the cookies.
     fn set_cookie<'a>(&'a self, cookies: &'a Cookies, value: impl Into<String>) {
-        cookies.add(self.options().into_cookie(value))
+        cookies.add(self.options().into_cookie(value));
     }
 }
 
@@ -146,12 +146,12 @@ pub trait Cookieable {
 
     /// Deletes a cookie from the cookies.
     fn remove_cookie<'a>(&'a self, cookies: &'a Cookies) {
-        cookies.signed_remove(self.options().name)
+        cookies.signed_remove(self.options().name);
     }
 
     /// Sets a cookie from the cookies.
     fn set_cookie<'a>(&'a self, cookies: &'a Cookies, value: impl Into<String>) {
-        cookies.signed_add(self.options().into_cookie(value))
+        cookies.signed_add(self.options().into_cookie(value));
     }
 }
 
@@ -168,12 +168,12 @@ pub trait Cookieable {
 
     /// Deletes a cookie from the cookies.
     fn remove_cookie<'a>(&self, cookies: &'a Cookies) {
-        cookies.private_remove(self.options().name)
+        cookies.private_remove(self.options().name);
     }
 
     /// Sets a cookie from the cookies.
     fn set_cookie<'a>(&'a self, cookies: &'a Cookies, value: impl Into<String>) {
-        cookies.private_add(self.options().into_cookie(value))
+        cookies.private_add(self.options().into_cookie(value));
     }
 }
 

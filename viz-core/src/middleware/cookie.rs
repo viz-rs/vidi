@@ -23,8 +23,8 @@ impl Config {
         Self {}
     }
 
-    #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     /// Creates a new config with the [`Key`][types::CookieKey].
+    #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     pub fn new(key: types::CookieKey) -> Self {
         Self {
             key: std::sync::Arc::new(key),

@@ -79,7 +79,7 @@ impl WebSocket {
 
             let socket = WebSocketStream::from_raw_socket(upgraded, Role::Server, config).await;
 
-            (callback)(socket).await
+            (callback)(socket).await;
         });
 
         self.into_response()

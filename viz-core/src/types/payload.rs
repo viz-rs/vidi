@@ -92,6 +92,7 @@ pub trait Payload {
     fn detect(m: &mime::Mime) -> bool;
 
     /// Sets the limit size.
+    #[must_use]
     #[inline]
     fn limit(limit: Option<u64>) -> u64 {
         limit.unwrap_or(Self::LIMIT)

@@ -39,6 +39,7 @@ impl Limits {
     pub const NORMAL: u64 = 1024 * 8;
 
     /// Creates a new Limits.
+    #[must_use]
     pub fn new() -> Self {
         Limits {
             inner: Arc::new(Vec::new()),
@@ -46,6 +47,7 @@ impl Limits {
     }
 
     /// Inserts a name-limit pair into the Limits.
+    #[must_use]
     pub fn insert(mut self, name: &'static str, limit: u64) -> Self {
         Arc::make_mut(&mut self.inner).push((name, limit));
         self

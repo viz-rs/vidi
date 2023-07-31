@@ -24,6 +24,7 @@ pub struct Session {
 
 impl Session {
     /// Creates new `Session` with `Data`
+    #[must_use]
     pub fn new(data: Data) -> Self {
         Self {
             state: Arc::new(State {
@@ -34,11 +35,13 @@ impl Session {
     }
 
     /// Gets status of the session
+    #[must_use]
     pub fn status(&self) -> &AtomicU8 {
         &self.state.status
     }
 
     /// Gets lock data of the session
+    #[must_use]
     pub fn lock_data(&self) -> &RwLock<Data> {
         &self.state.data
     }
@@ -81,6 +84,7 @@ impl Session {
     }
 
     /// Removes a value
+    #[must_use]
     pub fn remove(&self, key: &str) -> Option<Value> {
         let status = self.status().load(Ordering::Acquire);
         // not allowed `PURGED`
@@ -124,7 +128,7 @@ impl Session {
         let status = self.status().load(Ordering::Acquire);
         // not allowed `PURGED & RENEWED`
         if status != PURGED && status != RENEWED {
-            self.status().store(RENEWED, Ordering::SeqCst)
+            self.status().store(RENEWED, Ordering::SeqCst);
         }
     }
 

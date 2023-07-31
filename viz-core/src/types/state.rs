@@ -16,6 +16,7 @@ pub struct State<T: ?Sized>(pub T);
 
 impl<T> State<T> {
     /// Create new `State` instance.
+    #[must_use]
     #[inline]
     pub fn new(data: T) -> Self {
         Self(data)
