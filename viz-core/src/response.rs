@@ -34,8 +34,12 @@ pub trait ResponseExt: Sized {
         Self::with(t, mime::TEXT_HTML_UTF_8.as_ref())
     }
 
-    #[cfg(feature = "json")]
     /// The response with `application/javascript; charset=utf-8` media type.
+    ///
+    /// # Errors
+    ///
+    /// Throws an error if serialization fails.
+    #[cfg(feature = "json")]
     fn json<T>(t: T) -> Result<Response, crate::types::PayloadError>
     where
         T: serde::Serialize,
