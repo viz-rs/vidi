@@ -59,6 +59,10 @@ impl WebSocket {
     }
 
     /// Finish the upgrade, passing a function and a [`WebSocketConfig`] to handle the `WebSocket`.
+    ///
+    /// # Panics
+    ///
+    /// When missing `OnUpgrade`
     #[must_use]
     pub fn on_upgrade_with_config<F, Fut>(
         mut self,
@@ -69,7 +73,7 @@ impl WebSocket {
         F: FnOnce(WebSocketStream) -> Fut + Send + 'static,
         Fut: Future<Output = ()> + Send + 'static,
     {
-        let on_upgrade = self.on_upgrade.take().unwrap();
+        let on_upgrade = self.on_upgrade.take().expect("missing OnUpgrade");
 
         tokio::task::spawn(async move {
             let upgraded = match on_upgrade.await {

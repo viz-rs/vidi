@@ -47,6 +47,10 @@ impl Session {
     }
 
     /// Gets a value by the key
+    ///
+    /// # Errors
+    ///
+    /// TODO
     pub fn get<T>(&self, key: &str) -> Result<Option<T>, Error>
     where
         T: DeserializeOwned,
@@ -65,6 +69,10 @@ impl Session {
     }
 
     /// Sets a value by the key
+    ///
+    /// # Errors
+    ///
+    /// TODO
     pub fn set<T>(&self, key: &str, val: T) -> Result<(), Error>
     where
         T: Serialize,
@@ -146,6 +154,10 @@ impl Session {
     }
 
     /// Gets all raw key-value data from the session
+    ///
+    /// # Errors
+    ///
+    /// TODO
     pub fn data(&self) -> Result<Data, Error> {
         self.lock_data()
             .read()

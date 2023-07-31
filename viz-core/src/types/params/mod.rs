@@ -53,6 +53,10 @@ impl From<Vec<(&str, &str)>> for Params {
 
 impl Params {
     /// Gets single parameter by name.
+    ///
+    /// # Errors
+    ///
+    /// TODO
     pub fn find<T>(&self, name: &str) -> Result<T, ParamsError>
     where
         T: FromStr,

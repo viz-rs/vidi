@@ -28,53 +28,65 @@ impl CookieOptions {
     pub const MAX_AGE: u64 = 3600 * 24;
 
     /// Creates new `CookieOptions`
+    #[must_use]
     pub fn new(name: &'static str) -> Self {
         Self::default().name(name)
     }
 
     /// Creates new `CookieOptions` with `name`
+    #[must_use]
     pub fn name(mut self, name: &'static str) -> Self {
         self.name = name;
         self
     }
 
     /// Creates new `CookieOptions` with `max_age`
+    #[must_use]
     pub fn max_age(mut self, max_age: Duration) -> Self {
         self.max_age.replace(max_age);
         self
     }
 
     /// Creates new `CookieOptions` with `domain`
+    #[must_use]
     pub fn domain(mut self, domain: &'static str) -> Self {
         self.domain.replace(domain);
         self
     }
 
     /// Creates new `CookieOptions` with `path`
+    #[must_use]
     pub fn path(mut self, path: &'static str) -> Self {
         self.path = path;
         self
     }
 
     /// Creates new `CookieOptions` with `secure`
+    #[must_use]
     pub fn secure(mut self, secure: bool) -> Self {
         self.secure = secure;
         self
     }
 
     /// Creates new `CookieOptions` with `http_only`
+    #[must_use]
     pub fn http_only(mut self, http_only: bool) -> Self {
         self.http_only = http_only;
         self
     }
 
     /// Creates new `CookieOptions` with `same_site`
+    #[must_use]
     pub fn same_site(mut self, same_site: SameSite) -> Self {
         self.same_site.replace(same_site);
         self
     }
 
     /// Converts self into a [Cookie].
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `std::time::Duration` cannot be converted to `cookie::ime::Duration`
     pub fn into_cookie(&self, value: impl Into<String>) -> Cookie<'_> {
         let mut cookie = Cookie::new(self.name, value.into());
 
@@ -87,10 +99,10 @@ impl CookieOptions {
             cookie.set_domain(domain);
         }
         if let Some(max_age) = self.max_age {
-            cookie.set_max_age(
-                ::cookie::time::Duration::try_from(max_age)
-                    .expect("cant convert std Duration into time::Duration"),
-            );
+            cookie
+                .set_max_age(::cookie::time::Duration::try_from(max_age).expect(
+                    "`std::time::Duration` cannot be converted to `cookie::ime::Duration`",
+                ));
         }
 
         cookie
@@ -111,7 +123,7 @@ impl Default for CookieOptions {
     }
 }
 
-#[cfg(not(any(feature = "cookie-signed", feature = "cookie-private")))]
+#[cfg(not(feature = "cookie-private"))]
 /// An interface for managing the cookies.
 pub trait Cookieable {
     /// Gets the options of the cookie.
@@ -133,68 +145,24 @@ pub trait Cookieable {
     }
 }
 
-#[cfg(all(feature = "cookie-signed", not(feature = "cookie-private")))]
-/// An interface for managing the `signed` cookies.
-pub trait Cookieable {
-    /// Gets the options of the cookie.
-    fn options(&self) -> &CookieOptions;
-
-    /// Gets a cookie from the cookies.
-    fn get_cookie<'a>(&'a self, cookies: &'a Cookies) -> Option<Cookie<'a>> {
-        cookies.signed_get(self.options().name)
-    }
-
-    /// Deletes a cookie from the cookies.
-    fn remove_cookie<'a>(&'a self, cookies: &'a Cookies) {
-        cookies.signed_remove(self.options().name);
-    }
-
-    /// Sets a cookie from the cookies.
-    fn set_cookie<'a>(&'a self, cookies: &'a Cookies, value: impl Into<String>) {
-        cookies.signed_add(self.options().into_cookie(value));
-    }
-}
-
-#[cfg(all(feature = "cookie-private", not(feature = "cookie-signed")))]
+#[cfg(feature = "cookie-private")]
 /// An interface for managing the `private` cookies.
 pub trait Cookieable {
     /// Gets the options of the cookie.
     fn options(&self) -> &CookieOptions;
 
     /// Gets a cookie from the cookies.
-    fn get_cookie<'a>(&self, cookies: &'a Cookies) -> Option<Cookie<'a>> {
+    fn get_cookie<'a>(&'a self, cookies: &'a Cookies) -> Option<Cookie<'a>> {
         cookies.private_get(self.options().name)
     }
 
     /// Deletes a cookie from the cookies.
-    fn remove_cookie<'a>(&self, cookies: &'a Cookies) {
+    fn remove_cookie<'a>(&'a self, cookies: &'a Cookies) {
         cookies.private_remove(self.options().name);
     }
 
     /// Sets a cookie from the cookies.
     fn set_cookie<'a>(&'a self, cookies: &'a Cookies, value: impl Into<String>) {
         cookies.private_add(self.options().into_cookie(value));
-    }
-}
-
-#[cfg(all(feature = "cookie-private", feature = "cookie-signed"))]
-/// An interface for managing the cookies.
-pub trait Cookieable {
-    /// Gets the options of the cookie.
-    fn options(&self) -> &CookieOptions;
-
-    /// Gets a cookie from the cookies.
-    fn get_cookie<'a>(&'a self, _: &'a Cookies) -> Option<Cookie<'a>> {
-        panic!("Please choose a secure option, `cookie-signed` or `cookie-private`")
-    }
-
-    /// Deletes a cookie from the cookies.
-    fn remove_cookie<'a>(&'a self, _: &'a Cookies) {
-        panic!("Please choose a secure option, `cookie-signed` or `cookie-private`")
-    }
-
-    /// Sets a cookie from the cookies.
-    fn set_cookie<'a>(&'a self, _: &'a Cookies, _: impl Into<String>) {
-        panic!("Please choose a secure option, `cookie-signed` or `cookie-private`")
     }
 }

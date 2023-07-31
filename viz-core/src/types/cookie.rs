@@ -35,6 +35,7 @@ impl Clone for Cookies {
 
 impl Cookies {
     /// Creates a new Cookies with the [`CookieJar`].
+    #[must_use]
     pub fn new(cookie_jar: CookieJar) -> Self {
         Self {
             inner: Arc::new(Mutex::new(cookie_jar)),
@@ -44,6 +45,7 @@ impl Cookies {
     }
 
     /// Retures the inner mutex [`CookieJar`].
+    #[must_use]
     pub fn jar(&self) -> &Mutex<CookieJar> {
         &self.inner
     }
@@ -51,7 +53,7 @@ impl Cookies {
     /// Removes `cookie` from this cookies.
     pub fn remove(&self, name: impl AsRef<str>) {
         if let Ok(mut c) = self.jar().lock() {
-            c.remove(Cookie::named(name.as_ref().to_string()))
+            c.remove(Cookie::named(name.as_ref().to_string()));
         }
     }
 

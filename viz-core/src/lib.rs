@@ -5,6 +5,7 @@
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
 #![forbid(unsafe_code)]
+#![allow(clippy::module_name_repetitions)]
 #![warn(
     missing_debug_implementations,
     missing_docs,

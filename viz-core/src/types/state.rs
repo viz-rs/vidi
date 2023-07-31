@@ -123,6 +123,7 @@ pub struct StateError(pub &'static str);
 
 impl StateError {
     /// Creates a [`State`] error by specified type.
+    #[must_use]
     pub fn new<T>() -> Self {
         Self(type_name::<T>())
     }
