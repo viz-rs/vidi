@@ -57,11 +57,11 @@ impl From<Router> for Tree {
                         }
                     }) {
                         Some(t) => {
-                            t.insert(&path, handler);
+                            let _ = t.insert(&path, handler);
                         }
                         None => {
                             let mut t = PathTree::new();
-                            t.insert(&path, handler);
+                            let _ = t.insert(&path, handler);
                             tree.as_mut().push((method, t));
                         }
                     }
