@@ -15,7 +15,7 @@ use opentelemetry::{
 };
 use opentelemetry_semantic_conventions::trace::{
     CLIENT_ADDRESS, CLIENT_SOCKET_ADDRESS, EXCEPTION_MESSAGE, HTTP_REQUEST_BODY_SIZE,
-    HTTP_REQUEST_METHOD, HTTP_RESPONSE_CONTENT_LENGTH, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
+    HTTP_REQUEST_METHOD, HTTP_RESPONSE_BODY_SIZE, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
     NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_PATH, URL_QUERY, URL_SCHEME,
     USER_AGENT_ORIGINAL,
 };
@@ -105,7 +105,7 @@ where
                 );
                 if let Some(content_length) = resp.content_length() {
                     span.set_attribute(
-                        HTTP_RESPONSE_CONTENT_LENGTH
+                        HTTP_RESPONSE_BODY_SIZE
                             .i64(i64::try_from(content_length).unwrap_or(i64::MAX)),
                     );
                 }
@@ -181,8 +181,12 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
     if let Some(host) = uri.host() {
         attributes.insert(SERVER_ADDRESS, host.to_string().into());
     }
-    if let Some(port) = uri.port_u16().filter(|port| *port != 80 && *port != 443) {
-        attributes.insert(SERVER_PORT, port as i64);
+    if let Some(port) = uri
+        .port_u16()
+        .and_then(|len| i64::try_from(len).ok())
+        .filter(|port| *port != 80 && *port != 443)
+    {
+        attributes.insert(SERVER_PORT, port.into());
     }
 
     if let Some(path_query) = uri.path_and_query() {
@@ -204,7 +208,7 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
         .filter(|len| *len > 0)
         .and_then(|len| i64::try_from(len).ok())
     {
-        attributes.insert(HTTP_REQUEST_BODY_SIZE, content_length);
+        attributes.insert(HTTP_REQUEST_BODY_SIZE, content_length.into());
     }
 
     if let Some(user_agent) = req

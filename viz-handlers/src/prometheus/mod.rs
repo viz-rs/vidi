@@ -4,7 +4,8 @@
 
 use http_body_util::Full;
 use opentelemetry::{global::handle_error, metrics::MetricsError};
-use opentelemetry_prometheus::{Encoder, PrometheusExporter, TextEncoder};
+use opentelemetry_prometheus::PrometheusExporter;
+use prometheus::{Encoder, TextEncoder};
 
 use viz_core::{
     async_trait,

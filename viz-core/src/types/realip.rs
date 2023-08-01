@@ -27,13 +27,12 @@ impl RealIp {
                     .and_then(|value| value.to_str().ok())
                     .and_then(|value| rfc7239::parse(value).collect::<Result<Vec<_>, _>>().ok())
                     .and_then(|value| {
-                        value.into_iter().find_map(|item| {
-                            item.forwarded_for.map(
-                                |NodeIdentifier {
-                                     name: NodeName::Ip(ip_addr),
-                                     ..
-                                 }| ip_addr,
-                            )
+                        value.into_iter().find_map(|item| match item.forwarded_for {
+                            Some(NodeIdentifier {
+                                name: NodeName::Ip(ip_addr),
+                                ..
+                            }) => Some(ip_addr),
+                            _ => None,
                         })
                     })
             })

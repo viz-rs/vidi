@@ -141,7 +141,7 @@ where
 fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
     let mut attributes = Vec::with_capacity(5);
     // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#http-server>
-    attributes.push(HTTP_ROUTE.string(http_route));
+    attributes.push(HTTP_ROUTE.string(http_route.to_string()));
 
     // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#common-attributes>
     attributes.push(HTTP_REQUEST_METHOD.string(req.method().to_string()));
@@ -161,7 +161,7 @@ fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
 
     let uri = req.uri();
     if let Some(host) = uri.host() {
-        attributes.push(SERVER_ADDRESS.string(host));
+        attributes.push(SERVER_ADDRESS.string(host.to_string()));
     }
     if let Some(port) = uri.port_u16().filter(|port| *port != 80 && *port != 443) {
         attributes.push(SERVER_PORT.i64(port as i64));

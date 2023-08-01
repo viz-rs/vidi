@@ -31,6 +31,7 @@ prometheus = [
   "dep:http-body-util",
   "opentelemetry/metrics",
   "dep:opentelemetry-prometheus",
+  "dep:prometheus"
 ]
 
 [dependencies]
@@ -57,6 +58,7 @@ rust-embed = { workspace = true, optional = true }
 # OpenTelemetry
 opentelemetry = { workspace = true, default-features = false, optional = true }
 opentelemetry-prometheus = { workspace = true, optional = true }
+prometheus = { workspace = true, optional = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt", "macros"] }
