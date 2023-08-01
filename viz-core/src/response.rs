@@ -140,7 +140,10 @@ pub trait ResponseExt: Sized {
 
 impl ResponseExt for Response {
     fn content_length(&self) -> Option<u64> {
-        self.header(header::CONTENT_LENGTH)
+        self.headers()
+            .get(header::CONTENT_LENGTH)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.parse().ok())
     }
 
     fn ok(&self) -> bool {
