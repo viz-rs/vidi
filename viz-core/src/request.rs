@@ -1,5 +1,3 @@
-#![allow(clippy::module_name_repetitions)]
-
 use std::{mem::replace, sync::Arc};
 
 use crate::{
@@ -48,8 +46,8 @@ pub trait RequestExt: Sized {
     /// Get URL's query string of this request.
     fn query_string(&self) -> Option<&str>;
 
-    #[cfg(feature = "query")]
     /// Get query data by type.
+    #[cfg(feature = "query")]
     fn query<T>(&self) -> Result<T, PayloadError>
     where
         T: serde::de::DeserializeOwned;

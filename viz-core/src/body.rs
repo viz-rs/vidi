@@ -1,5 +1,3 @@
-#![allow(clippy::module_name_repetitions)]
-
 use std::{
     pin::Pin,
     task::{Context, Poll},
