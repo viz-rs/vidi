@@ -2,7 +2,7 @@
 //!
 //! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
 
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
 use http::uri::Scheme;
 use opentelemetry::{
