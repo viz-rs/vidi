@@ -167,7 +167,7 @@ fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
         attributes.push(SERVER_PORT.i64(port as i64));
     }
 
-    attributes.push(URL_SCHEME.string(uri.scheme().unwrap_or(&Scheme::HTTP)));
+    attributes.push(URL_SCHEME.string(uri.scheme().unwrap_or(&Scheme::HTTP).to_string()));
 
     attributes
 }

@@ -160,7 +160,10 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
 
     // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#common-attributes>
     attributes.insert(HTTP_REQUEST_METHOD, req.method().to_string().into());
-    attributes.insert(NETWORK_PROTOCOL_VERSION, format!("{:?}", req.version()));
+    attributes.insert(
+        NETWORK_PROTOCOL_VERSION,
+        format!("{:?}", req.version()).into(),
+    );
 
     let remote_addr = req.remote_addr();
     if let Some(remote_addr) = remote_addr {
@@ -179,7 +182,7 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
         attributes.insert(SERVER_ADDRESS, host.to_string().into());
     }
     if let Some(port) = uri.port_u16().filter(|port| *port != 80 && *port != 443) {
-        attributes.insert(SERVER_PORT, port.into());
+        attributes.insert(SERVER_PORT, port as i64);
     }
 
     if let Some(path_query) = uri.path_and_query() {
@@ -196,8 +199,12 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
         uri.scheme().unwrap_or(&Scheme::HTTP).to_string().into(),
     );
 
-    if let Some(content_length) = req.content_length().filter(|len| *len > 0) {
-        attributes.insert(HTTP_REQUEST_BODY_SIZE, content_length.into());
+    if let Some(content_length) = req
+        .content_length()
+        .filter(|len| *len > 0)
+        .and_then(|len| i64::try_from(len).ok())
+    {
+        attributes.insert(HTTP_REQUEST_BODY_SIZE, content_length);
     }
 
     if let Some(user_agent) = req
