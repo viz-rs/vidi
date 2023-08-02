@@ -163,8 +163,12 @@ fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
     if let Some(host) = uri.host() {
         attributes.push(SERVER_ADDRESS.string(host.to_string()));
     }
-    if let Some(port) = uri.port_u16().filter(|port| *port != 80 && *port != 443) {
-        attributes.push(SERVER_PORT.i64(port as i64));
+    if let Some(port) = uri
+        .port_u16()
+        .and_then(|port| i64::try_from(port).ok())
+        .filter(|port| *port != 80 && *port != 443)
+    {
+        attributes.push(SERVER_PORT.i64(port));
     }
 
     attributes.push(URL_SCHEME.string(uri.scheme().unwrap_or(&Scheme::HTTP).to_string()));

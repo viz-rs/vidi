@@ -9,4 +9,4 @@ viz = { workspace = true, features = ["otel-tracing"] }
 
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
 opentelemetry.workspace = true
-opentelemetry-jaeger = { version = "0.18.0", features = ["rt-tokio-current-thread"]}
+opentelemetry-jaeger = { version = "0.19.0", features = ["rt-tokio-current-thread"]}

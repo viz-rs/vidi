@@ -4,7 +4,6 @@
 
 use http_body_util::Full;
 use opentelemetry::{global::handle_error, metrics::MetricsError};
-use opentelemetry_prometheus::PrometheusExporter;
 use prometheus::{Encoder, TextEncoder};
 
 use viz_core::{
@@ -15,20 +14,20 @@ use viz_core::{
 
 #[doc(inline)]
 pub use opentelemetry_prometheus::ExporterBuilder;
+#[doc(inline)]
+pub use prometheus::Registry;
 
-/// The [`PrometheusExporter`] wrapper.
-///
-/// [`PrometheusExporter`]: opentelemetry_prometheus::PrometheusExporter
+/// The [`Registry`] wrapper.
 #[derive(Clone, Debug)]
 pub struct Prometheus {
-    exporter: PrometheusExporter,
+    registry: Registry,
 }
 
 impl Prometheus {
     /// Creates a new Prometheus.
     #[must_use]
-    pub fn new(exporter: PrometheusExporter) -> Self {
-        Self { exporter }
+    pub fn new(registry: Registry) -> Self {
+        Self { registry }
     }
 }
 
@@ -37,7 +36,7 @@ impl Handler<Request> for Prometheus {
     type Output = Result<Response>;
 
     async fn call(&self, _: Request) -> Self::Output {
-        let metric_families = self.exporter.registry().gather();
+        let metric_families = self.registry.gather();
         let encoder = TextEncoder::new();
         let mut body = Vec::new();
 
