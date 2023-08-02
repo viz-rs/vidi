@@ -205,8 +205,8 @@ fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
 
     if let Some(content_length) = req
         .content_length()
-        .filter(|len| *len > 0)
         .and_then(|len| i64::try_from(len).ok())
+        .filter(|len| *len > 0)
     {
         attributes.insert(HTTP_REQUEST_BODY_SIZE, content_length.into());
     }
