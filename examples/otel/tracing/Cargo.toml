@@ -11,5 +11,5 @@ tokio = { version = "1.0", features = [
   "rt-multi-thread",
   "macros",
 ] }
-opentelemetry = "0.18.0"
-opentelemetry-jaeger = { version = "0.17.0", features = ["rt-tokio-current-thread"]}
+opentelemetry = "0.20.0"
+opentelemetry-jaeger = { version = "0.19.0", features = ["rt-tokio-current-thread"]}

@@ -1,62 +1,73 @@
-//! Request metrics middleware with [OpenTelemetry].
+//! Request metrics middleware with [`OpenTelemetry`].
 //!
-//! [OpenTelemetry]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md
+//! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md
 
-use std::time::SystemTime;
+use std::{net::SocketAddr, time::SystemTime};
 
 use http::uri::Scheme;
 use opentelemetry::{
     metrics::{Histogram, Meter, Unit, UpDownCounter},
-    Context, KeyValue,
+    KeyValue,
 };
 use opentelemetry_semantic_conventions::trace::{
-    HTTP_CLIENT_IP,
-    HTTP_FLAVOR,
-    HTTP_METHOD,
-    // HTTP_RESPONSE_CONTENT_LENGTH,
-    HTTP_ROUTE,
-    HTTP_SCHEME, // , HTTP_SERVER_NAME
-    HTTP_STATUS_CODE,
-    HTTP_TARGET,
-    HTTP_USER_AGENT,
-    NET_HOST_PORT,
-    NET_SOCK_PEER_ADDR,
+    CLIENT_ADDRESS, CLIENT_SOCKET_ADDRESS, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE,
+    HTTP_ROUTE, NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_SCHEME,
 };
 
-use super::HTTP_HOST;
-
 use crate::{
-    async_trait, header::USER_AGENT, types::RealIp, Handler, IntoResponse, Request, RequestExt,
-    Response, Result, Transform,
+    async_trait, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    Transform,
 };
 
 const HTTP_SERVER_ACTIVE_REQUESTS: &str = "http.server.active_requests";
 const HTTP_SERVER_DURATION: &str = "http.server.duration";
+const HTTP_SERVER_REQUEST_SIZE: &str = "http.server.request.size";
+const HTTP_SERVER_RESPONSE_SIZE: &str = "http.server.response.size";
 
 /// Request metrics middleware config.
 #[derive(Clone, Debug)]
 pub struct Config {
     active_requests: UpDownCounter<i64>,
     duration: Histogram<f64>,
+    request_size: Histogram<u64>,
+    response_size: Histogram<u64>,
 }
 
 impl Config {
     /// Creates a new Config
-    pub fn new(meter: Meter) -> Self {
+    #[must_use]
+    pub fn new(meter: &Meter) -> Self {
         let active_requests = meter
             .i64_up_down_counter(HTTP_SERVER_ACTIVE_REQUESTS)
-            .with_description("HTTP concurrent in-flight requests per route")
+            .with_description(
+                "Measures the number of concurrent HTTP requests that are currently in-flight.",
+            )
+            .with_unit(Unit::new("{request}"))
             .init();
 
         let duration = meter
             .f64_histogram(HTTP_SERVER_DURATION)
-            .with_description("HTTP inbound request duration per route")
-            .with_unit(Unit::new("ms"))
+            .with_description("Measures the duration of inbound HTTP requests.")
+            .with_unit(Unit::new("s"))
+            .init();
+
+        let request_size = meter
+            .u64_histogram(HTTP_SERVER_REQUEST_SIZE)
+            .with_description("Measures the size of HTTP request messages (compressed).")
+            .with_unit(Unit::new("By"))
+            .init();
+
+        let response_size = meter
+            .u64_histogram(HTTP_SERVER_RESPONSE_SIZE)
+            .with_description("Measures the size of HTTP request messages (compressed).")
+            .with_unit(Unit::new("By"))
             .init();
 
         Config {
             active_requests,
             duration,
+            request_size,
+            response_size,
         }
     }
 }
@@ -69,16 +80,20 @@ impl<H> Transform<H> for Config {
             h,
             active_requests: self.active_requests.clone(),
             duration: self.duration.clone(),
+            request_size: self.request_size.clone(),
+            response_size: self.response_size.clone(),
         }
     }
 }
 
-/// Request metrics middleware with OpenTelemetry.
+/// Request metrics middleware with `OpenTelemetry`.
 #[derive(Debug, Clone)]
 pub struct MetricsMiddleware<H> {
     h: H,
     active_requests: UpDownCounter<i64>,
     duration: Histogram<f64>,
+    request_size: Histogram<u64>,
+    response_size: Histogram<u64>,
 }
 
 #[async_trait]
@@ -91,79 +106,72 @@ where
 
     async fn call(&self, req: Request) -> Self::Output {
         let timer = SystemTime::now();
-        let cx = Context::current();
-        let mut attributes = build_attributes(&req, &req.route_info().pattern);
+        let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
 
-        self.active_requests.add(&cx, 1, &attributes);
+        self.active_requests.add(1, &attributes);
 
-        let res = self
+        self.request_size
+            .record(req.content_length().unwrap_or(0), &attributes);
+
+        let resp = self
             .h
             .call(req)
             .await
             .map(IntoResponse::into_response)
             .map(|resp| {
-                self.active_requests.add(&cx, -1, &attributes);
+                self.active_requests.add(-1, &attributes);
 
-                attributes.push(HTTP_STATUS_CODE.i64(resp.status().as_u16() as i64));
+                attributes.push(HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
+
+                self.response_size
+                    .record(resp.content_length().unwrap_or(0), &attributes);
 
                 resp
             });
 
         self.duration.record(
-            &cx,
-            timer
-                .elapsed()
-                .map(|t| t.as_secs_f64() * 1000.0)
-                .unwrap_or_default(),
+            timer.elapsed().map(|t| t.as_secs_f64()).unwrap_or_default(),
             &attributes,
         );
 
-        res
+        resp
     }
 }
 
-fn build_attributes(req: &Request, http_route: &String) -> Vec<KeyValue> {
-    let mut attributes = Vec::with_capacity(10);
-    attributes.push(
-        HTTP_SCHEME.string(
-            req.schema()
-                .or(Some(&Scheme::HTTP))
-                .map(ToString::to_string)
-                .unwrap(),
-        ),
-    );
-    attributes.push(HTTP_FLAVOR.string(format!("{:?}", req.version())));
-    attributes.push(HTTP_METHOD.string(req.method().to_string()));
-    attributes.push(HTTP_ROUTE.string(http_route.to_owned()));
-    if let Some(path_and_query) = req.uri().path_and_query() {
-        attributes.push(HTTP_TARGET.string(path_and_query.as_str().to_string()));
+fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
+    let mut attributes = Vec::with_capacity(5);
+    // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#http-server>
+    attributes.push(HTTP_ROUTE.string(http_route.to_string()));
+
+    // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#common-attributes>
+    attributes.push(HTTP_REQUEST_METHOD.string(req.method().to_string()));
+    attributes.push(NETWORK_PROTOCOL_VERSION.string(format!("{:?}", req.version())));
+
+    let remote_addr = req.remote_addr();
+    if let Some(remote_addr) = remote_addr {
+        attributes.push(CLIENT_ADDRESS.string(remote_addr.to_string()));
     }
-    if let Some(host) = req.uri().host() {
-        attributes.push(HTTP_HOST.string(host.to_string()));
+    if let Some(realip) = req.realip().map(|value| value.0).filter(|realip| {
+        remote_addr
+            .map(SocketAddr::ip)
+            .map_or(true, |remoteip| &remoteip != realip)
+    }) {
+        attributes.push(CLIENT_SOCKET_ADDRESS.string(realip.to_string()));
     }
-    if let Some(user_agent) = req.headers().get(USER_AGENT).and_then(|s| s.to_str().ok()) {
-        attributes.push(HTTP_USER_AGENT.string(user_agent.to_string()));
+
+    let uri = req.uri();
+    if let Some(host) = uri.host() {
+        attributes.push(SERVER_ADDRESS.string(host.to_string()));
     }
-    let realip = RealIp::parse(req);
-    if let Some(realip) = realip {
-        attributes.push(HTTP_CLIENT_IP.string(realip.0.to_string()));
-    }
-    // if server_name != host {
-    //     attributes.insert(HTTP_SERVER_NAME, server_name.to_string().into());
-    // }
-    if let Some(remote_ip) = req.remote_addr().map(|add| add.ip()) {
-        if realip.map(|realip| realip.0 != remote_ip).unwrap_or(true) {
-            // Client is going through a proxy
-            attributes.push(NET_SOCK_PEER_ADDR.string(remote_ip.to_string()));
-        }
-    }
-    if let Some(port) = req
-        .uri()
+    if let Some(port) = uri
         .port_u16()
-        .filter(|port| *port != 80 || *port != 443)
+        .and_then(|port| i64::try_from(port).ok())
+        .filter(|port| *port != 80 && *port != 443)
     {
-        attributes.push(NET_HOST_PORT.i64(port as i64));
+        attributes.push(SERVER_PORT.i64(port));
     }
+
+    attributes.push(URL_SCHEME.string(uri.scheme().unwrap_or(&Scheme::HTTP).to_string()));
 
     attributes
 }

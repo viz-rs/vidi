@@ -5,15 +5,16 @@ use std::net::SocketAddr;
 use opentelemetry::{
     global,
     sdk::{
-        export::metrics::aggregation,
-        metrics::{controllers, processors, selectors},
+        metrics::{self, Aggregation, Instrument, MeterProvider, Stream},
+        Resource,
     },
+    KeyValue,
 };
 
 use viz::{
-    handlers::prometheus::{ExporterBuilder, Prometheus},
+    handlers::prometheus::{ExporterBuilder, Prometheus, Registry},
     middleware::otel,
-    Request, Result, Router, Server, ServiceMaker,
+    Error, Request, Result, Router, Server, ServiceMaker,
 };
 
 async fn index(_: Request) -> Result<&'static str> {
@@ -25,29 +26,47 @@ async fn main() -> Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     println!("listening on {addr}");
 
-    let exporter = {
-        let controller = controllers::basic(
-            processors::factory(
-                selectors::simple::histogram([1.0, 2.0, 5.0, 10.0, 20.0, 50.0]),
-                aggregation::cumulative_temporality_selector(),
+    let registry = Registry::new();
+    let (exporter, controller) = {
+        (
+            ExporterBuilder::default()
+                .with_registry(registry.clone())
+                .build()
+                .map_err(Error::normal)?,
+            metrics::new_view(
+                Instrument::new().name("http.server.duration"),
+                Stream::new().aggregation(Aggregation::ExplicitBucketHistogram {
+                    boundaries: vec![
+                        0.0, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0,
+                        7.5, 10.0,
+                    ],
+                    record_min_max: true,
+                }),
             )
-            .with_memory(true),
+            .unwrap(),
         )
-        .build();
-        ExporterBuilder::new(controller).init()
     };
+    let provider = MeterProvider::builder()
+        .with_reader(exporter)
+        .with_resource(Resource::new([KeyValue::new("service.name", "viz")]))
+        .with_view(controller)
+        .build();
 
-    let meter = global::meter("viz");
+    global::set_meter_provider(provider.clone());
 
     let app = Router::new()
         .get("/", index)
         .get("/:username", index)
-        .get("/metrics", Prometheus::new(exporter))
-        .with(otel::metrics::Config::new(meter));
+        .get("/metrics", Prometheus::new(registry))
+        .with(otel::metrics::Config::new(&global::meter("otel")));
 
     if let Err(err) = Server::bind(&addr).serve(ServiceMaker::from(app)).await {
         println!("{err}");
     }
+
+    // Ensure all spans have been reported
+    global::shutdown_tracer_provider();
+    provider.shutdown().map_err(Error::normal)?;
 
     Ok(())
 }

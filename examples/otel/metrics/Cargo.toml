@@ -11,4 +11,4 @@ tokio = { version = "1.0", features = [
   "rt-multi-thread",
   "macros",
 ] }
-opentelemetry = { version = "0.18.0", default-features = false, features = ["metrics"]}
+opentelemetry = { version = "0.20.0", default-features = false, features = ["metrics"]}

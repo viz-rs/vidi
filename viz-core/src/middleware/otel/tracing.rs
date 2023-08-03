@@ -1,8 +1,8 @@
-//! Request tracing middleware with [OpenTelemetry].
+//! Request tracing middleware with [`OpenTelemetry`].
 //!
-//! [OpenTelemetry]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
+//! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
 
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
 use http::uri::Scheme;
 use opentelemetry::{
@@ -14,39 +14,27 @@ use opentelemetry::{
     Context, Key, Value,
 };
 use opentelemetry_semantic_conventions::trace::{
-    EXCEPTION_MESSAGE,
-    HTTP_CLIENT_IP,
-    HTTP_FLAVOR,
-    HTTP_METHOD,
-    HTTP_RESPONSE_CONTENT_LENGTH,
-    HTTP_ROUTE,
-    HTTP_SCHEME,
-    // , HTTP_SERVER_NAME
-    HTTP_STATUS_CODE,
-    HTTP_TARGET,
-    HTTP_USER_AGENT,
-    NET_HOST_PORT,
-    NET_SOCK_PEER_ADDR,
+    CLIENT_ADDRESS, CLIENT_SOCKET_ADDRESS, EXCEPTION_MESSAGE, HTTP_REQUEST_BODY_SIZE,
+    HTTP_REQUEST_METHOD, HTTP_RESPONSE_BODY_SIZE, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
+    NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_PATH, URL_QUERY, URL_SCHEME,
+    USER_AGENT_ORIGINAL,
 };
-
-use super::HTTP_HOST;
 
 use crate::{
     async_trait,
-    header::{HeaderMap, USER_AGENT},
-    headers::{self, HeaderMapExt},
-    types::RealIp,
-    Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
+    header::{HeaderMap, HeaderName},
+    headers::UserAgent,
+    Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
 };
 
-/// Opentelemetry tracing config.
+/// `OpenTelemetry` tracing config.
 #[derive(Debug)]
 pub struct Config<T> {
     tracer: Arc<T>,
 }
 
 impl<T> Config<T> {
-    /// Creats new Opentelemetry tracing config.
+    /// Creats new `OpenTelemetry` tracing config.
     pub fn new(t: T) -> Self {
         Self {
             tracer: Arc::new(t),
@@ -65,7 +53,7 @@ impl<H, T> Transform<H> for Config<T> {
     }
 }
 
-/// OpenTelemetry tracing middleware.
+/// `OpenTelemetry` tracing middleware.
 #[derive(Debug, Clone)]
 pub struct TracingMiddleware<H, T> {
     h: H,
@@ -88,7 +76,7 @@ where
         });
 
         let http_route = &req.route_info().pattern;
-        let attributes = build_attributes(&req, http_route);
+        let attributes = build_attributes(&req, http_route.as_str());
 
         let mut span = self
             .tracer
@@ -99,7 +87,7 @@ where
 
         span.add_event("request.started".to_string(), vec![]);
 
-        let res = self
+        let resp = self
             .h
             .call(req)
             .with_context(Context::current_with_span(span))
@@ -108,13 +96,18 @@ where
         let cx = Context::current();
         let span = cx.span();
 
-        match res {
+        match resp {
             Ok(resp) => {
                 let resp = resp.into_response();
                 span.add_event("request.completed".to_string(), vec![]);
-                span.set_attribute(HTTP_STATUS_CODE.i64(resp.status().as_u16() as i64));
-                if let Some(content_length) = resp.headers().typed_get::<headers::ContentLength>() {
-                    span.set_attribute(HTTP_RESPONSE_CONTENT_LENGTH.i64(content_length.0 as i64));
+                span.set_attribute(
+                    HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())),
+                );
+                if let Some(content_length) = resp.content_length() {
+                    span.set_attribute(
+                        HTTP_RESPONSE_BODY_SIZE
+                            .i64(i64::try_from(content_length).unwrap_or(i64::MAX)),
+                    );
                 }
                 if resp.status().is_server_error() {
                     span.set_status(Status::error(
@@ -156,51 +149,74 @@ impl<'a> Extractor for RequestHeaderCarrier<'a> {
     }
 
     fn keys(&self) -> Vec<&str> {
-        self.headers.keys().map(|header| header.as_str()).collect()
+        self.headers.keys().map(HeaderName::as_str).collect()
     }
 }
 
-fn build_attributes(req: &Request, http_route: &String) -> OrderMap<Key, Value> {
+fn build_attributes(req: &Request, http_route: &str) -> OrderMap<Key, Value> {
     let mut attributes = OrderMap::<Key, Value>::with_capacity(10);
+    // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#http-server>
+    attributes.insert(HTTP_ROUTE, http_route.to_string().into());
+
+    // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#common-attributes>
+    attributes.insert(HTTP_REQUEST_METHOD, req.method().to_string().into());
     attributes.insert(
-        HTTP_SCHEME,
-        req.schema()
-            .or_else(|| Some(&Scheme::HTTP))
-            .map(ToString::to_string)
-            .unwrap()
-            .into(),
+        NETWORK_PROTOCOL_VERSION,
+        format!("{:?}", req.version()).into(),
     );
-    attributes.insert(HTTP_FLAVOR, format!("{:?}", req.version()).into());
-    attributes.insert(HTTP_METHOD, req.method().to_string().into());
-    attributes.insert(HTTP_ROUTE, http_route.to_owned().into());
-    if let Some(path_and_query) = req.uri().path_and_query() {
-        attributes.insert(HTTP_TARGET, path_and_query.as_str().to_string().into());
+
+    let remote_addr = req.remote_addr();
+    if let Some(remote_addr) = remote_addr {
+        attributes.insert(CLIENT_ADDRESS, remote_addr.to_string().into());
     }
-    if let Some(host) = req.uri().host() {
-        attributes.insert(HTTP_HOST, host.to_string().into());
+    if let Some(realip) = req.realip().map(|value| value.0).filter(|realip| {
+        remote_addr
+            .map(SocketAddr::ip)
+            .map_or(true, |remoteip| &remoteip != realip)
+    }) {
+        attributes.insert(CLIENT_SOCKET_ADDRESS, realip.to_string().into());
     }
-    if let Some(user_agent) = req.headers().get(USER_AGENT).and_then(|s| s.to_str().ok()) {
-        attributes.insert(HTTP_USER_AGENT, user_agent.to_string().into());
+
+    let uri = req.uri();
+    if let Some(host) = uri.host() {
+        attributes.insert(SERVER_ADDRESS, host.to_string().into());
     }
-    let realip = RealIp::parse(req);
-    if let Some(realip) = realip {
-        attributes.insert(HTTP_CLIENT_IP, realip.0.to_string().into());
+    if let Some(port) = uri
+        .port_u16()
+        .and_then(|len| i64::try_from(len).ok())
+        .filter(|port| *port != 80 && *port != 443)
+    {
+        attributes.insert(SERVER_PORT, port.into());
     }
-    // if server_name != host {
-    //     attributes.insert(HTTP_SERVER_NAME, server_name.to_string().into());
-    // }
-    if let Some(remote_ip) = req.remote_addr().map(|add| add.ip()) {
-        if realip.map(|realip| realip.0 != remote_ip).unwrap_or(true) {
-            // Client is going through a proxy
-            attributes.insert(NET_SOCK_PEER_ADDR, remote_ip.to_string().into());
+
+    if let Some(path_query) = uri.path_and_query() {
+        if path_query.path() != "/" {
+            attributes.insert(URL_PATH, path_query.path().to_string().into());
+        }
+        if let Some(query) = path_query.query() {
+            attributes.insert(URL_QUERY, query.to_string().into());
         }
     }
-    if let Some(port) = req
-        .uri()
-        .port_u16()
-        .filter(|port| *port != 80 || *port != 443)
+
+    attributes.insert(
+        URL_SCHEME,
+        uri.scheme().unwrap_or(&Scheme::HTTP).to_string().into(),
+    );
+
+    if let Some(content_length) = req
+        .content_length()
+        .and_then(|len| i64::try_from(len).ok())
+        .filter(|len| *len > 0)
     {
-        attributes.insert(NET_HOST_PORT, port.to_string().into());
+        attributes.insert(HTTP_REQUEST_BODY_SIZE, content_length.into());
+    }
+
+    if let Some(user_agent) = req
+        .header_typed::<UserAgent>()
+        .as_ref()
+        .map(UserAgent::as_str)
+    {
+        attributes.insert(USER_AGENT_ORIGINAL, user_agent.to_string().into());
     }
 
     attributes

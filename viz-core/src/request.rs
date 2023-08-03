@@ -1,8 +1,10 @@
 use std::{mem::replace, sync::Arc};
 
+use headers::HeaderMapExt;
+
 use crate::{
     async_trait, header,
-    types::{PayloadError, RouteInfo},
+    types::{PayloadError, RealIp, RouteInfo},
     Body, Bytes, FromRequest, Request, Result,
 };
 
@@ -55,6 +57,11 @@ pub trait RequestExt: Sized {
     where
         K: header::AsHeaderName,
         T: std::str::FromStr;
+
+    /// Get a header with the specified type.
+    fn header_typed<H>(&self) -> Option<H>
+    where
+        H: headers::Header;
 
     /// Get the size of this request's body.
     fn content_length(&self) -> Option<u64>;
@@ -155,6 +162,9 @@ pub trait RequestExt: Sized {
 
     /// Get remote addr.
     fn remote_addr(&self) -> Option<&std::net::SocketAddr>;
+
+    /// Get realip.
+    fn realip(&self) -> Option<RealIp>;
 }
 
 #[async_trait]
@@ -189,6 +199,13 @@ impl RequestExt for Request<Body> {
             .get(key)
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.parse::<T>().ok())
+    }
+
+    fn header_typed<H>(&self) -> Option<H>
+    where
+        H: headers::Header,
+    {
+        self.headers().typed_get()
     }
 
     fn content_length(&self) -> Option<u64> {
@@ -363,5 +380,9 @@ impl RequestExt for Request<Body> {
 
     fn route_info(&self) -> &Arc<RouteInfo> {
         self.extensions().get().expect("should get current route")
+    }
+
+    fn realip(&self) -> Option<RealIp> {
+        RealIp::parse(self)
     }
 }

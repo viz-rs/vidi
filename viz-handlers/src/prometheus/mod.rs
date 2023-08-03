@@ -3,7 +3,7 @@
 //! [OTEL]: https://docs.rs/opentelemetry-prometheus
 
 use opentelemetry::{global::handle_error, metrics::MetricsError};
-use opentelemetry_prometheus::{Encoder, PrometheusExporter, TextEncoder};
+use prometheus::{Encoder, TextEncoder};
 
 use viz_core::{
     async_trait,
@@ -13,19 +13,20 @@ use viz_core::{
 
 #[doc(inline)]
 pub use opentelemetry_prometheus::ExporterBuilder;
+#[doc(inline)]
+pub use prometheus::Registry;
 
-/// The [`PrometheusExporter`] wrapper.
-///
-/// [`PrometheusExporter`]: opentelemetry_prometheus::PrometheusExporter
+/// The [`Registry`] wrapper.
 #[derive(Clone, Debug)]
 pub struct Prometheus {
-    exporter: PrometheusExporter,
+    registry: Registry,
 }
 
 impl Prometheus {
     /// Creates a new Prometheus.
-    pub fn new(exporter: PrometheusExporter) -> Self {
-        Self { exporter }
+    #[must_use]
+    pub fn new(registry: Registry) -> Self {
+        Self { registry }
     }
 }
 
@@ -34,14 +35,14 @@ impl Handler<Request> for Prometheus {
     type Output = Result<Response>;
 
     async fn call(&self, _: Request) -> Self::Output {
-        let metric_families = self.exporter.registry().gather();
+        let metric_families = self.registry.gather();
         let encoder = TextEncoder::new();
         let mut body = Vec::new();
 
         if let Err(err) = encoder.encode(&metric_families, &mut body) {
             let text = err.to_string();
             handle_error(MetricsError::Other(text.clone()));
-            Err((StatusCode::INTERNAL_SERVER_ERROR, text).into_error())?
+            Err((StatusCode::INTERNAL_SERVER_ERROR, text).into_error())?;
         }
 
         let mut res = Response::new(body.into());
