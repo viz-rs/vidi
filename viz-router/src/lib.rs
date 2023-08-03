@@ -3,6 +3,7 @@
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
 #![forbid(unsafe_code)]
+#![allow(clippy::needless_pass_by_value)]
 #![warn(
     missing_debug_implementations,
     missing_docs,

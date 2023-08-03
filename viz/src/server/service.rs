@@ -21,6 +21,7 @@ pub struct ServiceMaker {
 
 impl ServiceMaker {
     /// Creates a service from router
+    #[must_use]
     pub fn new(router: Router) -> Self {
         Self {
             tree: Arc::new(router.into()),

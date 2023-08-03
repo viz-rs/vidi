@@ -1,3 +1,6 @@
+#![allow(clippy::unused_async)]
+#![allow(clippy::unnecessary_wraps)]
+
 use viz::{async_trait, Error, FromRequest, Handler, IntoResponse, Request, Result, StatusCode};
 use viz_macros::handler;
 
