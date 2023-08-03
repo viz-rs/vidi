@@ -1,3 +1,9 @@
+#![allow(dead_code)]
+#![allow(clippy::unused_async)]
+#![allow(clippy::similar_names)]
+#![allow(clippy::too_many_lines)]
+#![allow(clippy::wildcard_imports)]
+
 use std::marker::PhantomData;
 use viz_core::*;
 
@@ -34,7 +40,7 @@ async fn main() -> Result<()> {
     }
 
     #[async_trait]
-    impl<H, F, I, O, R, E> Handler<I> for CatchError<H, F, E, R>
+    impl<H, F, I, O, R, E> Handler<I> for CatchError<H, F, R, E>
     where
         I: Send + 'static,
         O: IntoResponse + Send,
@@ -322,7 +328,7 @@ async fn main() -> Result<()> {
             .is_ok());
 
         let th = MyAround {
-            name: "".to_string(),
+            name: String::new(),
         };
 
         // let rha = Responder::new(a);

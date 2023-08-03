@@ -45,7 +45,7 @@ impl Directory {
             let ext = path
                 .extension()
                 .and_then(|e| e.to_str())
-                .map(|e| e.to_string());
+                .map(ToString::to_string);
 
             let mut url = base.trim_matches('/').to_owned();
             url.push('/');
@@ -78,7 +78,7 @@ impl Directory {
             if let (Some(u), Some(n)) =
                 (a.join("").to_str(), a.file_name().and_then(|n| n.to_str()))
             {
-                paths.push((u.to_string(), n.to_owned() + "/"))
+                paths.push((u.to_string(), n.to_owned() + "/"));
             }
         }
 

@@ -33,12 +33,15 @@ pub struct File {
 
 impl File {
     /// Serve a new file by the specified path.
+    ///
+    /// # Panics
+    ///
+    /// If the path is not exists.
+    #[must_use]
     pub fn new(path: impl Into<PathBuf>) -> Self {
         let path = path.into();
 
-        if !path.exists() {
-            panic!("{} not found", path.to_string_lossy());
-        }
+        assert!(path.exists(), "{} not found", path.to_string_lossy());
 
         Self { path }
     }
@@ -49,7 +52,7 @@ impl Handler<Request> for File {
     type Output = Result<Response>;
 
     async fn call(&self, req: Request) -> Self::Output {
-        serve(&self.path, req.headers()).await
+        serve(&self.path, req.headers())
     }
 }
 
@@ -63,12 +66,15 @@ pub struct Dir {
 
 impl Dir {
     /// Serve a new directory by the specified path.
+    ///
+    /// # Panics
+    ///
+    /// If the path is not exists.
+    #[must_use]
     pub fn new(path: impl Into<PathBuf>) -> Self {
         let path = path.into();
 
-        if !path.exists() {
-            panic!("{} not found", path.to_string_lossy());
-        }
+        assert!(path.exists(), "{} not found", path.to_string_lossy());
 
         Self {
             path,
@@ -78,12 +84,14 @@ impl Dir {
     }
 
     /// Enable directory listing, `disabled` by default.
+    #[must_use]
     pub fn listing(mut self) -> Self {
         self.listing = true;
         self
     }
 
     /// Exclude paths from the directory listing.
+    #[must_use]
     pub fn unlisted(mut self, unlisted: Vec<&'static str>) -> Self {
         self.unlisted.replace(unlisted);
         self
@@ -115,12 +123,12 @@ impl Handler<Request> for Dir {
         }
 
         if path.is_file() {
-            return serve(&path, req.headers()).await;
+            return serve(&path, req.headers());
         }
 
         let index = path.join("index.html");
         if index.exists() {
-            return serve(&index, req.headers()).await;
+            return serve(&index, req.headers());
         }
 
         if self.listing {
@@ -159,7 +167,7 @@ fn extract_etag(mtime: &SystemTime, size: u64) -> Option<ETag> {
 }
 
 #[inline]
-async fn serve(path: &Path, headers: &HeaderMap) -> Result<Response> {
+fn serve(path: &Path, headers: &HeaderMap) -> Result<Response> {
     let mut file = std::fs::File::open(path).map_err(Error::Io)?;
     let metadata = file
         .metadata()

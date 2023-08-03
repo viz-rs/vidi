@@ -214,7 +214,11 @@ impl RequestExt for Request<Body> {
 
     #[cfg(feature = "limits")]
     async fn bytes_with(&mut self, name: &str, max: u64) -> Result<Bytes, PayloadError> {
-        let limit = self.limits().get(name).unwrap_or(max) as usize;
+        let limit = self
+            .limits()
+            .get(name)
+            .and_then(|value| usize::try_from(value).ok())
+            .unwrap_or(usize::try_from(max).ok().min(Some(usize::MIN)).unwrap());
         let body = Limited::new(replace(self.body_mut(), Body::empty()), limit);
         hyper::body::to_bytes(body).await.map_err(|err| {
             if err.downcast_ref::<LengthLimitError>().is_some() {
