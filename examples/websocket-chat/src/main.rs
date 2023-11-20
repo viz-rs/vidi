@@ -6,7 +6,7 @@ use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use tokio::sync::broadcast::{channel, Sender};
 use viz::{
-    get, serve,
+    get, serve_with_upgrades,
     types::{Message, Params, State, WebSocket},
     HandlerExt, IntoHandler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
     Router, Tree,
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         let (stream, addr) = listener.accept().await?;
         let tree = tree.clone();
         tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
+            if let Err(err) = serve_with_upgrades(stream, tree, Some(addr)).await {
                 eprintln!("Error while serving HTTP connection: {err}");
             }
         });
