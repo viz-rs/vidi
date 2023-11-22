@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 #![allow(clippy::unused_async)]
 #![allow(clippy::similar_names)]
-#![allow(clippy::too_many_lines)]
 #![allow(clippy::wildcard_imports)]
 
 use http_body_util::Full;

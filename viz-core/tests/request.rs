@@ -71,7 +71,6 @@ fn request_ext() -> Result<()> {
     Ok(())
 }
 
-#[allow(clippy::too_many_lines)]
 #[tokio::test]
 async fn request_body() -> Result<()> {
     use futures_util::stream::TryStreamExt;

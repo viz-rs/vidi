@@ -124,3 +124,4 @@ missing_docs = "warn"
 all = "deny"
 pedantic = "deny"
 module_name_repetitions = { level = "allow", priority = 1 }
+too_many_lines = { level = "allow", priority = 1 }

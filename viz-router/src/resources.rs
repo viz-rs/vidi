@@ -254,7 +254,6 @@ impl IntoIterator for Resources {
 
 #[cfg(test)]
 #[allow(clippy::unused_async)]
-#[allow(clippy::too_many_lines)]
 mod tests {
     use super::Kind;
     use crate::{get, Resources};

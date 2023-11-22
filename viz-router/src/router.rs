@@ -182,7 +182,6 @@ impl Router {
 
 #[cfg(test)]
 #[allow(clippy::unused_async)]
-#[allow(clippy::too_many_lines)]
 mod tests {
     use http_body_util::{BodyExt, Full};
     use std::sync::Arc;

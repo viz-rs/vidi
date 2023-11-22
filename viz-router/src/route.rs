@@ -212,7 +212,6 @@ impl fmt::Debug for Route {
 #[cfg(test)]
 #[allow(dead_code)]
 #[allow(clippy::unused_async)]
-#[allow(clippy::too_many_lines)]
 mod tests {
     use super::Route;
     use http_body_util::BodyExt;
