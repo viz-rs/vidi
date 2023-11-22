@@ -30,3 +30,6 @@ serde_derive.workspace = true
 hyper.workspace = true
 http-body-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[lints]
+workspace = true

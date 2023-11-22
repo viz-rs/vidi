@@ -105,3 +105,6 @@ tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true
