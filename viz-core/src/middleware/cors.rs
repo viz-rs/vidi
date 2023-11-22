@@ -24,7 +24,6 @@ pub struct Config {
     allow_headers: HashSet<HeaderName>,
     allow_origins: HashSet<HeaderValue>,
     expose_headers: HashSet<HeaderName>,
-    #[allow(clippy::type_complexity)]
     origin_verify: Option<Arc<dyn Fn(&HeaderValue) -> bool + Send + Sync>>,
 }
 
@@ -118,7 +117,6 @@ impl Config {
     }
 
     /// A function to verify the origin. If the function returns false, the request will be rejected.
-    #[allow(clippy::type_complexity)]
     #[must_use]
     pub fn origin_verify(
         mut self,
