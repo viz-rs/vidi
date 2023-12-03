@@ -4,8 +4,19 @@ version = "0.1.0"
 edition.workspace = true
 publish = false
 
+[features]
+tracing = [
+  "dep:hyper",
+  "dep:tracing",
+  "dep:tracing-subscriber"
+]
+
 [dependencies]
 viz = { workspace = true, features = ["embed"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 rust-embed.workspace = true
+
+hyper = { workspace = true, features = ["tracing"], optional = true }
+tracing = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"], optional = true }
