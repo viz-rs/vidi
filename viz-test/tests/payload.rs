@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use viz_core::{types, Error, Request, RequestExt, Response, ResponseExt, Result};
+use viz::{types, Error, Request, RequestExt, Response, ResponseExt, Result};
 
 #[tokio::test]
 async fn payload() -> Result<()> {

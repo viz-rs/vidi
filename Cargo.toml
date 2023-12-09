@@ -11,6 +11,7 @@ members = [
   "examples/unix-socket",
   "examples/static-files/embed",
   "examples/static-files/serve",
+  "examples/static-files/include-dir",
   "examples/limits",
   "examples/forms/form",
   "examples/forms/multipart",
@@ -28,23 +29,25 @@ members = [
   "examples/templates/*",
   "examples/tracing",
   "examples/graceful-shutdown",
+  "examples/databases/*",
 ]
 resolver = "2"
 
 [workspace.package]
-version = "0.5.0-rc.2"
+version = "0.5.1"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
 edition = "2021"
 homepage = "https://viz.rs"
 documentation = "https://docs.rs/viz"
 repository = "https://github.com/viz-rs/viz"
 license = "MIT"
+rust-version = "1.63"                           # follows `tokio` and `hyper`
 
 [workspace.dependencies]
-viz = { version = "0.5.0-rc.2", path = "viz" }
-viz-core = { version = "0.5.0-rc.2", path = "viz-core" }
-viz-router = { version = "0.5.0-rc.2", path = "viz-router" }
-viz-handlers = { version = "0.5.0-rc.2", path = "viz-handlers", default-features = false }
+viz = { version = "0.5.1", path = "viz" }
+viz-core = { version = "0.5.1", path = "viz-core" }
+viz-router = { version = "0.5.1", path = "viz-router" }
+viz-handlers = { version = "0.5.1", path = "viz-handlers", default-features = false }
 viz-macros = { version = "0.1", path = "viz-macros" }
 viz-test = { version = "0.1", path = "viz-test" }
 
@@ -61,8 +64,7 @@ thiserror = "1.0"
 path-tree = "0.7"
 
 # http
-# TODO: wait headers-v1.0
-headers = { git = "https://github.com/hyperium/headers.git", rev = "4400aa9" }
+headers = "0.4"
 http = "1"
 http-body = "1"
 http-body-util = "0.1"
@@ -70,8 +72,8 @@ hyper = { version = "1", features = ["server"] }
 hyper-util = { version = "0.1", features = ["server-auto", "tokio"] }
 
 futures-util = "0.3"
-tokio = { version = "1.33", features = ["net"] }
-tokio-tungstenite = "0.20"
+tokio = { version = "1.35", features = ["net"] }
+tokio-tungstenite = "0.21"
 tokio-stream = "0.1"
 tokio-util = "0.7"
 rustls-pemfile = "1.0"
@@ -110,3 +112,19 @@ split-debuginfo = "unpacked"
 [profile.dev.package."*"]
 opt-level = 3
 debug = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+rust_2018_idioms = "warn"
+single_use_lifetimes = "warn"
+non_ascii_idents = "warn"
+unreachable_pub = "warn"
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = "deny"
+pedantic = "deny"
+module_name_repetitions = { level = "allow", priority = 1 }
+too_many_lines = { level = "allow", priority = 1 }
+type_complexity = { level = "allow", priority = 1 }

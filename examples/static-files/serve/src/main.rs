@@ -15,12 +15,16 @@ async fn main() -> Result<()> {
     let listener = TcpListener::bind(addr).await?;
     println!("listening on http://{addr}");
 
+    // in `viz` directory
     let dir = env::current_dir().unwrap();
 
     let app = Router::new()
         .get("/", index)
         .get("/cargo.toml", serve::File::new(dir.join("Cargo.toml")))
-        .get("/examples/*", serve::Dir::new(dir).listing())
+        .get(
+            "/examples/*",
+            serve::Dir::new(dir.join("examples")).listing(),
+        )
         .any("/*", |_| async { Ok(Response::text("Welcome!")) });
     let tree = Arc::new(Tree::from(app));
 

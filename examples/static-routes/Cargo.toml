@@ -9,4 +9,4 @@ viz.workspace = true
 
 hyper.workspace = true 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-once_cell = "1.17"
+once_cell = "1.19"

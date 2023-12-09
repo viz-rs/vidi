@@ -196,9 +196,10 @@ fn serve(path: &Path, headers: &HeaderMap) -> Result<Response> {
         last_modified.replace(LastModified::from(modified));
     }
 
+    // See https://github.com/hyperium/headers/pull/155
     if let Some((start, end)) = headers
         .typed_get::<Range>()
-        .and_then(|range| range.iter().next())
+        .and_then(|range| range.satisfiable_ranges(100).next())
     {
         let start = match start {
             Bound::Included(n) => n,

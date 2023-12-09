@@ -1,11 +1,10 @@
 use http_body_util::{combinators::BoxBody, BodyExt, Full};
-use viz_core::{Bytes, Error, IncomingBody, OutgoingBody, Request, RequestExt, Result};
+use viz::{Bytes, Error, IncomingBody, OutgoingBody, Request, RequestExt, Result};
 
 #[tokio::test]
 async fn incoming_body() -> Result<()> {
     use bytes::Buf;
-    use viz::Router;
-    use viz_core::Body;
+    use viz::{Body, Router};
     use viz_test::TestServer;
 
     let mut empty = IncomingBody::Empty;
@@ -135,7 +134,7 @@ async fn incoming_stream() -> Result<()> {
 
 #[tokio::test]
 async fn outgoing_body() -> Result<()> {
-    use viz_core::Body;
+    use viz::Body;
 
     let mut empty = OutgoingBody::<Bytes>::Empty;
     assert!(empty.is_end_stream());

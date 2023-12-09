@@ -24,7 +24,6 @@ pub struct Config {
     allow_headers: HashSet<HeaderName>,
     allow_origins: HashSet<HeaderValue>,
     expose_headers: HashSet<HeaderName>,
-    #[allow(clippy::type_complexity)]
     origin_verify: Option<Arc<dyn Fn(&HeaderValue) -> bool + Send + Sync>>,
 }
 
@@ -118,7 +117,6 @@ impl Config {
     }
 
     /// A function to verify the origin. If the function returns false, the request will be rejected.
-    #[allow(clippy::type_complexity)]
     #[must_use]
     pub fn origin_verify(
         mut self,
@@ -210,9 +208,8 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, req: Request) -> Self::Output {
-        let origin = match req.header(ORIGIN).filter(is_not_empty) {
-            Some(origin) => origin,
-            None => return self.h.call(req).await.map(IntoResponse::into_response),
+        let Some(origin) = req.header(ORIGIN).filter(is_not_empty) else {
+            return self.h.call(req).await.map(IntoResponse::into_response);
         };
 
         if !self.config.allow_origins.contains(&origin)

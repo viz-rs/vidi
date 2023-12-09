@@ -4,14 +4,6 @@
 
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
-#![allow(clippy::module_name_repetitions)]
-#![forbid(unsafe_code)]
-#![warn(
-    missing_debug_implementations,
-    missing_docs,
-    rust_2018_idioms,
-    unreachable_pub
-)]
 #![doc(test(
     no_crate_inject,
     attr(

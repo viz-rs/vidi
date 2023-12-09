@@ -32,7 +32,7 @@ Here you can find a lot of small crabs 🦀.
 
 ## Usage
 
-### Run it
+### Run it in `viz` directory
 
 ```console
 $ cargo run --bin hello-world -- --nocapture

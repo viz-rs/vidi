@@ -9,5 +9,5 @@ viz.workspace = true
 
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
 
-markup = "0.14"
+markup = "0.15"
 v_htmlescape = "0.15"

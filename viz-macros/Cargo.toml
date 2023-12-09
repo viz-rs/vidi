@@ -6,6 +6,7 @@ license.workspace = true
 authors.workspace = true
 homepage.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 readme = "README.md"
 documentation = "https://docs.rs/viz-macros"
 description = "The proc macros for Viz"
@@ -28,3 +29,6 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true

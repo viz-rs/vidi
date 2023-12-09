@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Viz SeaOrm Todo Demo</title>
+</head>
+
+<body>
+    <div class="flex justify-center items-center w-screen h-screen bg-gray-100">
+        <div class="flex flex-col gap-4 px-8 py-4 bg-white rounded-2xl drop-shadow-xl">
+            <div class="flex justify-between gap-2 items-center">
+                <input id="input" maxlength="20" placeholder="Enter task..." type="text"
+                    class="rounded-full bg-gray-100 px-4 py-2 outline-0 border-0">
+                <button
+                    class="flex text-xl font-semibold w-10 h-10 justify-center items-center rounded-full cursor-pointer bg-green-300"
+                    id="submit">+</button>
+            </div>
+
+            <div id="todo-container" class="flex flex-col gap-2">
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+
+    var checked_tpl = `
+            <div
+                class="flex gap-2 bg-green-400 rounded-xl px-4 py-2 w-full cursor-pointer select-none transition-all">
+                    <div class="flex justify-center items-center w-6 h-6 rounded-md outline outline-1 outline-black">
+                        ✔
+                    </div>
+                </div>
+    `;
+    var unchecked_tpl = `
+             <div
+                    class="flex gap-2 bg-red-400 rounded-xl px-4 py-2 w-full cursor-pointer select-none transition-all">
+                    <div class="flex justify-center items-center w-6 h-6 rounded-md outline outline-1 outline-black">
+                        ❌
+                    </div>
+                </div>
+    `
+
+    var template = {
+        update: (todos) => {
+            var todo_container = document.getElementById("todo-container")
+            todo_container.innerHTML = "";
+            todos.forEach(todo => {
+                if (todo['completed']) {
+                    template.create_div(todo, checked_tpl, todo_container);
+                } else {
+                    template.create_div(todo, unchecked_tpl, todo_container);
+
+                }
+            });
+        },
+        create_div: (todo, html, parent) => {
+            var div = document.createElement("div");
+            div.setAttribute("id", todo['id']);
+            div.innerHTML = html;
+            parent.appendChild(div);
+            var child = document.createElement("div")
+            child.classList = "flex-1"
+            child.innerHTML = `
+                        ${todo['text']}
+                    `
+
+            var close_div = document.createElement("div");
+            close_div.classList = "text-xs rounded-full bg-gray-100 p-1"
+            close_div.innerHTML = "❌";
+            close_div.addEventListener("click", (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                service.delete(todo['id']);
+
+            })
+            var new_el = document.getElementById(todo['id']);
+            new_el.getElementsByTagName("div")[0]
+                .appendChild(child);
+
+            new_el.getElementsByTagName("div")[0].appendChild(close_div)
+            new_el.addEventListener("click", () => {
+                todo['completed'] = !todo['completed'];
+                service.update(todo);
+            })
+        }
+
+    }
+
+    var service = {
+        load: () => {
+            fetch("/todos")
+                .then(response => response.json())
+                .then(json => {
+                    template.update(json);
+                })
+                .catch(err => console.log('Request Failed', err));
+        },
+        create: (task) => {
+            fetch("/todos", { method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify(task) })
+                .then(response => response.json())
+                .then(json => {
+                    service.load();
+                })
+                .catch(err => console.log('Request Failed', err));
+        },
+        update: (task) => {
+            fetch(`/todos/${task['id']}`, { method: "PUT", headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify(task) })
+                .then(response => response.json())
+                .then(json => {
+                    service.load();
+                })
+                .catch(err => console.log('Request Failed', err));
+        },
+        delete: (id) => {
+            fetch(`/todos/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json; charset=utf-8" } })
+                .then(response => response.json())
+                .then(json => {
+                    service.load();
+                })
+                .catch(err => console.log('Request Failed', err));
+        }
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+        service.load();
+        var input = document.getElementById("input");
+
+        var create_task = () => {
+            var text = input.value;
+            if (!text) {
+                alert("task is empty");
+                return;
+
+            }
+            service.create({ "text": text, "completed": false });
+            input.value = ""
+        }
+        input.addEventListener("keypress", () => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                create_task();
+            }
+        })
+
+        document.getElementById("submit").addEventListener("click", () => {
+            create_task()
+
+        })
+    })
+</script>
+
+</html>

@@ -514,13 +514,6 @@
 
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
-#![forbid(unsafe_code)]
-#![warn(
-    missing_debug_implementations,
-    missing_docs,
-    rust_2018_idioms,
-    unreachable_pub
-)]
 #![doc(test(
     no_crate_inject,
     attr(
@@ -538,7 +531,7 @@ pub use responder::Responder;
 #[cfg(any(feature = "http1", feature = "http2"))]
 mod serve;
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub use serve::serve;
+pub use serve::{serve, serve_with_upgrades};
 
 /// TLS
 pub mod tls;

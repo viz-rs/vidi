@@ -76,9 +76,8 @@ impl WebSocket {
         let on_upgrade = self.on_upgrade.take().expect("missing OnUpgrade");
 
         tokio::task::spawn(async move {
-            let upgraded = match on_upgrade.await {
-                Ok(upgraded) => upgraded,
-                Err(_) => return,
+            let Ok(upgraded) = on_upgrade.await else {
+                return;
             };
 
             let socket =

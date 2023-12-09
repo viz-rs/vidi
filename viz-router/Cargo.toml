@@ -6,6 +6,7 @@ license.workspace = true
 authors.workspace = true
 homepage.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 readme = "README.md"
 documentation = "https://docs.rs/viz-router"
 description = "The router for Viz"
@@ -30,3 +31,6 @@ serde_derive.workspace = true
 hyper.workspace = true
 http-body-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[lints]
+workspace = true

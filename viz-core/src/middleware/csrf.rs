@@ -97,7 +97,7 @@ where
                     Some(raw_token) => base64::engine::general_purpose::URL_SAFE_NO_PAD
                         .decode(raw_token)
                         .ok()
-                        .filter(is_64)
+                        .filter(|b| b.len() == 64)
                         .map(unmask::<32>)
                         .map(Option::Some)
                         .ok_or_else(|| {
@@ -252,10 +252,13 @@ pub fn generate(secret: &[u8], otp: Vec<u8>) -> Vec<u8> {
 /// Verifys Token with a secret
 #[must_use]
 pub fn verify(secret: &[u8], raw_token: String) -> bool {
-    if let Ok(token) = base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(raw_token) {
-        return is_64(&token) && secret == unmask::<32>(token);
-    }
-    false
+    base64::engine::general_purpose::URL_SAFE_NO_PAD
+        .decode(raw_token)
+        .ok()
+        .filter(|b| b.len() == 64)
+        .map(unmask::<32>)
+        .filter(|t| t == secret)
+        .is_some()
 }
 
 /// Retures masked token
@@ -280,10 +283,6 @@ fn unmask<const N: usize>(mut token: Vec<u8>) -> Vec<u8> {
         .enumerate()
         .for_each(|(i, t)| *t ^= token[i]);
     secret
-}
-
-fn is_64(buf: &Vec<u8>) -> bool {
-    buf.len() == 64
 }
 
 #[cfg(test)]

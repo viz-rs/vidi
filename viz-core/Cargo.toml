@@ -6,6 +6,7 @@ license.workspace = true
 authors.workspace = true
 homepage.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 readme = "README.md"
 documentation = "https://docs.rs/viz-core"
 description = "The core traits and types in for Viz"
@@ -98,10 +99,11 @@ tokio-stream = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true }
 
 [dev-dependencies]
-viz = { workspace = true, features = ["session"] }
-viz-test.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true

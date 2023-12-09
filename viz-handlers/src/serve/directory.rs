@@ -6,7 +6,7 @@ use std::{
     ffi::OsStr,
     fmt::{Display, Formatter, Result},
     fs::read_dir,
-    path::PathBuf,
+    path::{Path, PathBuf},
     str::FromStr,
     string::ToString,
 };
@@ -24,7 +24,7 @@ impl Directory {
     pub(crate) fn new(
         base: &str,
         prev: bool,
-        root: &std::path::Path,
+        root: &Path,
         unlisted: &Option<Vec<&'static str>>,
     ) -> Option<Directory> {
         let mut entries = read_dir(root).ok()?;
@@ -66,7 +66,11 @@ impl Directory {
                 0,
                 (
                     parent.join("").to_str()?.strip_prefix('/')?.to_string(),
-                    parent.file_name().and_then(OsStr::to_str)?.to_string(),
+                    parent
+                        .file_name()
+                        .and_then(OsStr::to_str)
+                        .unwrap_or("")
+                        .to_string(),
                     false,
                     None,
                     "..".to_string(),

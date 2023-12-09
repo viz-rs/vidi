@@ -6,16 +6,24 @@ license.workspace = true
 authors.workspace = true
 homepage.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 readme = "README.md"
 documentation = "https://docs.rs/viz-test"
 description = "The core traits and types in for Viz"
 keywords = ["async", "framework", "http", "service", "web"]
 categories = ["asynchronous", "network-programming", "web-programming"]
-publish = false
 
 [dependencies]
 viz.workspace = true
 
+bytes.workspace = true
+futures-util.workspace = true
+headers.workspace = true
+http-body.workspace = true
+http-body-util.workspace = true
+hyper.workspace = true
+mime.workspace = true
+serde.workspace = true
 sessions = { version = "0.5", features = ["memory"] }
 nano-id = "0.3"
 

@@ -37,10 +37,6 @@
      alt="Discord"></a>
 </div>
 
-> **Note**: viz's [main](https://github.com/viz-rs/viz) branch is
-> currently preparing breaking changes. For the most recently *released* code,
-> look to the [0.4.x branch](https://github.com/viz-rs/viz/tree/0.4.x).
-
 ## Features
 
 - **Safety** `#![forbid(unsafe_code)]`
