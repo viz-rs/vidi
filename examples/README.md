@@ -31,6 +31,7 @@ Here you can find a lot of small crabs 🦀.
   * [maud](templates/maud)
   * [minijinja](templates/minijinja)
 * [Tracing aka logging](tracing)
+* [htmlx](htmlx)
 
 ## Usage
 
