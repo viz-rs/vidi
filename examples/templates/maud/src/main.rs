@@ -3,9 +3,10 @@
 #![allow(clippy::must_use_candidate)]
 #![allow(clippy::inherent_to_string_shadow_display)]
 
+use maud::{html, PreEscaped, DOCTYPE};
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use viz::{serve, BytesMut, Request, Response, ResponseExt, Result, Router, Tree};
+use viz::{serve, Request, Response, ResponseExt, Result, Router, Tree};
 
 pub struct Todo<'a> {
     id: u64,
@@ -23,10 +24,26 @@ async fn index(_: Request) -> Result<Response> {
             content: "Learn English",
         },
     ];
-    let mut buf = BytesMut::with_capacity(512);
-    buf.extend(TodosTemplate { items }.to_string().as_bytes());
 
-    Ok(Response::html(buf.freeze()))
+    let buf = html! {
+        (DOCTYPE)
+        head {
+            title { "Todos" }
+        }
+        body {
+            table {
+                tr { th { "ID" } th { "Content" } }
+                @for item in &items {
+                    tr {
+                        td { (item.id) }
+                        td { (PreEscaped(item.content.to_string())) }
+                    }
+                }
+            }
+        }
+    };
+
+    Ok(Response::html(buf.into_string()))
 }
 
 #[tokio::main]
@@ -46,27 +63,5 @@ async fn main() -> Result<()> {
                 eprintln!("Error while serving HTTP connection: {err}");
             }
         });
-    }
-}
-
-markup::define! {
-    TodosTemplate<'a>(items: Vec<Todo<'a>>) {
-        {markup::doctype()}
-        html {
-            head {
-                title { "Todos" }
-            }
-            body {
-                table {
-                    tr { th { "ID" } th { "Content" } }
-                    @for item in items {
-                        tr {
-                            td { {item.id} }
-                            td { {markup::raw(v_htmlescape::escape(item.content).to_string())} }
-                        }
-                    }
-                }
-            }
-        }
     }
 }

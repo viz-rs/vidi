@@ -1,0 +1,11 @@
+[package]
+name = "template-maud"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[dependencies]
+viz.workspace = true
+
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+maud = "0.25"
