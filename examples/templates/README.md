@@ -5,6 +5,7 @@
 ## Examples
 
 * [askama](askama)
+* [handlebars](../htmlx)
 * [markup](markup)
 * [maud](maud)
 * [minijinja](minijinja)

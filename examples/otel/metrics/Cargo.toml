@@ -7,6 +7,6 @@ publish = false
 [dependencies]
 viz = { workspace = true, features = ["otel-metrics", "otel-prometheus"] }
 
-tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 opentelemetry = { workspace = true, features = ["metrics"]}
 opentelemetry_sdk = { workspace = true, features = ["metrics"] }

@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = [
   "viz",
   "viz-core",
@@ -30,8 +31,8 @@ members = [
   "examples/tracing",
   "examples/graceful-shutdown",
   "examples/databases/*",
+  "examples/htmlx",
 ]
-resolver = "2"
 
 [workspace.package]
 version = "0.5.1"

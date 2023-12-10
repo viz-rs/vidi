@@ -7,4 +7,4 @@ publish = false
 [dependencies]
 viz.workspace = true
 
-tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

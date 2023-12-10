@@ -9,7 +9,7 @@ use tera::{Context, Tera};
 use tokio::net::TcpListener;
 use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router, Tree};
 
-static TERA: Lazy<Tera> =
+static TPLS: Lazy<Tera> =
     Lazy::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());
 
 #[derive(Serialize)]
@@ -36,7 +36,7 @@ async fn index(_: Request) -> Result<Response> {
     );
     let mut buf = BytesMut::with_capacity(512);
     buf.extend(
-        TERA.render("index.html", &ctx)
+        TPLS.render("index.html", &ctx)
             .map_err(Error::normal)?
             .as_bytes(),
     );

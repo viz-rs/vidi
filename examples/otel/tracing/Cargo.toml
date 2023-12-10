@@ -7,7 +7,7 @@ publish = false
 [dependencies]
 viz = { workspace = true, features = ["otel-tracing"] }
 
-tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 opentelemetry.workspace = true
 opentelemetry_sdk = { workspace = true, features = ["trace", "rt-tokio-current-thread"] }
 opentelemetry-jaeger = { version = "0.20", features = ["rt-tokio-current-thread"]}

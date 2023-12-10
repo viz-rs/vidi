@@ -9,7 +9,7 @@ use serde::Serialize;
 use tokio::net::TcpListener;
 use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router, Tree};
 
-static MINIJINJA: Lazy<Environment> = Lazy::new(|| {
+static TPLS: Lazy<Environment> = Lazy::new(|| {
     let mut env = Environment::new();
     env.set_loader(path_loader("examples/templates/minijinja/templates"));
     env
@@ -24,8 +24,7 @@ struct User<'a> {
 async fn index(_: Request) -> Result<Response> {
     let mut buf = BytesMut::with_capacity(512);
     buf.extend(
-        MINIJINJA
-            .get_template("index.html")
+        TPLS.get_template("index.html")
             .map_err(Error::normal)?
             .render(context! {
                 title => "Viz.rs",
