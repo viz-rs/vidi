@@ -1,7 +1,7 @@
 use crate::{
     header,
     types::{PayloadError, RealIp},
-    Body, BodyState, Bytes, FromRequest, Request, Result,
+    Body, BodyState, Bytes, FromRequest, Future, Request, Result,
 };
 use headers::HeaderMapExt;
 use http_body_util::{BodyExt, Collected};
@@ -35,8 +35,7 @@ use crate::types::Session;
 #[cfg(feature = "params")]
 use crate::types::{ParamsError, PathDeserializer, RouteInfo};
 
-/// The [`Request`] Extension.
-#[crate::async_trait]
+/// The [Request] Extension.
 pub trait RequestExt: private::Sealed + Sized {
     /// Get URL's schema of this request.
     fn schema(&self) -> Option<&http::uri::Scheme>;
@@ -75,7 +74,7 @@ pub trait RequestExt: private::Sealed + Sized {
     fn content_type(&self) -> Option<mime::Mime>;
 
     /// Extract the data from this request by the specified type.
-    async fn extract<T>(&mut self) -> Result<T, T::Error>
+    fn extract<T>(&mut self) -> impl Future<Output = Result<T, T::Error>> + Send
     where
         T: FromRequest;
 
@@ -90,25 +89,29 @@ pub trait RequestExt: private::Sealed + Sized {
     /// Return with a [Bytes][mdn] representation of the request body.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/arrayBuffer>
-    async fn bytes(&mut self) -> Result<Bytes, PayloadError>;
+    fn bytes(&mut self) -> impl Future<Output = Result<Bytes, PayloadError>> + Send;
 
     /// Return with a [Bytes][mdn]  by a limit representation of the request body.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/arrayBuffer>
     #[cfg(feature = "limits")]
-    async fn bytes_with(&mut self, limit: Option<u64>, max: u64) -> Result<Bytes, PayloadError>;
+    fn bytes_with(
+        &mut self,
+        limit: Option<u64>,
+        max: u64,
+    ) -> impl Future<Output = Result<Bytes, PayloadError>> + Send;
 
     /// Return with a [Text][mdn] representation of the request body.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/text>
-    async fn text(&mut self) -> Result<String, PayloadError>;
+    fn text(&mut self) -> impl Future<Output = Result<String, PayloadError>> + Send;
 
     /// Return with a `application/x-www-form-urlencoded` [FormData][mdn] by the specified type
     /// representation of the request body.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
     #[cfg(feature = "form")]
-    async fn form<T>(&mut self) -> Result<T, PayloadError>
+    fn form<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
@@ -116,7 +119,7 @@ pub trait RequestExt: private::Sealed + Sized {
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/json>
     #[cfg(feature = "json")]
-    async fn json<T>(&mut self) -> Result<T, PayloadError>
+    fn json<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
@@ -125,7 +128,7 @@ pub trait RequestExt: private::Sealed + Sized {
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
     #[cfg(feature = "multipart")]
-    async fn multipart(&mut self) -> Result<Multipart, PayloadError>;
+    fn multipart(&mut self) -> impl Future<Output = Result<Multipart, PayloadError>> + Send;
 
     /// Return a shared state by the specified type.
     #[cfg(feature = "state")]
@@ -193,7 +196,6 @@ pub trait RequestExt: private::Sealed + Sized {
     fn realip(&self) -> Option<RealIp>;
 }
 
-#[crate::async_trait]
 impl RequestExt for Request {
     fn schema(&self) -> Option<&http::uri::Scheme> {
         self.uri().scheme()

@@ -1,10 +1,9 @@
 use futures_util::Stream;
 use http_body_util::Full;
 
-use crate::{header, Body, BoxError, Bytes, Error, Response, Result, StatusCode};
+use crate::{header, Body, BoxError, Bytes, Error, Future, Response, Result, StatusCode};
 
 /// The [`Response`] Extension.
-#[crate::async_trait]
 pub trait ResponseExt: private::Sealed + Sized {
     /// Get the size of this response's body.
     fn content_length(&self) -> Option<u64>;
@@ -96,7 +95,7 @@ pub trait ResponseExt: private::Sealed + Sized {
 
     /// Downloads transfers the file from path as an attachment.
     #[cfg(feature = "fs")]
-    async fn download<T>(path: T, name: Option<&str>) -> Result<Self>
+    fn download<T>(path: T, name: Option<&str>) -> impl Future<Output = Result<Self>> + Send
     where
         T: AsRef<std::path::Path> + Send;
 
@@ -186,7 +185,6 @@ pub trait ResponseExt: private::Sealed + Sized {
     }
 }
 
-#[crate::async_trait]
 impl ResponseExt for Response {
     fn content_length(&self) -> Option<u64> {
         self.headers()
