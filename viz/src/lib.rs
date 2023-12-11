@@ -342,7 +342,7 @@
 //!
 //! ```
 //! # use std::{cmp, convert::Infallible};
-//! # use viz::{async_trait, FromRequest, Request, RequestExt, Result};
+//! # use viz::{FromRequest, Request, RequestExt, Result};
 //! struct Counter(u16);
 //!
 //! impl FromRequest for Counter {
