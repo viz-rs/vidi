@@ -345,7 +345,6 @@
 //! # use viz::{async_trait, FromRequest, Request, RequestExt, Result};
 //! struct Counter(u16);
 //!
-//! #[async_trait]
 //! impl FromRequest for Counter {
 //!     type Error = Infallible;
 //!     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {

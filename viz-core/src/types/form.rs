@@ -81,7 +81,6 @@ impl<T> Payload for Form<T> {
     }
 }
 
-#[crate::async_trait]
 impl<T> FromRequest for Form<T>
 where
     T: DeserializeOwned,

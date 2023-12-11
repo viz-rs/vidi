@@ -1,15 +1,12 @@
 #![allow(clippy::unused_async)]
 #![allow(clippy::unnecessary_wraps)]
 
-use viz_core::{
-    async_trait, Error, FromRequest, Handler, IntoResponse, Request, Result, StatusCode,
-};
+use viz_core::{Error, FromRequest, Handler, IntoResponse, Request, Result, StatusCode};
 use viz_macros::handler;
 
 #[derive(Debug)]
 struct Foo;
 
-#[async_trait]
 impl FromRequest for Foo {
     type Error = Error;
 
@@ -21,7 +18,6 @@ impl FromRequest for Foo {
 #[derive(Debug)]
 struct Bar;
 
-#[async_trait]
 impl FromRequest for Bar {
     type Error = Error;
 

@@ -64,7 +64,6 @@ where
     }
 }
 
-#[crate::async_trait]
 impl<T> FromRequest for Query<T>
 where
     T: DeserializeOwned,

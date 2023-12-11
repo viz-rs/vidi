@@ -22,7 +22,6 @@ async fn handler() -> Result<()> {
 
     struct MyU8(u8);
 
-    #[async_trait]
     impl FromRequest for MyU8 {
         type Error = std::convert::Infallible;
 
@@ -33,7 +32,6 @@ async fn handler() -> Result<()> {
 
     struct MyString(String);
 
-    #[async_trait]
     impl FromRequest for MyString {
         type Error = std::convert::Infallible;
 

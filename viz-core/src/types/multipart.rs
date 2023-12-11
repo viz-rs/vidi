@@ -26,7 +26,6 @@ impl<T> Payload for Multipart<T> {
     }
 }
 
-#[crate::async_trait]
 impl FromRequest for Multipart {
     type Error = PayloadError;
 

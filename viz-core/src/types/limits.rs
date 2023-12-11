@@ -81,7 +81,6 @@ impl Limits {
     }
 }
 
-#[crate::async_trait]
 impl FromRequest for Limits {
     type Error = Infallible;
 

@@ -36,7 +36,6 @@ pub enum Store {
 #[derive(Debug, Clone)]
 pub struct CsrfToken(pub String);
 
-#[crate::async_trait]
 impl FromRequest for CsrfToken {
     type Error = Error;
 

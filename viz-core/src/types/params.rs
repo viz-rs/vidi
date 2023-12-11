@@ -76,7 +76,6 @@ impl Params {
     }
 }
 
-#[crate::async_trait]
 impl<T> FromRequest for Params<T>
 where
     T: DeserializeOwned,

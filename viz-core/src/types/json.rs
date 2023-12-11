@@ -80,7 +80,6 @@ impl<T> Payload for Json<T> {
     }
 }
 
-#[crate::async_trait]
 impl<T> FromRequest for Json<T>
 where
     T: serde::de::DeserializeOwned,

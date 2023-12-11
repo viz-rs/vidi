@@ -170,7 +170,6 @@ impl fmt::Debug for Session {
     }
 }
 
-#[crate::async_trait]
 impl FromRequest for Session {
     type Error = Infallible;
 

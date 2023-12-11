@@ -98,7 +98,6 @@ impl WebSocket {
     }
 }
 
-#[crate::async_trait]
 impl FromRequest for WebSocket {
     type Error = WebSocketError;
 

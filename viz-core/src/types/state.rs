@@ -49,7 +49,6 @@ impl<T> DerefMut for State<T> {
     }
 }
 
-#[crate::async_trait]
 impl<T> FromRequest for State<T>
 where
     T: Clone + Send + Sync + 'static,

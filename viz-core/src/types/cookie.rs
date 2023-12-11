@@ -192,7 +192,6 @@ impl Cookies {
     }
 }
 
-#[crate::async_trait]
 impl FromRequest for Cookies {
     type Error = CookiesError;
 

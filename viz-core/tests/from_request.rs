@@ -2,7 +2,7 @@ use headers::HeaderValue;
 use viz_core::{
     header::{CONTENT_LENGTH, CONTENT_TYPE},
     types::{Form, Json, Limits, PayloadError, State, StateError},
-    Body, FromRequest, Request, RequestExt, Result,
+    Body, Request, RequestExt, Result,
 };
 
 #[tokio::test]
@@ -16,7 +16,7 @@ async fn from_request() -> Result<()> {
         .body(Body::Empty)?;
     req.extensions_mut().insert(Limits::default());
 
-    let result: Result<Json<Option<String>>, PayloadError> = FromRequest::extract(&mut req).await;
+    let result: Result<Json<Option<String>>, PayloadError> = req.extract().await;
     assert!(result.is_err());
 
     let mut req = Request::builder()

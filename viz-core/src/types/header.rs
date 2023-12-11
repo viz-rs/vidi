@@ -66,7 +66,6 @@ where
     }
 }
 
-#[crate::async_trait]
 impl<T> FromRequest for Header<T>
 where
     T: headers::Header,
