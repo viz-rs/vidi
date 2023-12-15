@@ -35,7 +35,7 @@ use crate::types::Session;
 #[cfg(feature = "params")]
 use crate::types::{ParamsError, PathDeserializer, RouteInfo};
 
-/// The [Request] Extension.
+/// The [`Request`] Extension.
 pub trait RequestExt: private::Sealed + Sized {
     /// Get URL's schema of this request.
     fn schema(&self) -> Option<&http::uri::Scheme>;
