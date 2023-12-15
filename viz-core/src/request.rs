@@ -37,7 +37,7 @@ use crate::types::{ParamsError, PathDeserializer, RouteInfo};
 
 /// The [`Request`] Extension.
 #[async_trait]
-pub trait RequestExt: Sized {
+pub trait RequestExt: private::Sealed + Sized {
     /// Get URL's schema of this request.
     fn schema(&self) -> Option<&http::uri::Scheme>;
 
@@ -444,4 +444,9 @@ impl RequestExt for Request {
     fn realip(&self) -> Option<RealIp> {
         RealIp::parse(self)
     }
+}
+
+mod private {
+    pub trait Sealed {}
+    impl Sealed for super::Request {}
 }

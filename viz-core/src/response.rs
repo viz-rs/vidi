@@ -5,7 +5,7 @@ use crate::{async_trait, header, Bytes, Error, OutgoingBody, Response, Result, S
 
 /// The [`Response`] Extension.
 #[async_trait]
-pub trait ResponseExt: Sized {
+pub trait ResponseExt: private::Sealed + Sized {
     /// Get the size of this response's body.
     fn content_length(&self) -> Option<u64>;
 
@@ -99,33 +99,60 @@ pub trait ResponseExt: Sized {
     /// or as an attachment, that is downloaded and saved locally.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
-    fn attachment(value: &str) -> Self;
+    fn attachment(value: &str) -> Response {
+        let val = header::HeaderValue::from_str(value)
+            .expect("content-disposition is not the correct value");
+        let mut resp = Response::default();
+        resp.headers_mut().insert(header::CONTENT_DISPOSITION, val);
+        resp
+    }
 
     /// The [`Content-Location`][mdn] header indicates an alternate location for the returned data.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Location>
-    fn location<T>(location: T) -> Self
+    fn location<T>(location: T) -> Response
     where
-        T: AsRef<str>;
+        T: AsRef<str>,
+    {
+        let val = header::HeaderValue::try_from(location.as_ref())
+            .expect("location is not the correct value");
+        let mut resp = Response::default();
+        resp.headers_mut().insert(header::CONTENT_LOCATION, val);
+        resp
+    }
 
     /// The response redirects to the specified URL.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect>
-    fn redirect<T>(url: T) -> Self
+    fn redirect<T>(url: T) -> Response
     where
-        T: AsRef<str>;
+        T: AsRef<str>,
+    {
+        let val =
+            header::HeaderValue::try_from(url.as_ref()).expect("url is not the correct value");
+        let mut resp = Response::default();
+        resp.headers_mut().insert(header::LOCATION, val);
+        resp
+    }
 
     /// The response redirects to the specified URL and the status code.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect>
-    fn redirect_with_status<T>(uri: T, status: StatusCode) -> Self
+    fn redirect_with_status<T>(url: T, status: StatusCode) -> Response
     where
-        T: AsRef<str>;
+        T: AsRef<str>,
+    {
+        assert!(status.is_redirection(), "not a redirection status code");
+
+        let mut resp = Self::redirect(url);
+        *resp.status_mut() = status;
+        resp
+    }
 
     /// The response redirects to the [`303`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303>
-    fn see_other<T>(url: T) -> Self
+    fn see_other<T>(url: T) -> Response
     where
         T: AsRef<str>,
     {
@@ -135,7 +162,7 @@ pub trait ResponseExt: Sized {
     /// The response redirects to the [`307`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307>
-    fn temporary<T>(url: T) -> Self
+    fn temporary<T>(url: T) -> Response
     where
         T: AsRef<str>,
     {
@@ -145,7 +172,7 @@ pub trait ResponseExt: Sized {
     /// The response redirects to the [`308`][mdn].
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/308>
-    fn permanent<T>(url: T) -> Self
+    fn permanent<T>(url: T) -> Response
     where
         T: AsRef<str>,
     {
@@ -201,45 +228,9 @@ impl ResponseExt for Response {
         ));
         Ok(resp)
     }
+}
 
-    fn attachment(value: &str) -> Self {
-        let val = header::HeaderValue::from_str(value)
-            .expect("content-disposition is not the correct value");
-        let mut resp = Self::default();
-        resp.headers_mut().insert(header::CONTENT_DISPOSITION, val);
-        resp
-    }
-
-    fn location<T>(location: T) -> Self
-    where
-        T: AsRef<str>,
-    {
-        let val = header::HeaderValue::try_from(location.as_ref())
-            .expect("location is not the correct value");
-        let mut resp = Self::default();
-        resp.headers_mut().insert(header::CONTENT_LOCATION, val);
-        resp
-    }
-
-    fn redirect<T>(url: T) -> Self
-    where
-        T: AsRef<str>,
-    {
-        let val =
-            header::HeaderValue::try_from(url.as_ref()).expect("url is not the correct value");
-        let mut resp = Self::default();
-        resp.headers_mut().insert(header::LOCATION, val);
-        resp
-    }
-
-    fn redirect_with_status<T>(url: T, status: StatusCode) -> Self
-    where
-        T: AsRef<str>,
-    {
-        assert!(status.is_redirection(), "not a redirection status code");
-
-        let mut resp = Self::redirect(url);
-        *resp.status_mut() = status;
-        resp
-    }
+mod private {
+    pub trait Sealed {}
+    impl Sealed for super::Response {}
 }
