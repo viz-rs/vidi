@@ -57,9 +57,10 @@ otel-metrics = ["otel", "opentelemetry?/metrics"]
 
 [dependencies]
 async-trait.workspace = true
-bytes.workspace = true
 dyn-clone.workspace = true
 futures-util.workspace = true
+
+bytes.workspace = true
 headers.workspace = true
 http.workspace = true
 http-body.workspace = true
@@ -67,6 +68,7 @@ http-body-util.workspace = true
 
 hyper.workspace = true
 hyper-util.workspace = true
+sync_wrapper = { version = "0.1.2", git = "https://github.com/fundon/sync_wrapper.git", rev = "e2ce8d8" }
 
 mime.workspace = true
 thiserror.workspace = true
@@ -99,7 +101,6 @@ tokio = { workspace = true, optional = true }
 tokio-tungstenite = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true }
-sync_wrapper = { version = "0.1.2", git = "https://github.com/fundon/sync_wrapper.git", rev = "e2ce8d8" }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
