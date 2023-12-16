@@ -25,8 +25,9 @@ where
 }
 
 impl<H, F, R, E> CatchError<H, F, R, E> {
+    /// Creates a [`CatchError`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self {
             h,
             f,

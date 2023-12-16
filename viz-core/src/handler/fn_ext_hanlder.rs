@@ -16,8 +16,8 @@ where
 }
 
 impl<H, E, O> FnExtHandler<H, E, O> {
-    /// Create a new `Handler` for the extractors.
-    pub(super) fn new(h: H) -> Self {
+    /// Creates a new `Handler` for the extractors.
+    pub fn new(h: H) -> Self {
         Self(h, PhantomData)
     }
 }

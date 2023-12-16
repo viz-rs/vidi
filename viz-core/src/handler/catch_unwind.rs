@@ -12,8 +12,9 @@ pub struct CatchUnwind<H, F> {
 }
 
 impl<H, F> CatchUnwind<H, F> {
+    /// Creates an [`CatchUnwind`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }
@@ -22,8 +23,8 @@ impl<H, F> CatchUnwind<H, F> {
 impl<H, F, I, O, R> Handler<I> for CatchUnwind<H, F>
 where
     I: Send + 'static,
-    O: IntoResponse + Send,
     H: Handler<I, Output = Result<O>> + Clone,
+    O: IntoResponse + Send,
     F: Handler<Box<dyn Any + Send>, Output = R> + Clone,
     R: IntoResponse,
 {

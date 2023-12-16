@@ -8,8 +8,9 @@ pub struct MapErr<H, F> {
 }
 
 impl<H, F> MapErr<H, F> {
+    /// Creates a [`MapErr`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

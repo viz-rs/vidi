@@ -8,8 +8,9 @@ pub struct Before<H, F> {
 }
 
 impl<H, F> Before<H, F> {
+    /// Creates a [`Before`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

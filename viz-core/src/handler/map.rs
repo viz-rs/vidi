@@ -8,8 +8,9 @@ pub struct Map<H, F> {
 }
 
 impl<H, F> Map<H, F> {
+    /// Creates a [`Map`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

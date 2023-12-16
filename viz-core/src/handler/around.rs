@@ -11,8 +11,9 @@ pub struct Around<H, F> {
 }
 
 impl<H, F> Around<H, F> {
+    /// Creates an [`Around`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

@@ -8,8 +8,9 @@ pub struct After<H, F> {
 }
 
 impl<H, F> After<H, F> {
+    /// Creates an [`After`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

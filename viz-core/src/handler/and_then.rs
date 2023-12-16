@@ -8,8 +8,9 @@ pub struct AndThen<H, F> {
 }
 
 impl<H, F> AndThen<H, F> {
+    /// Creates an [`AndThen`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

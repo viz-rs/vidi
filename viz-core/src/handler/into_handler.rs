@@ -2,12 +2,12 @@ use crate::{FromRequest, IntoResponse, Request, Result};
 
 use super::{FnExt, FnExtHandler, Handler};
 
-/// Trait implemented by types that can be converted to a [`Handler`].
+/// The trait implemented by types that can be converted to a [`Handler`].
 pub trait IntoHandler<E, I> {
     /// The target handler.
     type Handler: Handler<I>;
 
-    /// Convert self to a [Handler].
+    /// Converts self to a [`Handler`].
     #[must_use]
     fn into_handler(self) -> Self::Handler;
 }

@@ -5,9 +5,9 @@ use crate::{async_trait, Handler, IntoResponse, Response, Result};
 pub struct MapInToResponse<H>(pub(crate) H);
 
 impl<H> MapInToResponse<H> {
-    /// Creates a new `Responder`.
+    /// Creates a [`MapInToResponse`] handler.
     #[inline]
-    pub(super) fn new(h: H) -> Self {
+    pub fn new(h: H) -> Self {
         Self(h)
     }
 }

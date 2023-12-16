@@ -50,6 +50,9 @@ pub use or_else::OrElse;
 mod transform;
 pub use transform::Transform;
 
+mod service;
+pub use service::ServiceHandler;
+
 /// A simplified asynchronous interface for handling input and output.
 ///
 /// Composable request handlers.
@@ -83,14 +86,6 @@ where
 /// [`FutureExt`]: https://docs.rs/futures/latest/futures/future/trait.FutureExt.html
 /// [`StreamExt`]: https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html
 pub trait HandlerExt<I>: Handler<I> {
-    /// Converts this Handler into a [`BoxHandler`].
-    fn boxed(self) -> BoxHandler<I, Self::Output>
-    where
-        Self: Sized,
-    {
-        Box::new(self)
-    }
-
     /// Maps the input before the handler calls.
     fn before<F>(self, f: F) -> Before<Self, F>
     where
@@ -113,6 +108,21 @@ pub trait HandlerExt<I>: Handler<I> {
         Self: Sized,
     {
         Around::new(self, f)
+    }
+
+    /// Wraps this handler in an Either handler, making it the left-hand variant of that Either.
+    ///
+    /// Returns the left-hand variant if `enable` is true, otherwise returns the right-hand
+    /// variant.
+    fn either<R>(self, r: R, enable: bool) -> Either<Self, R>
+    where
+        Self: Sized,
+    {
+        if enable {
+            Either::Left(self)
+        } else {
+            Either::Right(r)
+        }
     }
 
     /// Maps the `Ok` value of the output if after the handler called.
@@ -173,7 +183,15 @@ pub trait HandlerExt<I>: Handler<I> {
         CatchUnwind::new(self, f)
     }
 
-    /// Returns a new [Handler] that wrapping the `Self` and a type implementing [`Transform`].
+    /// Converts this Handler into a [`BoxHandler`].
+    fn boxed(self) -> BoxHandler<I, Self::Output>
+    where
+        Self: Sized,
+    {
+        Box::new(self)
+    }
+
+    /// Returns a new [`Handler`] that wrapping the `Self` and a type implementing [`Transform`].
     fn with<T>(self, t: T) -> T::Output
     where
         T: Transform<Self>,

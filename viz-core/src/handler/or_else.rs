@@ -8,8 +8,9 @@ pub struct OrElse<H, F> {
 }
 
 impl<H, F> OrElse<H, F> {
+    /// Creates an [`OrElse`] handler.
     #[inline]
-    pub(super) fn new(h: H, f: F) -> Self {
+    pub fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }
