@@ -25,7 +25,7 @@ pub struct Sse<S> {
 
 impl<S> Sse<S>
 where
-    S: Stream<Item = Event> + Send + Sync + 'static,
+    S: Stream<Item = Event> + Send + 'static,
 {
     /// Creates a new Server-Sent Event.
     #[must_use]
@@ -46,7 +46,7 @@ where
 
 impl<S> IntoResponse for Sse<S>
 where
-    S: Stream<Item = Event> + Send + Sync + 'static,
+    S: Stream<Item = Event> + Send + 'static,
 {
     fn into_response(self) -> Response {
         let stream = self.stream.map(|e| Ok::<Bytes, std::io::Error>(e.into()));

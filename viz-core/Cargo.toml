@@ -99,6 +99,7 @@ tokio = { workspace = true, optional = true }
 tokio-tungstenite = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true }
+sync_wrapper = { version = "0.1.2", git = "https://github.com/fundon/sync_wrapper.git", rev = "e2ce8d8" }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

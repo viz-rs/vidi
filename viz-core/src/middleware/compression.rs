@@ -81,15 +81,11 @@ impl<T: IntoResponse> IntoResponse for Compress<T> {
                 res = res.map(|body| {
                     let body = StreamReader::new(body);
                     if self.algo == ContentCoding::Gzip {
-                        OutgoingBody::streaming(ReaderStream::new(bufread::GzipEncoder::new(body)))
+                        OutgoingBody::stream(ReaderStream::new(bufread::GzipEncoder::new(body)))
                     } else if self.algo == ContentCoding::Deflate {
-                        OutgoingBody::streaming(ReaderStream::new(bufread::DeflateEncoder::new(
-                            body,
-                        )))
+                        OutgoingBody::stream(ReaderStream::new(bufread::DeflateEncoder::new(body)))
                     } else {
-                        OutgoingBody::streaming(ReaderStream::new(bufread::BrotliEncoder::new(
-                            body,
-                        )))
+                        OutgoingBody::stream(ReaderStream::new(bufread::BrotliEncoder::new(body)))
                     }
                 });
                 res.headers_mut()

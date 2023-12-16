@@ -4,8 +4,9 @@ use std::{
 };
 
 use futures_util::{Stream, TryStreamExt};
-use http_body_util::{combinators::BoxBody, BodyExt, Full, StreamBody};
+use http_body_util::{combinators::UnsyncBoxBody, BodyExt, Full, StreamBody};
 use hyper::body::{Body, Frame, Incoming, SizeHint};
+use sync_wrapper::SyncWrapper;
 
 use crate::{BoxError, Bytes, Error, Result};
 
@@ -123,26 +124,26 @@ pub enum OutgoingBody<D = Bytes> {
     /// A body that consists of a single chunk.
     Full(Full<D>),
     /// A boxed [`Body`] trait object.
-    Boxed(BoxBody<D, Error>),
+    Boxed(SyncWrapper<UnsyncBoxBody<D, Error>>),
 }
 
 impl OutgoingBody {
     /// A body created from a [`Stream`].
-    pub fn streaming<S, D, E>(stream: S) -> Self
+    pub fn stream<S, D, E>(stream: S) -> Self
     where
-        S: Stream<Item = Result<D, E>> + Send + Sync + 'static,
+        S: Stream<Item = Result<D, E>> + Send + 'static,
         D: Into<Bytes> + 'static,
         E: Into<Error> + 'static,
     {
-        Self::Boxed(
+        Self::Boxed(SyncWrapper::new(
             StreamBody::new(
                 stream
                     .map_ok(Into::into)
                     .map_ok(Frame::data)
                     .map_err(Into::into),
             )
-            .boxed(),
-        )
+            .boxed_unsync(),
+        ))
     }
 }
 
@@ -164,7 +165,7 @@ impl Body for OutgoingBody {
         match self.get_mut() {
             Self::Empty => Poll::Ready(None),
             Self::Full(full) => Pin::new(full).poll_frame(cx).map_err(Error::from),
-            Self::Boxed(body) => Pin::new(body).poll_frame(cx),
+            Self::Boxed(body) => Pin::new(body.get_mut()).poll_frame(cx),
         }
     }
 
@@ -173,7 +174,7 @@ impl Body for OutgoingBody {
         match self {
             Self::Empty => true,
             Self::Full(full) => full.is_end_stream(),
-            Self::Boxed(body) => body.is_end_stream(),
+            Self::Boxed(wrapper) => wrapper.get_ref().is_end_stream(),
         }
     }
 
@@ -182,7 +183,7 @@ impl Body for OutgoingBody {
         match self {
             Self::Empty => SizeHint::with_exact(0),
             Self::Full(full) => full.size_hint(),
-            Self::Boxed(body) => body.size_hint(),
+            Self::Boxed(wrapper) => wrapper.get_ref().size_hint(),
         }
     }
 }
@@ -197,7 +198,7 @@ impl Stream for OutgoingBody {
             Self::Full(full) => Pin::new(full)
                 .poll_frame(cx)
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
-            Self::Boxed(body) => Pin::new(body)
+            Self::Boxed(wrapper) => Pin::new(wrapper.get_mut())
                 .poll_frame(cx)
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
         } {
@@ -212,7 +213,7 @@ impl Stream for OutgoingBody {
         let sh = match self {
             Self::Empty => return (0, Some(0)),
             Self::Full(full) => full.size_hint(),
-            Self::Boxed(body) => body.size_hint(),
+            Self::Boxed(wrapper) => wrapper.get_ref().size_hint(),
         };
         (
             usize::try_from(sh.lower()).unwrap_or(usize::MAX),
@@ -233,8 +234,8 @@ impl<D> From<Full<D>> for OutgoingBody<D> {
     }
 }
 
-impl<D> From<BoxBody<D, Error>> for OutgoingBody<D> {
-    fn from(value: BoxBody<D, Error>) -> Self {
-        Self::Boxed(value)
+impl<D> From<UnsyncBoxBody<D, Error>> for OutgoingBody<D> {
+    fn from(value: UnsyncBoxBody<D, Error>) -> Self {
+        Self::Boxed(SyncWrapper::new(value))
     }
 }
