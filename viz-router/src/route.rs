@@ -167,7 +167,7 @@ impl FromIterator<(Method, BoxHandler)> for Route {
 pub fn on<H, O>(method: Method, handler: H) -> Route
 where
     H: Handler<Request, Output = Result<O>> + Clone,
-    O: IntoResponse + Send + Sync + 'static,
+    O: IntoResponse + Send + 'static,
 {
     Route::new().on(method, handler)
 }

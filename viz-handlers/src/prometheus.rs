@@ -24,7 +24,7 @@ pub struct Prometheus {
 }
 
 impl Prometheus {
-    /// Creates a new Prometheus.
+    /// Creates a new [`Prometheus`].
     #[must_use]
     pub fn new(registry: Registry) -> Self {
         Self { registry }
