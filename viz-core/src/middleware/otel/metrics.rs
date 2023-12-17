@@ -99,8 +99,8 @@ pub struct MetricsMiddleware<H> {
 #[async_trait]
 impl<H, O> Handler<Request> for MetricsMiddleware<H>
 where
-    O: IntoResponse,
     H: Handler<Request, Output = Result<O>> + Clone,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 

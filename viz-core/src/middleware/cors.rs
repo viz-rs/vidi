@@ -63,7 +63,8 @@ impl Config {
     {
         self.allow_methods = allow_methods
             .into_iter()
-            .filter_map(|m| m.try_into().ok())
+            .map(TryInto::try_into)
+            .filter_map(Result::ok)
             .collect();
         self
     }
@@ -79,7 +80,8 @@ impl Config {
     {
         self.allow_headers = allow_headers
             .into_iter()
-            .filter_map(|h| h.try_into().ok())
+            .map(TryInto::try_into)
+            .filter_map(Result::ok)
             .collect();
         self
     }
@@ -95,7 +97,8 @@ impl Config {
     {
         self.allow_origins = allow_origins
             .into_iter()
-            .filter_map(|h| h.try_into().ok())
+            .map(TryInto::try_into)
+            .filter_map(Result::ok)
             .collect();
         self
     }
@@ -111,7 +114,8 @@ impl Config {
     {
         self.expose_headers = expose_headers
             .into_iter()
-            .filter_map(|h| h.try_into().ok())
+            .map(TryInto::try_into)
+            .filter_map(Result::ok)
             .collect();
         self
     }
@@ -202,8 +206,8 @@ pub struct CorsMiddleware<H> {
 #[async_trait]
 impl<H, O> Handler<Request> for CorsMiddleware<H>
 where
-    O: IntoResponse,
     H: Handler<Request, Output = Result<O>> + Clone,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 
@@ -244,7 +248,9 @@ where
                         hs.to_str()
                             .map(|hs| {
                                 hs.split(',')
-                                    .filter_map(|h| HeaderName::from_bytes(h.as_bytes()).ok())
+                                    .map(str::as_bytes)
+                                    .map(HeaderName::from_bytes)
+                                    .filter_map(Result::ok)
                                     .any(|header| self.config.allow_headers.contains(&header))
                             })
                             .unwrap_or(false),
@@ -273,10 +279,7 @@ where
                 headers.typed_insert(self.aceh.clone());
             }
 
-            self.h
-                .call(req)
-                .await
-                .map_or_else(IntoResponse::into_response, IntoResponse::into_response)
+            self.h.call(req).await.map(IntoResponse::into_response)?
         };
 
         // https://github.com/rs/cors/issues/10

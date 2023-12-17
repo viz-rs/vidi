@@ -5,20 +5,21 @@ use std::fmt;
 use crate::{
     async_trait,
     header::{HeaderValue, COOKIE, SET_COOKIE},
-    types, Handler, IntoResponse, Request, Response, Result, Transform,
+    types::{Cookie, CookieJar, CookieKey, Cookies},
+    Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// A configure for [`CookieMiddleware`].
 pub struct Config {
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
-    key: std::sync::Arc<types::CookieKey>,
+    key: std::sync::Arc<CookieKey>,
 }
 
 impl Config {
     /// Creates a new config with the [`Key`][types::CookieKey].
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     #[must_use]
-    pub fn with_key(key: types::CookieKey) -> Self {
+    pub fn with_key(key: CookieKey) -> Self {
         Self {
             key: std::sync::Arc::new(key),
         }
@@ -29,7 +30,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
-            key: std::sync::Arc::new(types::CookieKey::generate()),
+            key: std::sync::Arc::new(CookieKey::generate()),
         }
     }
 }
@@ -65,7 +66,7 @@ where
 pub struct CookieMiddleware<H> {
     h: H,
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
-    key: std::sync::Arc<types::CookieKey>,
+    key: std::sync::Arc<CookieKey>,
 }
 
 impl<H> fmt::Debug for CookieMiddleware<H> {
@@ -82,8 +83,8 @@ impl<H> fmt::Debug for CookieMiddleware<H> {
 #[async_trait]
 impl<H, O> Handler<Request> for CookieMiddleware<H>
 where
-    O: IntoResponse,
     H: Handler<Request, Output = Result<O>> + Clone,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 
@@ -93,14 +94,13 @@ where
             .get_all(COOKIE)
             .iter()
             .filter_map(|c| HeaderValue::to_str(c).ok())
-            .fold(types::CookieJar::new(), add_cookie);
+            .fold(CookieJar::new(), add_cookie);
 
-        let cookies = types::Cookies::new(jar);
+        let cookies = Cookies::new(jar);
         #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
         let cookies = cookies.with_key(self.key.clone());
 
-        req.extensions_mut()
-            .insert::<types::Cookies>(cookies.clone());
+        req.extensions_mut().insert::<Cookies>(cookies.clone());
 
         self.h
             .call(req)
@@ -109,9 +109,9 @@ where
             .map(|mut res| {
                 if let Ok(c) = cookies.jar().lock() {
                     c.delta()
-                        .filter_map(|cookie| {
-                            HeaderValue::from_str(&cookie.encoded().to_string()).ok()
-                        })
+                        .map(Cookie::encoded)
+                        .map(|cookie| HeaderValue::from_str(&cookie.to_string()))
+                        .filter_map(Result::ok)
                         .fold(res.headers_mut(), |headers, cookie| {
                             headers.append(SET_COOKIE, cookie);
                             headers
@@ -123,9 +123,10 @@ where
 }
 
 #[inline]
-fn add_cookie(mut jar: types::CookieJar, value: &str) -> types::CookieJar {
-    types::Cookie::split_parse_encoded(value)
+fn add_cookie(mut jar: CookieJar, value: &str) -> CookieJar {
+    Cookie::split_parse_encoded(value)
         .filter_map(Result::ok)
-        .for_each(|cookie| jar.add_original(cookie.into_owned()));
+        .map(Cookie::into_owned)
+        .for_each(|cookie| jar.add_original(cookie));
     jar
 }

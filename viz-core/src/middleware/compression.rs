@@ -44,7 +44,8 @@ where
         let accept_encoding = req
             .headers()
             .get(ACCEPT_ENCODING)
-            .and_then(|v| v.to_str().ok())
+            .map(HeaderValue::to_str)
+            .and_then(Result::ok)
             .and_then(parse_accept_encoding);
 
         let raw = self.h.call(req).await?;

@@ -70,8 +70,8 @@ pub struct LimitsMiddleware<H> {
 #[async_trait]
 impl<H, O> Handler<Request> for LimitsMiddleware<H>
 where
-    O: IntoResponse,
     H: Handler<Request, Output = Result<O>> + Clone,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 

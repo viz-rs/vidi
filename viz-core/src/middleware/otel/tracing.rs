@@ -4,7 +4,7 @@
 
 use std::{net::SocketAddr, sync::Arc};
 
-use http::uri::Scheme;
+use http::{uri::Scheme, HeaderValue};
 use opentelemetry::{
     global,
     propagation::Extractor,
@@ -61,10 +61,10 @@ pub struct TracingMiddleware<H, T> {
 #[async_trait]
 impl<H, O, T> Handler<Request> for TracingMiddleware<H, T>
 where
+    H: Handler<Request, Output = Result<O>> + Clone,
+    O: IntoResponse,
     T: Tracer + Send + Sync + Clone + 'static,
     T::Span: Send + Sync + 'static,
-    O: IntoResponse,
-    H: Handler<Request, Output = Result<O>> + Clone,
 {
     type Output = Result<Response>;
 
@@ -143,7 +143,10 @@ impl<'a> RequestHeaderCarrier<'a> {
 
 impl Extractor for RequestHeaderCarrier<'_> {
     fn get(&self, key: &str) -> Option<&str> {
-        self.headers.get(key).and_then(|v| v.to_str().ok())
+        self.headers
+            .get(key)
+            .map(HeaderValue::to_str)
+            .and_then(Result::ok)
     }
 
     fn keys(&self) -> Vec<&str> {

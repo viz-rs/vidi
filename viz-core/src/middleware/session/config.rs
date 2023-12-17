@@ -7,7 +7,7 @@ use std::{
 use crate::{
     async_trait,
     middleware::helper::{CookieOptions, Cookieable},
-    types::Session,
+    types::{Cookie, Session},
     Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode, Transform,
 };
 
@@ -92,8 +92,8 @@ where
 #[async_trait]
 impl<H, O, S, G, V> Handler<Request> for SessionMiddleware<H, S, G, V>
 where
-    O: IntoResponse,
     H: Handler<Request, Output = Result<O>> + Clone,
+    O: IntoResponse,
     S: Storage + 'static,
     G: Fn() -> String + Send + Sync + 'static,
     V: Fn(&str) -> bool + Send + Sync + 'static,
@@ -101,10 +101,10 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, mut req: Request) -> Self::Output {
-        let cookies = req.cookies().map_err(Into::<Error>::into)?;
+        let cookies = req.cookies().map_err(Error::from)?;
         let cookie = self.config.get_cookie(&cookies);
 
-        let mut session_id = cookie.map(|cookie| cookie.value().to_string());
+        let mut session_id = cookie.as_ref().map(Cookie::value).map(ToString::to_string);
         let data = match &session_id {
             Some(sid) if (self.config.store().verify)(sid) => self.config.store().get(sid).await?,
             _ => None,
@@ -125,11 +125,7 @@ where
 
         if status == PURGED {
             if let Some(sid) = &session_id {
-                self.config
-                    .store()
-                    .remove(sid)
-                    .await
-                    .map_err(Into::<Error>::into)?;
+                self.config.store().remove(sid).await.map_err(Error::from)?;
                 self.config.remove_cookie(&cookies);
             }
 
@@ -138,11 +134,7 @@ where
 
         if status == RENEWED {
             if let Some(sid) = &session_id.take() {
-                self.config
-                    .store()
-                    .remove(sid)
-                    .await
-                    .map_err(Into::<Error>::into)?;
+                self.config.store().remove(sid).await.map_err(Error::from)?;
             }
         }
 
@@ -160,7 +152,7 @@ where
                 &self.config.ttl().unwrap_or_else(max_age),
             )
             .await
-            .map_err(Into::<Error>::into)?;
+            .map_err(Error::from)?;
 
         resp
     }
