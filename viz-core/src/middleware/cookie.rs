@@ -16,7 +16,7 @@ pub struct Config {
 }
 
 impl Config {
-    /// Creates a new config with the [`Key`][types::CookieKey].
+    /// Creates a new config with the [`Key`][CookieKey].
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     #[must_use]
     pub fn with_key(key: CookieKey) -> Self {
