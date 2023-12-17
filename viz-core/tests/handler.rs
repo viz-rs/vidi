@@ -107,8 +107,8 @@ async fn handler() -> Result<()> {
         }
 
         async fn a(_: Request) -> Result<Response> {
-            Err(CustomError::NotFound)?;
-            Err(CustomError2::NotFound)?;
+            // Err(CustomError::NotFound)?;
+            // Err(CustomError2::NotFound)?;
             Ok(().into_response())
         }
         async fn b(_: Request) -> Result<Response> {

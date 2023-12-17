@@ -1,8 +1,14 @@
-use std::{net::IpAddr, str};
+use std::{
+    net::{IpAddr, SocketAddr},
+    str,
+};
 
 use rfc7239::{NodeIdentifier, NodeName};
 
-use crate::{header::FORWARDED, Request, RequestExt, Result};
+use crate::{
+    header::{HeaderValue, FORWARDED},
+    Request, RequestExt, Result,
+};
 
 /// Gets real ip remote addr from request headers.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -19,15 +25,21 @@ impl RealIp {
     pub fn parse(req: &Request) -> Option<Self> {
         req.headers()
             .get(Self::X_REAL_IP)
-            .and_then(|value| value.to_str().ok())
-            .and_then(|value| value.parse::<IpAddr>().ok())
+            .map(HeaderValue::to_str)
+            .and_then(Result::ok)
+            .map(str::parse)
+            .and_then(Result::ok)
             .or_else(|| {
                 req.headers()
                     .get(FORWARDED)
-                    .and_then(|value| value.to_str().ok())
-                    .and_then(|value| rfc7239::parse(value).collect::<Result<Vec<_>, _>>().ok())
-                    .and_then(|value| {
-                        value.into_iter().find_map(|item| match item.forwarded_for {
+                    .map(HeaderValue::to_str)
+                    .and_then(Result::ok)
+                    .map(rfc7239::parse)
+                    .map(Iterator::collect)
+                    .and_then(Result::ok)
+                    .map(Vec::into_iter)
+                    .and_then(|mut value| {
+                        value.find_map(|item| match item.forwarded_for {
                             Some(NodeIdentifier {
                                 name: NodeName::Ip(ip_addr),
                                 ..
@@ -39,15 +51,17 @@ impl RealIp {
             .or_else(|| {
                 req.headers()
                     .get(Self::X_FORWARDED_FOR)
-                    .and_then(|value| value.to_str().ok())
+                    .map(HeaderValue::to_str)
+                    .and_then(Result::ok)
                     .and_then(|value| {
                         value
                             .split(',')
                             .map(str::trim)
-                            .find_map(|value| value.parse::<IpAddr>().ok())
+                            .map(str::parse)
+                            .find_map(Result::ok)
                     })
             })
             .map(RealIp)
-            .or_else(|| req.remote_addr().map(|addr| RealIp(addr.ip())))
+            .or_else(|| req.remote_addr().map(SocketAddr::ip).map(RealIp))
     }
 }

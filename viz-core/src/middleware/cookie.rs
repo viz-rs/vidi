@@ -93,7 +93,8 @@ where
             .headers()
             .get_all(COOKIE)
             .iter()
-            .filter_map(|c| HeaderValue::to_str(c).ok())
+            .map(HeaderValue::to_str)
+            .filter_map(Result::ok)
             .fold(CookieJar::new(), add_cookie);
 
         let cookies = Cookies::new(jar);
