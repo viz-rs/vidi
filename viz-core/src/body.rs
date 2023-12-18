@@ -173,8 +173,8 @@ impl Body for OutgoingBody {
     fn is_end_stream(&self) -> bool {
         match self {
             Self::Empty => true,
+            Self::Boxed(_) => false,
             Self::Full(full) => full.is_end_stream(),
-            Self::Boxed(wrapper) => wrapper.get_ref().is_end_stream(),
         }
     }
 
@@ -182,8 +182,8 @@ impl Body for OutgoingBody {
     fn size_hint(&self) -> SizeHint {
         match self {
             Self::Empty => SizeHint::with_exact(0),
+            Self::Boxed(_) => SizeHint::default(),
             Self::Full(full) => full.size_hint(),
-            Self::Boxed(wrapper) => wrapper.get_ref().size_hint(),
         }
     }
 }
@@ -212,8 +212,8 @@ impl Stream for OutgoingBody {
     fn size_hint(&self) -> (usize, Option<usize>) {
         let sh = match self {
             Self::Empty => return (0, Some(0)),
+            Self::Boxed(_) => return (0, None),
             Self::Full(full) => full.size_hint(),
-            Self::Boxed(wrapper) => wrapper.get_ref().size_hint(),
         };
         (
             usize::try_from(sh.lower()).unwrap_or(usize::MAX),

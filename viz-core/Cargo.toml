@@ -62,13 +62,12 @@ futures-util.workspace = true
 
 bytes.workspace = true
 headers.workspace = true
-http.workspace = true
-http-body.workspace = true
 http-body-util.workspace = true
-
-hyper.workspace = true
+http-body.workspace = true
+http.workspace = true
 hyper-util.workspace = true
-sync_wrapper = { version = "0.1.2", git = "https://github.com/fundon/sync_wrapper.git", rev = "e2ce8d8" }
+hyper.workspace = true
+sync_wrapper = "0.1.2"
 
 mime.workspace = true
 thiserror.workspace = true

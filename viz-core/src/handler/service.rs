@@ -20,8 +20,7 @@ impl<S> ServiceHandler<S> {
 impl<I, O, S> Handler<Request<I>> for ServiceHandler<S>
 where
     I: Body + Send + Unpin + 'static,
-    // O: Body + Send + 'static,
-    O: Body + Send + Sync + 'static,
+    O: Body + Send + 'static,
     O::Data: Into<Bytes>,
     O::Error: Into<Error>,
     S: Service<Request<I>, Response = Response<O>> + Send + Sync + Clone + 'static,
@@ -38,8 +37,7 @@ where
                 resp.map(|body| {
                     body.map_frame(|f| f.map_data(Into::into))
                         .map_err(Into::into)
-                        // .boxed_unsync()
-                        .boxed()
+                        .boxed_unsync()
                 })
                 .map(Into::into)
             })
