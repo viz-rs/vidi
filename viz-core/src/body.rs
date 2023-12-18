@@ -165,7 +165,7 @@ impl Body for OutgoingBody {
         match self.get_mut() {
             Self::Empty => Poll::Ready(None),
             Self::Full(full) => Pin::new(full).poll_frame(cx).map_err(Error::from),
-            Self::Boxed(body) => Pin::new(body.get_mut()).poll_frame(cx),
+            Self::Boxed(body) => Pin::new(body).get_pin_mut().poll_frame(cx),
         }
     }
 
@@ -198,7 +198,8 @@ impl Stream for OutgoingBody {
             Self::Full(full) => Pin::new(full)
                 .poll_frame(cx)
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
-            Self::Boxed(wrapper) => Pin::new(wrapper.get_mut())
+            Self::Boxed(wrapper) => Pin::new(wrapper)
+                .get_pin_mut()
                 .poll_frame(cx)
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
         } {

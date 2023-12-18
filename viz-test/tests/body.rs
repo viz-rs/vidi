@@ -145,7 +145,7 @@ async fn outgoing_body() -> Result<()> {
     assert!(empty.frame().await.is_none());
     assert!(empty.frame().await.is_none());
 
-    let mut full_none = OutgoingBody::Full(Full::new(Bytes::new()));
+    let mut full_none = OutgoingBody::from(Full::new(Bytes::new()));
     assert!(full_none.is_end_stream());
     let size_hint = full_none.size_hint();
     assert_eq!(size_hint.lower(), 0);
@@ -154,7 +154,7 @@ async fn outgoing_body() -> Result<()> {
     assert!(full_none.frame().await.is_none());
     assert!(full_none.frame().await.is_none());
 
-    let mut full_some = OutgoingBody::<Bytes>::Full(Full::new(Bytes::from(vec![1, 0, 2, 4])));
+    let mut full_some = OutgoingBody::from(Full::new(Bytes::from(vec![1, 0, 2, 4])));
     assert!(!full_some.is_end_stream());
     let size_hint = full_some.size_hint();
     assert_eq!(size_hint.lower(), 4);
@@ -178,19 +178,21 @@ async fn outgoing_body() -> Result<()> {
 
     let mut boxed: OutgoingBody =
         UnsyncBoxBody::new(Full::new(Bytes::new()).map_err(Into::into)).into();
-    assert!(boxed.is_end_stream());
+    assert_eq!(boxed.is_end_stream(), false);
+    // boxed stream uses default size
     let size_hint = boxed.size_hint();
     assert_eq!(size_hint.lower(), 0);
-    assert_eq!(size_hint.upper(), Some(0));
+    assert_eq!(size_hint.upper(), None);
     assert_eq!(&format!("{boxed:?}"), r"Boxed(SyncWrapper)");
     assert!(boxed.frame().await.is_none());
 
     let mut boxed: OutgoingBody =
         UnsyncBoxBody::new(Full::new(Bytes::from(vec![2, 0, 4, 8])).map_err(Into::into)).into();
     assert!(!boxed.is_end_stream());
+    // boxed stream uses default size
     let size_hint = boxed.size_hint();
-    assert_eq!(size_hint.lower(), 4);
-    assert_eq!(size_hint.upper(), Some(4));
+    assert_eq!(size_hint.lower(), 0);
+    assert_eq!(size_hint.upper(), None);
     assert_eq!(&format!("{boxed:?}"), r"Boxed(SyncWrapper)");
     assert_eq!(
         boxed
@@ -219,7 +221,7 @@ async fn outgoing_stream() -> Result<()> {
     reader.read_to_end(&mut buf).await?;
     assert!(buf.is_empty());
 
-    let full_none = OutgoingBody::Full(Full::new(Bytes::new()));
+    let full_none = OutgoingBody::from(Full::new(Bytes::new()));
     assert_eq!(full_none.size_hint(), (0, Some(0)));
     let mut reader = full_none.into_async_read();
     let mut buf = Vec::new();
@@ -234,7 +236,7 @@ async fn outgoing_stream() -> Result<()> {
 
     let boxed: OutgoingBody =
         UnsyncBoxBody::new(Full::new(Bytes::new()).map_err(Into::into)).into();
-    assert_eq!(boxed.size_hint(), (0, Some(0)));
+    assert_eq!(boxed.size_hint(), (0, None));
     let mut reader = boxed.into_async_read();
     let mut buf = Vec::new();
     reader.read_to_end(&mut buf).await?;
@@ -242,9 +244,9 @@ async fn outgoing_stream() -> Result<()> {
 
     let mut boxed: OutgoingBody =
         UnsyncBoxBody::new(Full::new(Bytes::from(vec![2, 0, 4, 8])).map_err(Into::into)).into();
-    assert_eq!(boxed.size_hint(), (4, Some(4)));
+    assert_eq!(boxed.size_hint(), (0, None));
     assert_eq!(boxed.next().await.unwrap().unwrap(), vec![2, 0, 4, 8]);
-    assert_eq!(boxed.size_hint(), (0, Some(0)));
+    assert_eq!(boxed.size_hint(), (0, None));
     assert!(boxed.next().await.is_none());
 
     Ok(())
