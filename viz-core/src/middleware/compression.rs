@@ -8,7 +8,7 @@ use tokio_util::io::{ReaderStream, StreamReader};
 use crate::{
     async_trait,
     header::{HeaderValue, ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH},
-    Handler, IntoResponse, OutgoingBody, Request, Response, Result, Transform,
+    Body, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// Compress response body.
@@ -81,11 +81,11 @@ impl<T: IntoResponse> IntoResponse for Compress<T> {
                 res = res.map(|body| {
                     let body = StreamReader::new(body);
                     if self.algo == ContentCoding::Gzip {
-                        OutgoingBody::stream(ReaderStream::new(bufread::GzipEncoder::new(body)))
+                        Body::from_stream(ReaderStream::new(bufread::GzipEncoder::new(body)))
                     } else if self.algo == ContentCoding::Deflate {
-                        OutgoingBody::stream(ReaderStream::new(bufread::DeflateEncoder::new(body)))
+                        Body::from_stream(ReaderStream::new(bufread::DeflateEncoder::new(body)))
                     } else {
-                        OutgoingBody::stream(ReaderStream::new(bufread::BrotliEncoder::new(body)))
+                        Body::from_stream(ReaderStream::new(bufread::BrotliEncoder::new(body)))
                     }
                 });
                 res.headers_mut()

@@ -8,8 +8,8 @@ use tokio::net::TcpListener;
 use viz::{
     server::conn::http1,
     types::{Params, RouteInfo},
-    IncomingBody, IntoResponse, Io, Method, Request, RequestExt, Response, Result, Router,
-    StatusCode, Tree,
+    Body, IntoResponse, Io, Method, Request, RequestExt, Response, Result, Router, StatusCode,
+    Tree,
 };
 
 /// Static Lazy Routes
@@ -35,9 +35,7 @@ async fn main() -> Result<()> {
             if let Err(err) = http1::Builder::new()
                 .serve_connection(
                     Io::new(stream),
-                    service_fn(|req| {
-                        serve(req.map(|body| IncomingBody::new(Some(body))), Some(addr))
-                    }),
+                    service_fn(|req| serve(req.map(Body::Incoming), Some(addr))),
                 )
                 .await
             {

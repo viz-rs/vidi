@@ -1,7 +1,7 @@
 use http_body_util::BodyExt;
 use hyper::service::Service;
 
-use crate::{async_trait, Body, Bytes, Error, Handler, Request, Response, Result};
+use crate::{async_trait, Bytes, Error, Handler, HttpBody, Request, Response, Result};
 
 /// Converts a hyper [`Service`] to a viz [`Handler`].
 #[derive(Debug, Clone)]
@@ -19,8 +19,8 @@ impl<S> ServiceHandler<S> {
 #[async_trait]
 impl<I, O, S> Handler<Request<I>> for ServiceHandler<S>
 where
-    I: Body + Send + Unpin + 'static,
-    O: Body + Send + 'static,
+    I: HttpBody + Send + Unpin + 'static,
+    O: HttpBody + Send + 'static,
     O::Data: Into<Bytes>,
     O::Error: Into<Error>,
     S: Service<Request<I>, Response = Response<O>> + Send + Sync + Clone + 'static,

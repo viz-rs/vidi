@@ -23,9 +23,9 @@ impl Error {
     /// Create a new error object from any error type.
     pub fn boxed<T>(t: T) -> Self
     where
-        T: StdError + Send + Sync + 'static,
+        T: Into<BoxError>,
     {
-        Self::Boxed(Box::new(t))
+        Self::Boxed(t.into())
     }
 
     /// Forwards to the method defined on the type `dyn Error`.
@@ -98,11 +98,11 @@ impl Error {
 
 impl<E, T> From<(E, T)> for Error
 where
-    E: StdError + Send + Sync + 'static,
+    E: Into<BoxError>,
     T: IntoResponse,
 {
     fn from((e, t): (E, T)) -> Self {
-        Self::Report(Box::new(e), t.into_response())
+        Self::Report(e.into(), t.into_response())
     }
 }
 

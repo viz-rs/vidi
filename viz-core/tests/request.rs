@@ -7,7 +7,7 @@ use viz_core::{
     // StatusCode,
     header::CONTENT_TYPE,
     types::PayloadError,
-    IncomingBody,
+    Body,
     Request,
     RequestExt,
     Result,
@@ -20,7 +20,7 @@ struct Page {
 
 #[test]
 fn request_ext() -> Result<()> {
-    let mut req = Request::builder().uri("viz.rs").body(IncomingBody::Empty)?;
+    let mut req = Request::builder().uri("viz.rs").body(Body::Empty)?;
 
     assert_eq!(req.schema(), None);
     assert_eq!(req.uri(), "viz.rs");
@@ -39,12 +39,25 @@ fn request_ext() -> Result<()> {
     );
     assert_eq!(
         req.incoming().unwrap_err().to_string(),
+        PayloadError::Empty.to_string()
+    );
+
+    let mut req = Request::builder()
+        .uri("viz.rs")
+        .body(Body::Full("test".into()))?;
+
+    assert_eq!(req.schema(), None);
+    assert_eq!(req.uri(), "viz.rs");
+    assert_eq!(req.path(), "");
+    assert!(req.incoming().is_ok());
+    assert_eq!(
+        req.incoming().unwrap_err().to_string(),
         PayloadError::Used.to_string()
     );
 
     let mut req = Request::builder()
         .uri("https://viz.rs?p=1")
-        .body(IncomingBody::Empty)?;
+        .body(Body::Empty)?;
 
     req.headers_mut()
         .insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));

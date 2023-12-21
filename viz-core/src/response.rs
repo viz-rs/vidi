@@ -1,7 +1,7 @@
 use futures_util::Stream;
 use http_body_util::Full;
 
-use crate::{async_trait, header, Bytes, Error, OutgoingBody, Response, Result, StatusCode};
+use crate::{async_trait, header, Body, BoxError, Bytes, Error, Response, Result, StatusCode};
 
 /// The [`Response`] Extension.
 #[async_trait]
@@ -26,7 +26,7 @@ pub trait ResponseExt: private::Sealed + Sized {
     /// Creates a response with an empty body.
     #[must_use]
     fn empty() -> Response {
-        Response::new(OutgoingBody::default())
+        Response::new(Body::empty())
     }
 
     /// The response with the specified [`Content-Type`][mdn].
@@ -34,7 +34,7 @@ pub trait ResponseExt: private::Sealed + Sized {
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type>
     fn with<B>(body: B, content_type: &'static str) -> Response
     where
-        B: Into<OutgoingBody>,
+        B: Into<Body>,
     {
         let mut resp = Response::new(body.into());
         resp.headers_mut().insert(
@@ -89,9 +89,9 @@ pub trait ResponseExt: private::Sealed + Sized {
     where
         S: Stream<Item = Result<D, E>> + Send + 'static,
         D: Into<Bytes> + 'static,
-        E: Into<Error> + 'static,
+        E: Into<BoxError> + 'static,
     {
-        Response::new(OutgoingBody::stream(stream))
+        Response::new(Body::from_stream(stream))
     }
 
     /// Downloads transfers the file from path as an attachment.
@@ -229,7 +229,7 @@ impl ResponseExt for Response {
         .escape_default();
 
         let mut resp = Self::attachment(&format!("attachment; filename=\"{value}\""));
-        *resp.body_mut() = OutgoingBody::stream(tokio_util::io::ReaderStream::new(
+        *resp.body_mut() = Body::from_stream(tokio_util::io::ReaderStream::new(
             tokio::fs::File::open(path).await.map_err(Error::from)?,
         ));
         Ok(resp)

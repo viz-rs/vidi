@@ -3,8 +3,7 @@
 use form_data::FormData;
 
 use crate::{
-    async_trait, Error, FromRequest, IncomingBody, IntoResponse, Request, RequestExt, Response,
-    StatusCode,
+    async_trait, Body, Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode,
 };
 
 use super::{Payload, PayloadError};
@@ -12,7 +11,7 @@ use super::{Payload, PayloadError};
 pub use form_data::{Error as MultipartError, Limits as MultipartLimits};
 
 /// Extracts the data from the multipart body of a request.
-pub type Multipart<T = IncomingBody> = FormData<T>;
+pub type Multipart<T = Body> = FormData<T>;
 
 impl<T> Payload for Multipart<T> {
     const NAME: &'static str = "multipart";

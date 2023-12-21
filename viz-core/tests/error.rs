@@ -1,5 +1,5 @@
 use std::error::Error as StdError;
-use viz_core::{Error, OutgoingBody, Response, StatusCode};
+use viz_core::{Body, Error, Response, StatusCode};
 
 #[test]
 fn error() {
@@ -33,13 +33,13 @@ fn error() {
         .into();
     assert!(e.downcast_mut::<std::io::Error>().is_some());
 
-    let e = Error::Responder(Response::new(OutgoingBody::Empty));
+    let e = Error::Responder(Response::new(Body::Empty));
     assert!(!e.is::<std::io::Error>());
-    let e = Error::Responder(Response::new(OutgoingBody::Empty));
+    let e = Error::Responder(Response::new(Body::Empty));
     assert!(e.downcast::<std::io::Error>().is_err());
-    let e = Error::Responder(Response::new(OutgoingBody::Empty));
+    let e = Error::Responder(Response::new(Body::Empty));
     assert!(e.downcast_ref::<std::io::Error>().is_none());
-    let mut e = Error::Responder(Response::new(OutgoingBody::Empty));
+    let mut e = Error::Responder(Response::new(Body::Empty));
     assert!(e.downcast_mut::<std::io::Error>().is_none());
 
     let _: Error = http::Error::from(StatusCode::from_u16(1000).unwrap_err()).into();

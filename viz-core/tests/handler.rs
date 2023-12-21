@@ -237,9 +237,7 @@ async fn handler() -> Result<()> {
                 |_: Box<dyn std::any::Any + Send>| async move { panic!("Custom Error 2") },
             );
 
-        assert!(Handler::call(&aa, Request::new(IncomingBody::Empty))
-            .await
-            .is_ok());
+        assert!(Handler::call(&aa, Request::new(Body::Empty)).await.is_ok());
 
         let th = MyAround {
             name: String::new(),
@@ -287,9 +285,7 @@ async fn handler() -> Result<()> {
 
         assert!(rha.call(Request::default()).await.is_ok());
 
-        assert!(Handler::call(&rha, Request::new(IncomingBody::Empty))
-            .await
-            .is_ok());
+        assert!(Handler::call(&rha, Request::new(Body::Empty)).await.is_ok());
 
         assert!(rhb.call(Request::default()).await.is_err());
 

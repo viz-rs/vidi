@@ -1,7 +1,7 @@
 use crate::{
     async_trait, header,
     types::{PayloadError, RealIp},
-    Bytes, FromRequest, Incoming, IncomingBody, Request, Result,
+    Body, BodyState, Bytes, FromRequest, Request, Result,
 };
 use headers::HeaderMapExt;
 use http_body_util::{BodyExt, Collected};
@@ -79,16 +79,13 @@ pub trait RequestExt: private::Sealed + Sized {
     where
         T: FromRequest;
 
-    /// Get Incoming body.
-    fn incoming_body(&mut self) -> IncomingBody;
-
-    /// Get Incoming.
+    /// Get an incoming body.
     ///
     /// # Errors
     ///
     /// Will return [`PayloadError::Empty`] or [`PayloadError::Used`] if the incoming does not
     /// exist or be used.
-    fn incoming(&mut self) -> Result<Incoming, PayloadError>;
+    fn incoming(&mut self) -> Result<Body, PayloadError>;
 
     /// Return with a [Bytes][mdn] representation of the request body.
     ///
@@ -252,16 +249,22 @@ impl RequestExt for Request {
         T::extract(self).await
     }
 
-    fn incoming_body(&mut self) -> IncomingBody {
-        std::mem::replace(self.body_mut(), IncomingBody::used())
-    }
-
-    fn incoming(&mut self) -> Result<Incoming, PayloadError> {
-        match self.incoming_body() {
-            IncomingBody::Empty => Err(PayloadError::Empty),
-            IncomingBody::Incoming(None) => Err(PayloadError::Used),
-            IncomingBody::Incoming(Some(incoming)) => Ok(incoming),
+    fn incoming(&mut self) -> Result<Body, PayloadError> {
+        if let Some(state) = self.extensions().get::<BodyState>() {
+            match state {
+                BodyState::Empty => Err(PayloadError::Empty)?,
+                BodyState::Used => Err(PayloadError::Used)?,
+                BodyState::Normal => unreachable!(),
+            }
         }
+
+        let (state, result) = match std::mem::replace(self.body_mut(), Body::empty()) {
+            Body::Empty => (BodyState::Empty, Err(PayloadError::Empty)),
+            body => (BodyState::Used, Ok(body)),
+        };
+
+        self.extensions_mut().insert(state);
+        result
     }
 
     async fn bytes(&mut self) -> Result<Bytes, PayloadError> {
@@ -362,7 +365,7 @@ impl RequestExt for Request {
             .as_str();
 
         Ok(Multipart::with_limits(
-            self.incoming_body(),
+            self.incoming()?,
             boundary,
             self.extensions()
                 .get::<std::sync::Arc<MultipartLimits>>()

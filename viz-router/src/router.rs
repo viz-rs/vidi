@@ -188,7 +188,7 @@ mod tests {
     use viz_core::{
         async_trait,
         types::{Params, RouteInfo},
-        Error, Handler, HandlerExt, IncomingBody, IntoResponse, Method, Next, Request, RequestExt,
+        Body, Error, Handler, HandlerExt, IntoResponse, Method, Next, Request, RequestExt,
         Response, ResponseExt, Result, StatusCode, Transform,
     };
 
@@ -528,7 +528,7 @@ mod tests {
             Request::builder()
                 .method(method.clone())
                 .uri(path.to_owned())
-                .body(IncomingBody::Empty)
+                .body(Body::Empty)
                 .unwrap(),
             method,
             path.to_string(),

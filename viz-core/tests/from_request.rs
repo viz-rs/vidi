@@ -2,7 +2,7 @@ use headers::HeaderValue;
 use viz_core::{
     header::{CONTENT_LENGTH, CONTENT_TYPE},
     types::{Form, Json, Limits, PayloadError, State, StateError},
-    FromRequest, IncomingBody, Request, RequestExt, Result,
+    Body, FromRequest, Request, RequestExt, Result,
 };
 
 #[tokio::test]
@@ -13,7 +13,7 @@ async fn from_request() -> Result<()> {
             HeaderValue::from_static(mime::APPLICATION_JSON.as_ref()),
         )
         .header(CONTENT_LENGTH, "0")
-        .body(IncomingBody::Empty)?;
+        .body(Body::Empty)?;
     req.extensions_mut().insert(Limits::default());
 
     let result: Result<Json<Option<String>>, PayloadError> = FromRequest::extract(&mut req).await;
@@ -25,19 +25,19 @@ async fn from_request() -> Result<()> {
             HeaderValue::from_static(mime::APPLICATION_WWW_FORM_URLENCODED.as_ref()),
         )
         .header(CONTENT_LENGTH, "0")
-        .body(IncomingBody::Empty)?;
+        .body(Body::Empty)?;
     req.extensions_mut().insert(Limits::default());
 
     let result: Result<Form<Option<String>>, PayloadError> = req.extract().await;
     assert!(result.is_err());
 
-    let mut req = Request::builder().body(IncomingBody::Empty)?;
+    let mut req = Request::builder().body(Body::Empty)?;
     req.extensions_mut().insert(Limits::default());
 
     let state: Option<State<String>> = req.extract().await?;
     assert!(state.is_none());
 
-    let mut req = Request::builder().body(IncomingBody::Empty)?;
+    let mut req = Request::builder().body(Body::Empty)?;
     req.extensions_mut().insert(Limits::default());
 
     let result: Result<State<String>, StateError> = req.extract().await?;

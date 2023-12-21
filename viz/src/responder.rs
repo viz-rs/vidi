@@ -2,7 +2,7 @@ use std::{convert::Infallible, future::Future, net::SocketAddr, pin::Pin, sync::
 
 use crate::{
     types::{Params, RouteInfo},
-    Handler, Incoming, IncomingBody, IntoResponse, Method, Request, Response, StatusCode, Tree,
+    Body, Handler, Incoming, IntoResponse, Method, Request, Response, StatusCode, Tree,
 };
 
 /// Handles the HTTP [`Request`] and retures the HTTP [`Response`].
@@ -46,7 +46,7 @@ impl Responder {
         }));
         // req.set_state(tree.clone());
         Ok(handler
-            .call(req.map(Some).map(IncomingBody::new))
+            .call(req.map(Body::Incoming))
             .await
             .unwrap_or_else(IntoResponse::into_response))
     }

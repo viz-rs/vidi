@@ -21,7 +21,7 @@ pub mod middleware;
 pub mod types;
 
 mod body;
-pub use body::{IncomingBody, OutgoingBody};
+pub use body::{Body, BodyState};
 
 mod error;
 pub use error::{BoxError, Error};
@@ -39,9 +39,9 @@ mod response;
 pub use response::ResponseExt;
 
 /// Represents an HTTP Request.
-pub type Request<T = IncomingBody> = http::Request<T>;
+pub type Request<T = Body> = http::Request<T>;
 /// Represents an HTTP Response.
-pub type Response<T = OutgoingBody> = http::Response<T>;
+pub type Response<T = Body> = http::Response<T>;
 /// Represents either success (Ok) or failure (Err).
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
@@ -50,7 +50,7 @@ pub use bytes::{Bytes, BytesMut};
 #[doc(inline)]
 pub use headers;
 pub use http::{header, Method, StatusCode};
-pub use hyper::body::{Body, Incoming};
+pub use hyper::body::{Body as HttpBody, Incoming};
 pub use hyper_util::rt::TokioIo as Io;
 pub use std::future::Future;
 pub use thiserror::Error as ThisError;
