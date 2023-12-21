@@ -14,7 +14,7 @@ use crate::{BoxError, Error, HttpBody, Result};
 /// A body state.
 #[derive(Clone, Debug, PartialEq)]
 pub enum BodyState {
-    /// The body is initialization state.
+    /// The body is inited.
     Normal,
     /// The body is empty.
     Empty,
@@ -39,7 +39,7 @@ pub enum Body<D = Bytes> {
 }
 
 impl Body {
-    /// Creates new incoming body.
+    /// Creates an empty body.
     #[must_use]
     pub fn empty() -> Self {
         Self::Empty
