@@ -45,6 +45,20 @@ impl Body {
         Self::Empty
     }
 
+    /// Wraps a body into box.
+    pub fn wrap<B>(body: B) -> Self
+    where
+        B: HttpBody + Send + 'static,
+        B::Data: Into<Bytes>,
+        B::Error: Into<BoxError>,
+    {
+        Self::Boxed(SyncWrapper::new(
+            body.map_frame(|frame| frame.map_data(Into::into))
+                .map_err(Error::boxed)
+                .boxed_unsync(),
+        ))
+    }
+
     /// A body created from a [`Stream`].
     pub fn from_stream<S>(stream: S) -> Self
     where

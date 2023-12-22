@@ -6,6 +6,7 @@ members = [
   "viz-handlers",
   "viz-macros",
   "viz-router",
+  "viz-tower",
   "viz-test",
 
   "examples/hello-world",

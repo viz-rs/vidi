@@ -1,0 +1,22 @@
+[package]
+name = "viz-tower"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+repository.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+viz-core.workspace = true
+http-body-util.workspace = true
+tower = { version = "0.4", features = ["util"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "test-util"] }
+tower-http = { version = "0.5", features = ["limit", "request-id", "timeout"] }
+
+[lints]
+workspace = true

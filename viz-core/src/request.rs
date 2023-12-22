@@ -254,11 +254,11 @@ impl RequestExt for Request {
             match state {
                 BodyState::Empty => Err(PayloadError::Empty)?,
                 BodyState::Used => Err(PayloadError::Used)?,
-                BodyState::Normal => unreachable!(),
+                BodyState::Normal => {}
             }
         }
 
-        let (state, result) = match std::mem::replace(self.body_mut(), Body::empty()) {
+        let (state, result) = match std::mem::replace(self.body_mut(), Body::Empty) {
             Body::Empty => (BodyState::Empty, Err(PayloadError::Empty)),
             body => (BodyState::Used, Ok(body)),
         };
