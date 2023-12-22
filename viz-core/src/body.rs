@@ -52,11 +52,10 @@ impl Body {
         B::Data: Into<Bytes>,
         B::Error: Into<BoxError>,
     {
-        Self::Boxed(SyncWrapper::new(
-            body.map_frame(|frame| frame.map_data(Into::into))
-                .map_err(Error::boxed)
-                .boxed_unsync(),
-        ))
+        body.map_frame(|frame| frame.map_data(Into::into))
+            .map_err(Error::boxed)
+            .boxed_unsync()
+            .into()
     }
 
     /// A body created from a [`Stream`].
@@ -66,15 +65,14 @@ impl Body {
         S::Ok: Into<Bytes>,
         S::Error: Into<BoxError>,
     {
-        Self::Boxed(SyncWrapper::new(
-            StreamBody::new(
-                stream
-                    .map_ok(Into::into)
-                    .map_ok(Frame::data)
-                    .map_err(Error::boxed),
-            )
-            .boxed_unsync(),
-        ))
+        StreamBody::new(
+            stream
+                .map_ok(Into::into)
+                .map_ok(Frame::data)
+                .map_err(Error::boxed),
+        )
+        .boxed_unsync()
+        .into()
     }
 
     /// A stream created from a [`http_body::Body`].

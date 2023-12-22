@@ -38,8 +38,8 @@ where
                     body.map_frame(|f| f.map_data(Into::into))
                         .map_err(Into::into)
                         .boxed_unsync()
+                        .into()
                 })
-                .map(Into::into)
             })
             .map_err(Into::into)
     }
