@@ -13,17 +13,17 @@ pub use middleware::{Layered, Middleware};
 
 /// Converts a tower [`Service`] into a [`Handler`].
 #[derive(Debug, Clone)]
-pub struct TowerServiceHandler<S>(S);
+pub struct ServiceHandler<S>(S);
 
-impl<S> TowerServiceHandler<S> {
-    /// Creates a new [`TowerServiceHandler`].
+impl<S> ServiceHandler<S> {
+    /// Creates a new [`ServiceHandler`].
     pub fn new(s: S) -> Self {
         Self(s)
     }
 }
 
 #[async_trait]
-impl<O, S> Handler<Request> for TowerServiceHandler<S>
+impl<O, S> Handler<Request> for ServiceHandler<S>
 where
     O: HttpBody + Send + 'static,
     O::Data: Into<Bytes>,
@@ -102,7 +102,7 @@ mod tests {
             .service(hello_svc);
 
         let r0 = Request::new(Body::Full("12".into()));
-        let h0 = TowerServiceHandler::new(svc);
+        let h0 = ServiceHandler::new(svc);
         assert!(h0.call(r0).await.is_err());
 
         let r1 = Request::new(Body::Full("1".into()));

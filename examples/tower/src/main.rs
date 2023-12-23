@@ -2,14 +2,19 @@
 
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use tower::util::{MapErrLayer, MapRequestLayer, MapResponseLayer};
-use tower::{service_fn, ServiceBuilder};
-use tower_http::limit::RequestBodyLimitLayer;
-use tower_http::request_id::{MakeRequestUuid, SetRequestIdLayer};
-use tower_http::trace::TraceLayer;
+use tower::{
+    service_fn,
+    util::{MapErrLayer, MapRequestLayer, MapResponseLayer},
+    ServiceBuilder,
+};
+use tower_http::{
+    limit::RequestBodyLimitLayer,
+    request_id::{MakeRequestUuid, SetRequestIdLayer},
+    trace::TraceLayer,
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use viz::{serve, Body, Error, IntoResponse, Request, Response, Result, Router, Tree};
-use viz_tower::{Layered, TowerServiceHandler};
+use viz_tower::{Layered, ServiceHandler};
 
 async fn index(_: Request) -> Result<Response> {
     Ok("Hello, World!".into_response())
@@ -36,12 +41,12 @@ async fn main() -> Result<()> {
     let index_svc = ServiceBuilder::new()
         .layer(MapRequestLayer::new(|req: Request<_>| req.map(Body::wrap)))
         .service(service_fn(index));
-    let index_handler = TowerServiceHandler::new(index_svc);
+    let index_handler = ServiceHandler::new(index_svc);
 
     let any_svc = ServiceBuilder::new()
         .layer(MapResponseLayer::new(IntoResponse::into_response))
         .service_fn(any);
-    let any_handler = TowerServiceHandler::new(any_svc);
+    let any_handler = ServiceHandler::new(any_svc);
 
     let layer = ServiceBuilder::new()
         .layer(TraceLayer::new_for_http())
