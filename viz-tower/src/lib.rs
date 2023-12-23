@@ -1,8 +1,15 @@
 //! An adapter that makes a tower [`Service`] into a [`Handler`].
 
-use http_body_util::BodyExt;
 use tower::{Service, ServiceExt};
-use viz_core::{async_trait, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result};
+use viz_core::{
+    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+};
+
+mod service;
+pub use service::HandlerService;
+
+mod middleware;
+pub use middleware::{Layered, Middleware};
 
 /// Converts a tower [`Service`] into a [`Handler`].
 #[derive(Debug, Clone)]
@@ -32,14 +39,7 @@ where
             .clone()
             .oneshot(req)
             .await
-            .map(|resp| {
-                resp.map(|body| {
-                    body.map_frame(|f| f.map_data(Into::into))
-                        .map_err(Error::boxed)
-                        .boxed_unsync()
-                        .into()
-                })
-            })
+            .map(|resp| resp.map(Body::wrap))
             .map_err(Error::boxed)
     }
 }

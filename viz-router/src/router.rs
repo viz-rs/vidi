@@ -366,7 +366,7 @@ mod tests {
         req.extensions_mut().insert(Arc::from(RouteInfo {
             id: *route.id,
             pattern: route.pattern(),
-            params: Into::<Params>::into(route.params()),
+            params: route.params().into(),
         }));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
@@ -396,7 +396,7 @@ mod tests {
         req.extensions_mut().insert(Arc::from(RouteInfo {
             id: *route.id,
             pattern: route.pattern(),
-            params: Into::<Params>::into(route.params()),
+            params: route.params().into(),
         }));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
@@ -431,7 +431,7 @@ mod tests {
         req.extensions_mut().insert(Arc::from(RouteInfo {
             id: *route.id,
             pattern: route.pattern(),
-            params: Into::<Params>::into(route.params()),
+            params: route.params().into(),
         }));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
@@ -446,7 +446,7 @@ mod tests {
         let route_info = Arc::from(RouteInfo {
             id: *route.id,
             pattern: route.pattern(),
-            params: Into::<Params>::into(route.params()),
+            params: route.params().into(),
         });
         assert_eq!(route.pattern(), "/posts/:post_id/users/:user_id");
         assert_eq!(route_info.pattern, "/posts/:post_id/users/:user_id");
@@ -464,7 +464,7 @@ mod tests {
         req.extensions_mut().insert(Arc::from(RouteInfo {
             id: *route.id,
             pattern: route.pattern(),
-            params: Into::<Params>::into(route.params()),
+            params: route.params().into(),
         }));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),

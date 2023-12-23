@@ -1,46 +1,38 @@
-use http_body_util::BodyExt;
 use hyper::service::Service;
 
-use crate::{async_trait, Bytes, Error, Handler, HttpBody, Request, Response, Result};
+use crate::{
+    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+};
 
 /// Converts a hyper [`Service`] to a viz [`Handler`].
 #[derive(Debug, Clone)]
-pub struct ServiceHandler<S> {
-    s: S,
-}
+pub struct ServiceHandler<S>(S);
 
 impl<S> ServiceHandler<S> {
     /// Creates a new [`ServiceHandler`].
     pub fn new(s: S) -> Self {
-        Self { s }
+        Self(s)
     }
 }
 
 #[async_trait]
 impl<I, O, S> Handler<Request<I>> for ServiceHandler<S>
 where
-    I: HttpBody + Send + Unpin + 'static,
+    I: HttpBody + Send + 'static,
     O: HttpBody + Send + 'static,
     O::Data: Into<Bytes>,
-    O::Error: Into<Error>,
+    O::Error: Into<BoxError>,
     S: Service<Request<I>, Response = Response<O>> + Send + Sync + Clone + 'static,
     S::Future: Send,
-    S::Error: Into<Error>,
+    S::Error: Into<BoxError>,
 {
     type Output = Result<Response>;
 
     async fn call(&self, req: Request<I>) -> Self::Output {
-        self.s
+        self.0
             .call(req)
             .await
-            .map(|resp| {
-                resp.map(|body| {
-                    body.map_frame(|f| f.map_data(Into::into))
-                        .map_err(Into::into)
-                        .boxed_unsync()
-                        .into()
-                })
-            })
-            .map_err(Into::into)
+            .map(|resp| resp.map(Body::wrap))
+            .map_err(Error::boxed)
     }
 }

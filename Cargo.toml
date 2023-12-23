@@ -33,6 +33,7 @@ members = [
   "examples/graceful-shutdown",
   "examples/databases/*",
   "examples/htmlx",
+  "examples/tower",
 ]
 
 [workspace.package]
@@ -52,6 +53,7 @@ viz-router = { version = "0.7.1", path = "viz-router" }
 viz-handlers = { version = "0.7.1", path = "viz-handlers", default-features = false }
 viz-macros = { version = "0.2.0", path = "viz-macros" }
 viz-test = { version = "0.2.0", path = "viz-test" }
+viz-tower = { version = "0.1.0", path = "viz-tower" }
 
 async-trait = "0.1"
 dyn-clone = "1.0"
@@ -102,6 +104,10 @@ prometheus = "0.13"
 # Tracing
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Tower
+tower = "0.4"
+tower-http = "0.5"
 
 [workspace.metadata.docs.rs]
 all-features = true

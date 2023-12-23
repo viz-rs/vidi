@@ -1,12 +1,18 @@
 [package]
-name = "tracing-example"
+name = "tower-example"
 version = "0.1.0"
 edition.workspace = true
 publish = false
 
 [dependencies]
 viz.workspace = true
+viz-tower.workspace = true
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tower.workspace = true
+tower-http = { workspace = true, features = ["full"] }
+
+[lints]
+workspace = true
