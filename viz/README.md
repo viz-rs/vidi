@@ -49,6 +49,8 @@
 
 - Simple + Flexible `Handler` & `Middleware`
 
+- Supports: Tower `Service`
+
 ## Hello Viz
 
 ```rust
