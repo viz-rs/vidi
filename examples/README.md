@@ -33,6 +33,7 @@ Here you can find a lot of small crabs 🦀.
   * [minijinja](templates/minijinja)
 * [Tracing aka logging](tracing)
 * [htmlx](htmlx)
+* [Tower Services](tower)
 
 ## Usage
 
