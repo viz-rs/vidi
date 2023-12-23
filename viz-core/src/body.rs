@@ -46,6 +46,7 @@ impl Body {
     }
 
     /// Wraps a body into box.
+    #[allow(clippy::missing_panics_doc)]
     pub fn wrap<B>(body: B) -> Self
     where
         B: HttpBody + Send + 'static,
