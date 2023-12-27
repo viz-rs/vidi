@@ -48,6 +48,9 @@ pub use map_into_response::MapInToResponse;
 mod or_else;
 pub use or_else::OrElse;
 
+mod try_handler;
+pub use try_handler::TryHandler;
+
 mod transform;
 pub use transform::Transform;
 
