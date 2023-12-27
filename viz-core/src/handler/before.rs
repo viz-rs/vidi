@@ -1,4 +1,6 @@
-use crate::{async_trait, Handler, Result};
+use futures_util::{future::BoxFuture, TryFutureExt};
+
+use crate::{Handler, Result};
 
 /// Maps the input before the handler calls.
 #[derive(Debug, Clone)]
@@ -15,16 +17,17 @@ impl<H, F> Before<H, F> {
     }
 }
 
-#[async_trait]
 impl<H, F, I, O> Handler<I> for Before<H, F>
 where
     I: Send + 'static,
-    F: Handler<I, Output = Result<I>> + Clone,
-    H: Handler<I, Output = Result<O>> + Clone,
+    F: Handler<I, Output = Result<I>>,
+    H: Handler<I, Output = Result<O>> + Send + Copy,
 {
     type Output = H::Output;
 
-    async fn call(&self, i: I) -> Self::Output {
-        self.h.call(self.f.call(i).await?).await
+    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+        let h = self.h;
+        let fut = self.f.call(i).and_then(move |i| h.call(i));
+        Box::pin(fut)
     }
 }
