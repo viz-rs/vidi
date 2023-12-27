@@ -19,10 +19,8 @@ impl<H, F> AndThen<H, F> {
 
 impl<H, F, I, O> Handler<I> for AndThen<H, F>
 where
-    I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    O: Send,
-    F: Handler<O, Output = H::Output> + Send + Copy,
+    F: Handler<O, Output = H::Output> + Send,
 {
     type Output = F::Output;
 

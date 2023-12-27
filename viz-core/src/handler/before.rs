@@ -19,9 +19,8 @@ impl<H, F> Before<H, F> {
 
 impl<H, F, I, O> Handler<I> for Before<H, F>
 where
-    I: Send + 'static,
     F: Handler<I, Output = Result<I>>,
-    H: Handler<I, Output = Result<O>> + Send + Copy,
+    H: Handler<I, Output = Result<O>> + Send,
 {
     type Output = H::Output;
 

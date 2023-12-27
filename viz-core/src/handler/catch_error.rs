@@ -1,6 +1,8 @@
 use std::marker::PhantomData;
 
-use crate::{async_trait, Handler, IntoResponse, Response, Result};
+use futures_util::future::BoxFuture;
+
+use crate::{Handler, IntoResponse, Response, Result};
 
 /// Catches rejected error while calling the handler.
 #[derive(Debug)]
@@ -36,7 +38,6 @@ impl<H, F, R, E> CatchError<H, F, R, E> {
     }
 }
 
-#[async_trait]
 impl<H, F, I, O, R, E> Handler<I> for CatchError<H, F, R, E>
 where
     I: Send + 'static,
@@ -48,7 +49,7 @@ where
 {
     type Output = Result<Response>;
 
-    async fn call(&self, i: I) -> Self::Output {
+    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
         match self.h.call(i).await {
             Ok(r) => Ok(r.into_response()),
             Err(e) => Ok(self.f.call(e.downcast::<E>()?).await.into_response()),

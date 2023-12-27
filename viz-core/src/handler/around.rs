@@ -22,7 +22,6 @@ impl<H, F> Around<H, F> {
 
 impl<H, F, I, O> Handler<I> for Around<H, F>
 where
-    I: Send + 'static,
     H: Handler<I, Output = Result<O>> + Copy,
     F: Handler<Next<I, H>, Output = H::Output>,
 {

@@ -1,4 +1,4 @@
-use futures_util::{future::BoxFuture, FutureExt, TryFutureExt};
+use futures_util::{future::BoxFuture, TryFutureExt};
 
 use crate::{Handler, Result};
 
@@ -17,18 +17,15 @@ impl<H, F> Map<H, F> {
     }
 }
 
-impl<H, F, I, O> Handler<I> for Map<H, F>
+impl<H, F, I, O, T> Handler<I> for Map<H, F>
 where
-    I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    O: Send + 'static,
-    F: Handler<O, Output = O> + Copy,
+    F: FnOnce(O) -> T + Send,
 {
-    type Output = H::Output;
+    type Output = Result<T>;
 
     fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
-        let f = self.f;
-        let fut = self.h.call(i).map_ok(move |o| f.call(o));
+        let fut = self.h.call(i).map_ok(self.f);
         Box::pin(fut)
     }
 }

@@ -1,4 +1,6 @@
-use crate::{async_trait, Handler, IntoResponse, Response, Result};
+use futures_util::{future::BoxFuture, TryFutureExt};
+
+use crate::{Handler, IntoResponse, Response, Result};
 
 /// Maps the handler's output type to the [`Response`].
 #[derive(Debug, Clone)]
@@ -12,16 +14,15 @@ impl<H> MapInToResponse<H> {
     }
 }
 
-#[async_trait]
 impl<H, I, O> Handler<I> for MapInToResponse<H>
 where
-    I: Send + 'static,
     H: Handler<I, Output = Result<O>> + Clone,
     O: IntoResponse + Send,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, i: I) -> Self::Output {
-        self.0.call(i).await.map(IntoResponse::into_response)
+    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+        let fut = self.0.call(i).map_ok(IntoResponse::into_response);
+        Box::pin(fut)
     }
 }
