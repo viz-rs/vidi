@@ -1,8 +1,7 @@
-use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use tower::Service;
-use viz_core::{Error, Future, Handler, Request, Response, Result};
+use viz_core::{future::BoxFuture, Error, Handler, Request, Response, Result};
 
 /// An adapter that makes a [`Handler`] into a [`Service`].
 #[derive(Debug)]
@@ -30,7 +29,7 @@ where
 {
     type Response = Response;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Response>> + Send + 'static>>;
+    type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     #[inline]
     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {

@@ -1,11 +1,10 @@
-use crate::{async_trait, Request};
+use crate::{future::BoxFuture, Request};
 
 /// A handler with extractors.
-#[async_trait]
-pub trait FnExt<E>: Clone + Send + Sync + 'static {
+pub trait FnExt<E> {
     /// The returned type after the call operator is used.
     type Output;
 
     /// Performs the call operation.
-    async fn call(&self, req: Request) -> Self::Output;
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output>;
 }

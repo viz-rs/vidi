@@ -3,7 +3,10 @@
 #[cfg(feature = "multipart")]
 use std::sync::Arc;
 
-use crate::{async_trait, types, Handler, IntoResponse, Request, Response, Result, Transform};
+use crate::{
+    future::{BoxFuture, TryFutureExt},
+    types, Handler, IntoResponse, Request, Response, Result, Transform,
+};
 
 /// A configuration for [`LimitsMiddleware`].
 #[derive(Debug, Clone)]
@@ -67,19 +70,18 @@ pub struct LimitsMiddleware<H> {
     config: Config,
 }
 
-#[async_trait]
 impl<H, O> Handler<Request> for LimitsMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
-    O: IntoResponse,
+    H: Handler<Request, Output = Result<O>>,
+    O: IntoResponse + 'static,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, mut req: Request) -> Self::Output {
+    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
         req.extensions_mut().insert(self.config.limits.clone());
         #[cfg(feature = "multipart")]
         req.extensions_mut().insert(self.config.multipart.clone());
 
-        self.h.call(req).await.map(IntoResponse::into_response)
+        Box::pin(self.h.call(req).map_ok(IntoResponse::into_response))
     }
 }

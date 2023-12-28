@@ -47,6 +47,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 
 pub use async_trait::async_trait;
 pub use bytes::{Bytes, BytesMut};
+pub use futures_util::future;
 #[doc(inline)]
 pub use headers;
 pub use http::{header, Method, StatusCode};
@@ -57,7 +58,11 @@ pub use thiserror::Error as ThisError;
 
 #[doc(hidden)]
 mod tuples {
-    use super::{async_trait, Error, FnExt, FromRequest, Future, IntoResponse, Request, Result};
+    use super::{
+        async_trait,
+        future::{BoxFuture, TryFutureExt},
+        Error, FnExt, FromRequest, Future, IntoResponse, Request, Result,
+    };
 
     tuple_impls!(A B C D E F G H I J K L);
 }

@@ -1,7 +1,9 @@
 //! Traits and types for handling an HTTP.
 
-use crate::Future;
-use futures_util::future::BoxFuture;
+use crate::future::{BoxFuture, Future};
+
+mod cloneable;
+pub use cloneable::{BoxCloneable, Cloneable};
 
 mod after;
 pub use after::After;
@@ -71,8 +73,8 @@ pub trait Handler<Input> {
 impl<F, I, Fut, O> Handler<I> for F
 where
     I: Send + 'static,
-    F: Fn(I) -> Fut + ?Sized + Clone + Send + Sync + 'static,
-    Fut: Future<Output = O> + Send,
+    F: Fn(I) -> Fut + ?Sized + Clone + Send + 'static,
+    Fut: Future<Output = O> + Send + 'static,
 {
     type Output = Fut::Output;
 
@@ -170,7 +172,7 @@ pub trait HandlerExt<I>: Handler<I> {
     }
 
     /// Catches rejected error while calling the handler.
-    fn catch_error<F, R, E>(self, f: F) -> CatchError<Self, F, R, E>
+    fn catch_error<F, E, R>(self, f: F) -> CatchError<Self, F, E, R>
     where
         Self: Sized,
     {
@@ -188,9 +190,9 @@ pub trait HandlerExt<I>: Handler<I> {
     /// Converts this Handler into a [`BoxHandler`].
     fn boxed(self) -> BoxHandler<I, Self::Output>
     where
-        Self: Sized,
+        Self: Sized + Send + Clone + 'static,
     {
-        Box::new(self)
+        BoxHandler::new(self)
     }
 
     /// Returns a new [`Handler`] that wrapping the `Self` and a type implementing [`Transform`].

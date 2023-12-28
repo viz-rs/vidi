@@ -2,7 +2,8 @@
 
 use tower::{Service, ServiceExt};
 use viz_core::{
-    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+    future::{BoxFuture, TryFutureExt},
+    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
 };
 
 mod service;
@@ -25,25 +26,25 @@ impl<S> ServiceHandler<S> {
     }
 }
 
-#[async_trait]
 impl<O, S> Handler<Request> for ServiceHandler<S>
 where
     O: HttpBody + Send + 'static,
     O::Data: Into<Bytes>,
     O::Error: Into<BoxError>,
-    S: Service<Request, Response = Response<O>> + Send + Sync + Clone + 'static,
+    S: Service<Request, Response = Response<O>> + Send + Clone + 'static,
     S::Future: Send,
     S::Error: Into<BoxError>,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        self.0
-            .clone()
-            .oneshot(req)
-            .await
-            .map(|resp| resp.map(Body::wrap))
-            .map_err(Error::boxed)
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        Box::pin(
+            self.0
+                .clone()
+                .oneshot(req)
+                .map_ok(|resp| resp.map(Body::wrap))
+                .map_err(Error::boxed),
+        )
     }
 }
 

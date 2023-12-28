@@ -11,7 +11,7 @@ use tokio::io::AsyncReadExt;
 use tokio_util::io::ReaderStream;
 
 use viz_core::{
-    async_trait,
+    future::BoxFuture,
     headers::{
         AcceptRanges, ContentLength, ContentRange, ContentType, ETag, HeaderMap, HeaderMapExt,
         IfMatch, IfModifiedSince, IfNoneMatch, IfUnmodifiedSince, LastModified, Range,
@@ -47,12 +47,12 @@ impl File {
     }
 }
 
-#[async_trait]
 impl Handler<Request> for File {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        serve(&self.path, req.headers())
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        let path = self.path.clone();
+        Box::pin(async move { serve(&path, req.headers()) })
     }
 }
 
@@ -98,46 +98,52 @@ impl Dir {
     }
 }
 
-#[async_trait]
 impl Handler<Request> for Dir {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        if req.method() != Method::GET {
-            Err(Error::MethodNotAllowed)?;
-        }
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        let Self {
+            mut path,
+            listing,
+            unlisted,
+        } = self.clone();
 
-        let mut prev = false;
-        let mut path = self.path.clone();
+        Box::pin(async move {
+            if req.method() != Method::GET {
+                Err(Error::MethodNotAllowed)?;
+            }
 
-        if let Some(param) = req.route_info().params.first().map(|(_, v)| v) {
-            let p = percent_encoding::percent_decode_str(param)
-                .decode_utf8()
-                .map_err(|_| Error::InvalidPath)?;
-            sanitize_path(&mut path, &p)?;
-            prev = true;
-        }
+            let mut prev = false;
 
-        if !path.exists() {
-            Err(StatusCode::NOT_FOUND.into_error())?;
-        }
+            if let Some(param) = req.route_info().params.first().map(|(_, v)| v) {
+                let p = percent_encoding::percent_decode_str(param)
+                    .decode_utf8()
+                    .map_err(|_| Error::InvalidPath)?;
+                sanitize_path(&mut path, &p)?;
+                prev = true;
+            }
 
-        if path.is_file() {
-            return serve(&path, req.headers());
-        }
+            if !path.exists() {
+                Err(StatusCode::NOT_FOUND.into_error())?;
+            }
 
-        let index = path.join("index.html");
-        if index.exists() {
-            return serve(&index, req.headers());
-        }
+            if path.is_file() {
+                return serve(&path, req.headers());
+            }
 
-        if self.listing {
-            return Directory::new(req.path(), prev, &path, &self.unlisted)
-                .ok_or_else(|| StatusCode::INTERNAL_SERVER_ERROR.into_error())
-                .map(IntoResponse::into_response);
-        }
+            let index = path.join("index.html");
+            if index.exists() {
+                return serve(&index, req.headers());
+            }
 
-        Ok(StatusCode::NOT_FOUND.into_response())
+            if listing {
+                return Directory::new(req.path(), prev, &path, &unlisted)
+                    .ok_or_else(|| StatusCode::INTERNAL_SERVER_ERROR.into_error())
+                    .map(IntoResponse::into_response);
+            }
+
+            Ok(StatusCode::NOT_FOUND.into_response())
+        })
     }
 }
 

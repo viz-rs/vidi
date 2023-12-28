@@ -3,7 +3,7 @@
 use std::{collections::HashSet, fmt, sync::Arc};
 
 use crate::{
-    async_trait,
+    future::BoxFuture,
     header::{
         HeaderMap, HeaderName, HeaderValue, ACCESS_CONTROL_ALLOW_CREDENTIALS,
         ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_HEADERS,
@@ -203,99 +203,103 @@ pub struct CorsMiddleware<H> {
     aceh: AccessControlExposeHeaders,
 }
 
-#[async_trait]
 impl<H, O> Handler<Request> for CorsMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
-    O: IntoResponse,
+    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    O: IntoResponse + 'static,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        let Some(origin) = req.header(ORIGIN).filter(is_not_empty) else {
-            return self.h.call(req).await.map(IntoResponse::into_response);
-        };
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        let Self {
+            config,
+            acam,
+            acah,
+            aceh,
+            h,
+        } = self.clone();
 
-        if !self.config.allow_origins.contains(&origin)
-            || !self
-                .config
-                .origin_verify
-                .as_ref()
-                .map_or(true, |f| (f)(&origin))
-        {
-            return Err(StatusCode::FORBIDDEN.into_error());
-        }
+        Box::pin(async move {
+            let Some(origin) = req.header(ORIGIN).filter(is_not_empty) else {
+                return h.call(req).await.map(IntoResponse::into_response);
+            };
 
-        let mut headers = HeaderMap::new();
-        let mut resp = if req.method() == Method::OPTIONS {
-            // Preflight request
-            if req
-                .header(ACCESS_CONTROL_REQUEST_METHOD)
-                .map_or(false, |method| {
-                    self.config.allow_methods.is_empty()
-                        || self.config.allow_methods.contains(&method)
-                })
+            if !config.allow_origins.contains(&origin)
+                || !config.origin_verify.as_ref().map_or(true, |f| (f)(&origin))
             {
-                headers.typed_insert(self.acam.clone());
+                return Err(StatusCode::FORBIDDEN.into_error());
+            }
+
+            let mut headers = HeaderMap::new();
+            let mut resp = if req.method() == Method::OPTIONS {
+                // Preflight request
+                if req
+                    .header(ACCESS_CONTROL_REQUEST_METHOD)
+                    .map_or(false, |method| {
+                        config.allow_methods.is_empty() || config.allow_methods.contains(&method)
+                    })
+                {
+                    headers.typed_insert(acam);
+                } else {
+                    return Err((StatusCode::FORBIDDEN, "Invalid Preflight Request").into_error());
+                }
+
+                let (allow_headers, request_headers) = req
+                    .header(ACCESS_CONTROL_REQUEST_HEADERS)
+                    .map_or((true, None), |hs: HeaderValue| {
+                        (
+                            hs.to_str()
+                                .map(|hs| {
+                                    hs.split(',')
+                                        .map(str::as_bytes)
+                                        .map(HeaderName::from_bytes)
+                                        .filter_map(Result::ok)
+                                        .any(|header| config.allow_headers.contains(&header))
+                                })
+                                .unwrap_or(false),
+                            Some(hs),
+                        )
+                    });
+
+                if !allow_headers {
+                    return Err((StatusCode::FORBIDDEN, "Invalid Preflight Request").into_error());
+                }
+
+                if config.allow_headers.is_empty() {
+                    headers.insert(
+                        ACCESS_CONTROL_ALLOW_HEADERS,
+                        request_headers.unwrap_or(HeaderValue::from_static("*")),
+                    );
+                } else {
+                    headers.typed_insert(acah.clone());
+                }
+
+                // 204 - no content
+                StatusCode::NO_CONTENT.into_response()
             } else {
-                return Err((StatusCode::FORBIDDEN, "Invalid Preflight Request").into_error());
-            }
+                // Simple Request
+                if !config.expose_headers.is_empty() {
+                    headers.typed_insert(aceh.clone());
+                }
 
-            let (allow_headers, request_headers) = req
-                .header(ACCESS_CONTROL_REQUEST_HEADERS)
-                .map_or((true, None), |hs: HeaderValue| {
-                    (
-                        hs.to_str()
-                            .map(|hs| {
-                                hs.split(',')
-                                    .map(str::as_bytes)
-                                    .map(HeaderName::from_bytes)
-                                    .filter_map(Result::ok)
-                                    .any(|header| self.config.allow_headers.contains(&header))
-                            })
-                            .unwrap_or(false),
-                        Some(hs),
-                    )
-                });
+                h.call(req).await.map(IntoResponse::into_response)?
+            };
 
-            if !allow_headers {
-                return Err((StatusCode::FORBIDDEN, "Invalid Preflight Request").into_error());
-            }
+            // https://github.com/rs/cors/issues/10
+            headers.insert(VARY, ORIGIN.into());
+            headers.insert(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
 
-            if self.config.allow_headers.is_empty() {
+            if config.credentials {
                 headers.insert(
-                    ACCESS_CONTROL_ALLOW_HEADERS,
-                    request_headers.unwrap_or(HeaderValue::from_static("*")),
+                    ACCESS_CONTROL_ALLOW_CREDENTIALS,
+                    HeaderValue::from_static("true"),
                 );
-            } else {
-                headers.typed_insert(self.acah.clone());
             }
 
-            // 204 - no content
-            StatusCode::NO_CONTENT.into_response()
-        } else {
-            // Simple Request
-            if !self.config.expose_headers.is_empty() {
-                headers.typed_insert(self.aceh.clone());
-            }
+            resp.headers_mut().extend(headers);
 
-            self.h.call(req).await.map(IntoResponse::into_response)?
-        };
-
-        // https://github.com/rs/cors/issues/10
-        headers.insert(VARY, ORIGIN.into());
-        headers.insert(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
-
-        if self.config.credentials {
-            headers.insert(
-                ACCESS_CONTROL_ALLOW_CREDENTIALS,
-                HeaderValue::from_static("true"),
-            );
-        }
-
-        resp.headers_mut().extend(headers);
-
-        Ok(resp)
+            Ok(resp)
+        })
     }
 }
 

@@ -1,6 +1,4 @@
-use futures_util::future::BoxFuture;
-
-use crate::Handler;
+use crate::{future::BoxFuture, Handler};
 
 /// Combines two different handlers having the same associated types into a single type.
 #[derive(Debug, Clone)]
@@ -13,7 +11,8 @@ pub enum Either<L, R> {
 
 impl<L, R, I, O> Handler<I> for Either<L, R>
 where
-    I: Send + 'static,
+    I: 'static,
+    O: 'static,
     L: Handler<I, Output = O>,
     R: Handler<I, Output = O>,
 {

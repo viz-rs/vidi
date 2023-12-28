@@ -67,7 +67,7 @@ sync_wrapper = "0.1.2"
 thiserror = "1.0"
 
 # router
-path-tree = "0.7"
+path-tree = "0.7.3"
 
 # http
 headers = "0.4"

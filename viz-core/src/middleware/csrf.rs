@@ -6,6 +6,7 @@ use base64::Engine as _;
 
 use crate::{
     async_trait,
+    future::BoxFuture,
     header::{HeaderName, HeaderValue, VARY},
     middleware::helper::{CookieOptions, Cookieable},
     Error, FromRequest, Handler, IntoResponse, Method, Request, RequestExt, Response, Result,
@@ -186,10 +187,9 @@ where
     }
 }
 
-#[async_trait]
 impl<H, O, S, G, V> Handler<Request> for CsrfMiddleware<H, S, G, V>
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
+    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
     O: IntoResponse,
     S: Fn() -> Result<Vec<u8>> + Send + Sync + 'static,
     G: Fn(&[u8], Vec<u8>) -> Vec<u8> + Send + Sync + 'static,
@@ -197,38 +197,46 @@ where
 {
     type Output = Result<Response>;
 
-    async fn call(&self, mut req: Request) -> Self::Output {
-        let mut secret = self.config.get(&req)?;
-        let config = self.config.as_ref();
+    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+        let Self { config, h } = self.clone();
 
-        if !config.ignored_methods.contains(req.method()) {
-            let mut forbidden = true;
-            if let Some(secret) = secret.take() {
-                if let Some(raw_token) = req.header(&config.header) {
-                    forbidden = !(config.verify)(&secret, raw_token);
+        Box::pin(async move {
+            let mut secret = config.get(&req)?;
+
+            let (token, secret) = {
+                let config = config.as_ref();
+
+                if !config.ignored_methods.contains(req.method()) {
+                    let mut forbidden = true;
+                    if let Some(secret) = secret.take() {
+                        if let Some(raw_token) = req.header(&config.header) {
+                            forbidden = !(config.verify)(&secret, raw_token);
+                        }
+                    }
+                    if forbidden {
+                        return Err((StatusCode::FORBIDDEN, "Invalid csrf token").into_error());
+                    }
                 }
-            }
-            if forbidden {
-                return Err((StatusCode::FORBIDDEN, "Invalid csrf token").into_error());
-            }
-        }
+                let otp = (config.secret)()?;
+                let secret = (config.secret)()?;
+                let token = base64::engine::general_purpose::URL_SAFE_NO_PAD
+                    .encode((config.generate)(&secret, otp));
 
-        let otp = (config.secret)()?;
-        let secret = (config.secret)()?;
-        let token = base64::engine::general_purpose::URL_SAFE_NO_PAD
-            .encode((config.generate)(&secret, otp));
-        req.extensions_mut().insert(CsrfToken(token.to_string()));
-        self.config.set(&req, token, secret)?;
+                (token, secret)
+            };
 
-        self.h
-            .call(req)
-            .await
-            .map(IntoResponse::into_response)
-            .map(|mut res| {
-                res.headers_mut()
-                    .insert(VARY, HeaderValue::from_static("Cookie"));
-                res
-            })
+            req.extensions_mut().insert(CsrfToken(token.to_string()));
+            config.set(&req, token, secret)?;
+
+            h.call(req)
+                .await
+                .map(IntoResponse::into_response)
+                .map(|mut res| {
+                    res.headers_mut()
+                        .insert(VARY, HeaderValue::from_static("Cookie"));
+                    res
+                })
+        })
     }
 }
 

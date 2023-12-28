@@ -13,7 +13,7 @@ macro_rules! export_internal_verb {
         #[must_use]
         pub fn $name<H, O>(self, handler: H) -> Self
         where
-            H: Handler<Request, Output = Result<O>> + Clone,
+            H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
             O: IntoResponse + Send + 'static,
         {
             self.on(Method::$verb, handler)
@@ -27,7 +27,7 @@ macro_rules! export_verb {
         #[must_use]
         pub fn $name<H, O>(handler: H) -> Route
         where
-            H: Handler<Request, Output = Result<O>> + Clone,
+            H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
             O: IntoResponse + Send + 'static,
         {
             Route::new().$name(handler)
@@ -70,7 +70,7 @@ impl Route {
     #[must_use]
     pub fn on<H, O>(self, method: Method, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Clone,
+        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
         O: IntoResponse + Send + 'static,
     {
         self.push(method, handler.map_into_response().boxed())
@@ -80,7 +80,7 @@ impl Route {
     #[must_use]
     pub fn any<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Clone,
+        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
         O: IntoResponse + Send + 'static,
     {
         [
@@ -127,7 +127,7 @@ impl Route {
     pub fn with<T>(self, t: T) -> Self
     where
         T: Transform<BoxHandler>,
-        T::Output: Handler<Request, Output = Result<Response>>,
+        T::Output: Handler<Request, Output = Result<Response>> + Send + Clone + 'static,
     {
         self.map_handler(|handler| t.transform(handler).boxed())
     }
@@ -136,7 +136,7 @@ impl Route {
     #[must_use]
     pub fn with_handler<H>(self, f: H) -> Self
     where
-        H: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Clone,
+        H: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Send + Clone + 'static,
     {
         self.map_handler(|handler| handler.around(f.clone()).boxed())
     }
@@ -166,7 +166,7 @@ impl FromIterator<(Method, BoxHandler)> for Route {
 /// Creates a route with a handler and HTTP verb pair.
 pub fn on<H, O>(method: Method, handler: H) -> Route
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
+    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
     O: IntoResponse + Send + 'static,
 {
     Route::new().on(method, handler)
@@ -188,7 +188,7 @@ repeat!(
 /// Creates a route with a handler and any HTTP verbs.
 pub fn any<H, O>(handler: H) -> Route
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
+    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
     O: IntoResponse + Send + 'static,
 {
     Route::new().any(handler)
@@ -218,7 +218,7 @@ mod tests {
     use serde::Deserialize;
     use std::sync::Arc;
     use viz_core::{
-        async_trait,
+        future::{BoxFuture, TryFutureExt},
         handler::Transform,
         types::{Query, State},
         Handler, HandlerExt, IntoHandler, IntoResponse, Method, Next, Request, RequestExt,
@@ -250,15 +250,14 @@ mod tests {
         #[derive(Clone)]
         struct LoggerHandler<H>(H);
 
-        #[async_trait]
         impl<H> Handler<Request> for LoggerHandler<H>
         where
-            H: Handler<Request> + Clone,
+            H: Handler<Request> + Send + Clone + 'static,
         {
             type Output = H::Output;
 
-            async fn call(&self, req: Request) -> Self::Output {
-                self.0.call(req).await
+            fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+                Box::pin(self.0.call(req))
             }
         }
 
@@ -298,16 +297,16 @@ mod tests {
             name: String,
         }
 
-        #[async_trait]
         impl<H, I, O> Handler<Next<I, H>> for Around2
         where
             I: Send + 'static,
-            H: Handler<I, Output = Result<O>> + Clone,
+            H: Handler<I, Output = Result<O>> + Clone + 'static,
+            O: 'static,
         {
             type Output = H::Output;
 
-            async fn call(&self, (i, h): Next<I, H>) -> Self::Output {
-                h.call(i).await
+            fn call(&self, (i, h): Next<I, H>) -> BoxFuture<'static, Self::Output> {
+                Box::pin(h.call(i))
             }
         }
 
@@ -316,16 +315,15 @@ mod tests {
             name: String,
         }
 
-        #[async_trait]
         impl<H, O> Handler<Next<Request, H>> for Around3
         where
             H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse,
+            O: IntoResponse + 'static,
         {
             type Output = Result<Response>;
 
-            async fn call(&self, (i, h): Next<Request, H>) -> Self::Output {
-                h.call(i).await.map(IntoResponse::into_response)
+            fn call(&self, (i, h): Next<Request, H>) -> BoxFuture<'static, Self::Output> {
+                Box::pin(h.call(i).map_ok(IntoResponse::into_response))
             }
         }
 
@@ -334,15 +332,14 @@ mod tests {
             name: String,
         }
 
-        #[async_trait]
         impl<H> Handler<Next<Request, H>> for Around4
         where
             H: Handler<Request, Output = Result<Response>> + Clone,
         {
             type Output = Result<Response>;
 
-            async fn call(&self, (i, h): Next<Request, H>) -> Self::Output {
-                h.call(i).await
+            fn call(&self, (i, h): Next<Request, H>) -> BoxFuture<'static, Self::Output> {
+                Box::pin(h.call(i))
             }
         }
 

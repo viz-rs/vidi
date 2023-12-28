@@ -1,6 +1,7 @@
-use futures_util::{future::BoxFuture, TryFutureExt};
-
-use crate::{Error, Handler, Result};
+use crate::{
+    future::{BoxFuture, TryFutureExt},
+    Error, Handler, Result,
+};
 
 /// Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.
 #[derive(Debug, Clone)]
@@ -20,12 +21,13 @@ impl<H, F> OrElse<H, F> {
 impl<H, F, I, O> Handler<I> for OrElse<H, F>
 where
     H: Handler<I, Output = Result<O>>,
-    F: Handler<Error, Output = H::Output> + Send + Copy,
+    F: Handler<Error, Output = H::Output> + Send + Clone + 'static,
+    O: 'static,
 {
     type Output = F::Output;
 
     fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
-        let f = self.f;
+        let f = self.f.clone();
         let fut = self.h.call(i).or_else(move |e| f.call(e));
         Box::pin(fut)
     }

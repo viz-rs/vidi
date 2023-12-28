@@ -1,6 +1,4 @@
-use futures_util::future::BoxFuture;
-
-use super::{Handler, MapErr};
+use crate::{future::BoxFuture, Handler};
 
 pub trait TryHandler<Input>: Handler<Input> {
     type Ok;
@@ -23,12 +21,4 @@ where
     }
 }
 
-pub trait TryHandlerExt<I>: TryHandler<I> {
-    fn map_err<F, E>(self, f: F) -> MapErr<Self, F>
-    where
-        F: FnOnce(Self::Error) -> E,
-        Self: Sized,
-    {
-        MapErr::new(self, f)
-    }
-}
+pub trait TryHandlerExt<I>: TryHandler<I> {}

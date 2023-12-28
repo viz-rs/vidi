@@ -22,20 +22,22 @@ macro_rules! tuple_impls {
             }
         }
 
-        #[async_trait]
         impl<$($T,)* Fun, Fut, Out> FnExt<($($T,)*)> for Fun
         where
             $($T: FromRequest + Send,)*
             $($T::Error: IntoResponse + Send,)*
-            Fun: Fn($($T,)*) -> Fut + Clone + Send + Sync + 'static,
+            Fun: Fn($($T,)*) -> Fut + Send + Copy + 'static,
             Fut: Future<Output = Result<Out>> + Send,
         {
             type Output =  Fut::Output;
 
-            #[allow(unused, unused_mut)]
-            async fn call(&self, mut req: Request) -> Self::Output {
-                (self)($($T::extract(&mut req).await.map_err(IntoResponse::into_error)?,)*)
-                    .await
+            #[allow(unused, unused_mut, non_snake_case)]
+            fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+                let this = *self;
+                let fut = async move {
+                    <($($T,)*)>::extract(&mut req).and_then(move |($($T,)*)| this($($T,)*)).await
+                };
+                Box::pin(fut)
             }
         }
     };

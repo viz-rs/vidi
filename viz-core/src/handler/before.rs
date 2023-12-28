@@ -1,6 +1,7 @@
-use futures_util::{future::BoxFuture, TryFutureExt};
-
-use crate::{Handler, Result};
+use crate::{
+    future::{BoxFuture, TryFutureExt},
+    Handler, Result,
+};
 
 /// Maps the input before the handler calls.
 #[derive(Debug, Clone)]
@@ -19,13 +20,15 @@ impl<H, F> Before<H, F> {
 
 impl<H, F, I, O> Handler<I> for Before<H, F>
 where
-    F: Handler<I, Output = Result<I>>,
-    H: Handler<I, Output = Result<O>> + Send,
+    I: Send + 'static,
+    F: Handler<I, Output = Result<I>> + 'static,
+    H: Handler<I, Output = Result<O>> + Send + Clone + 'static,
+    O: 'static,
 {
     type Output = H::Output;
 
     fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
-        let h = self.h;
+        let h = self.h.clone();
         let fut = self.f.call(i).and_then(move |i| h.call(i));
         Box::pin(fut)
     }

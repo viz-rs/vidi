@@ -5,8 +5,8 @@ use std::{borrow::Cow, marker::PhantomData};
 use http_body_util::Full;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use viz_core::{
-    async_trait,
-    header::{HeaderMap, CONTENT_TYPE, ETAG, IF_NONE_MATCH},
+    future::BoxFuture,
+    header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
     Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
 };
 
@@ -28,15 +28,14 @@ impl<E> File<E> {
     }
 }
 
-#[async_trait]
 impl<E> Handler<Request> for File<E>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        serve::<E>(&self.0, req.method(), req.headers())
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        Box::pin(serve::<E>(self.0.to_string(), req))
     }
 }
 
@@ -56,32 +55,35 @@ impl<E> Default for Dir<E> {
     }
 }
 
-#[async_trait]
 impl<E> Handler<Request> for Dir<E>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
         let path = match req.route_info().params.first().map(|(_, v)| v) {
             Some(p) => p,
             None => "index.html",
-        };
+        }
+        .to_string();
 
-        serve::<E>(path, req.method(), req.headers())
+        Box::pin(serve::<E>(path, req))
     }
 }
 
-fn serve<E>(path: &str, method: &Method, headers: &HeaderMap) -> Result<Response>
+async fn serve<E>(path: String, req: Request) -> Result<Response>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
+    let method = req.method();
+    let headers = req.headers();
+
     if method != Method::GET {
         Err(StatusCode::METHOD_NOT_ALLOWED.into_error())?;
     }
 
-    match E::get(path) {
+    match E::get(&path) {
         Some(EmbeddedFile { data, metadata }) => {
             let hash = hex::encode(metadata.sha256_hash());
 

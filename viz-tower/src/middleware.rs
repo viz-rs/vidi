@@ -1,6 +1,7 @@
 use tower::{Layer, Service, ServiceExt};
 use viz_core::{
-    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+    future::{BoxFuture, TryFutureExt},
+    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
 };
 
 use crate::HandlerService;
@@ -19,27 +20,27 @@ impl<L, H> Middleware<L, H> {
     }
 }
 
-#[async_trait]
 impl<O, L, H> Handler<Request> for Middleware<L, H>
 where
     L: Layer<HandlerService<H>> + Send + Sync + Clone + 'static,
-    H: Handler<Request, Output = Result<Response>> + Send + Sync + Clone + 'static,
+    H: Handler<Request, Output = Result<Response>> + Send + Clone + 'static,
     O: HttpBody + Send + 'static,
     O::Data: Into<Bytes>,
     O::Error: Into<BoxError>,
-    L::Service: Service<Request, Response = Response<O>> + Send + Sync + Clone + 'static,
+    L::Service: Service<Request, Response = Response<O>> + Send + Clone + 'static,
     <L::Service as Service<Request>>::Future: Send,
     <L::Service as Service<Request>>::Error: Into<BoxError>,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        self.l
-            .clone()
-            .layer(HandlerService::new(self.h.clone()))
-            .oneshot(req)
-            .await
-            .map(|resp| resp.map(Body::wrap))
-            .map_err(Error::boxed)
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        Box::pin(
+            self.l
+                .clone()
+                .layer(HandlerService::new(self.h.clone()))
+                .oneshot(req)
+                .map_ok(|resp| resp.map(Body::wrap))
+                .map_err(Error::boxed),
+        )
     }
 }

@@ -1,6 +1,7 @@
-use futures_util::{future::BoxFuture, TryFutureExt};
-
-use crate::{Error, Handler, Result};
+use crate::{
+    future::{BoxFuture, TryFutureExt},
+    Error, Handler, Result,
+};
 
 /// Maps the `Err` value of the output if after the handler called.
 #[derive(Debug, Clone)]
@@ -20,12 +21,14 @@ impl<H, F> MapErr<H, F> {
 impl<H, F, I, O, E> Handler<I> for MapErr<H, F>
 where
     H: Handler<I, Output = Result<O, E>>,
-    F: FnOnce(E) -> Error + Send,
+    F: FnOnce(E) -> Error + Send + Clone + 'static,
+    O: 'static,
+    E: 'static,
 {
     type Output = Result<O>;
 
     fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
-        let fut = self.h.call(i).map_err(self.f);
+        let fut = self.h.call(i).map_err(self.f.clone());
         Box::pin(fut)
     }
 }

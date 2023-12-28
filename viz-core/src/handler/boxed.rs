@@ -1,19 +1,32 @@
-use crate::{async_trait, Handler, Request, Response, Result};
+use crate::{future::BoxFuture, handler::BoxCloneable, Handler, Request, Response, Result};
 
-/// Alias the boxed Handler.
-pub type BoxHandler<I = Request, O = Result<Response>> = Box<dyn Handler<I, Output = O>>;
+pub struct BoxHandler<I = Request, O = Result<Response>>(BoxCloneable<I, O>);
 
-impl Clone for BoxHandler {
-    fn clone(&self) -> Self {
-        dyn_clone::clone_box(&**self)
+impl<I, O> BoxHandler<I, O> {
+    pub fn new<H>(h: H) -> Self
+    where
+        H: Handler<I, Output = O> + Send + Clone + 'static,
+    {
+        Self(Box::new(h))
     }
 }
 
-#[async_trait]
-impl Handler<Request> for BoxHandler {
-    type Output = Result<Response>;
+impl<I, O> Clone for BoxHandler<I, O> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone_box())
+    }
+}
 
-    async fn call(&self, req: Request) -> Self::Output {
-        self.as_ref().call(req).await
+impl<I, O> Handler<I> for BoxHandler<I, O> {
+    type Output = O;
+
+    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+        self.0.call(i)
+    }
+}
+
+impl<I, O> From<BoxCloneable<I, O>> for BoxHandler<I, O> {
+    fn from(value: BoxCloneable<I, O>) -> Self {
+        Self(value)
     }
 }

@@ -7,7 +7,7 @@ use viz_core::{BoxHandler, Method};
 use crate::{Route, Router};
 
 /// Store all final routes.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Tree(Vec<(Method, PathTree<BoxHandler>)>);
 
 impl Tree {
@@ -20,7 +20,7 @@ impl Tree {
     ) -> Option<(&'a BoxHandler, Path<'a, 'b>)> {
         self.0
             .iter()
-            .find_map(|(m, t)| if m == method { t.find(path) } else { None })
+            .find_map(|(m, t)| (m == method).then(|| t.find(path)).flatten())
     }
 
     /// Consumes the Tree, returning the wrapped value.

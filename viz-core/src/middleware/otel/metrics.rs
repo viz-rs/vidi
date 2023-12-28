@@ -15,7 +15,7 @@ use opentelemetry_semantic_conventions::trace::{
 };
 
 use crate::{
-    async_trait, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    future::BoxFuture, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
     Transform,
 };
 
@@ -96,45 +96,52 @@ pub struct MetricsMiddleware<H> {
     response_size: Histogram<u64>,
 }
 
-#[async_trait]
 impl<H, O> Handler<Request> for MetricsMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
+    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
     O: IntoResponse,
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        let timer = SystemTime::now();
-        let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
+    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+        let Self {
+            active_requests,
+            duration,
+            request_size,
+            response_size,
+            h,
+        } = self.clone();
 
-        self.active_requests.add(1, &attributes);
+        Box::pin(async move {
+            let timer = SystemTime::now();
+            let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
 
-        self.request_size
-            .record(req.content_length().unwrap_or(0), &attributes);
+            active_requests.add(1, &attributes);
 
-        let resp = self
-            .h
-            .call(req)
-            .await
-            .map(IntoResponse::into_response)
-            .map(|resp| {
-                self.active_requests.add(-1, &attributes);
+            request_size.record(req.content_length().unwrap_or(0), &attributes);
 
-                attributes.push(HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
+            let resp = h
+                .call(req)
+                .await
+                .map(IntoResponse::into_response)
+                .map(|resp| {
+                    active_requests.add(-1, &attributes);
 
-                self.response_size
-                    .record(resp.content_length().unwrap_or(0), &attributes);
+                    attributes
+                        .push(HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
 
-                resp
-            });
+                    response_size.record(resp.content_length().unwrap_or(0), &attributes);
 
-        self.duration.record(
-            timer.elapsed().map(|t| t.as_secs_f64()).unwrap_or_default(),
-            &attributes,
-        );
+                    resp
+                });
 
-        resp
+            duration.record(
+                timer.elapsed().map(|t| t.as_secs_f64()).unwrap_or_default(),
+                &attributes,
+            );
+
+            resp
+        })
     }
 }
 

@@ -78,6 +78,7 @@ hyper-util.workspace = true
 
 rustls-pemfile = { workspace = true, optional = true }
 
+sync_wrapper.workspace = true
 futures-util = { workspace = true, optional = true }
 tokio-native-tls = { workspace = true, optional = true }
 tokio-rustls = { workspace = true, optional = true }

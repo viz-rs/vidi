@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::{
-    async_trait,
+    future::BoxFuture,
     middleware::helper::{CookieOptions, Cookieable},
     types::{Cookie, Session},
     Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode, Transform,
@@ -89,10 +89,9 @@ where
     }
 }
 
-#[async_trait]
 impl<H, O, S, G, V> Handler<Request> for SessionMiddleware<H, S, G, V>
 where
-    H: Handler<Request, Output = Result<O>> + Clone,
+    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
     O: IntoResponse,
     S: Storage + 'static,
     G: Fn() -> String + Send + Sync + 'static,
@@ -100,61 +99,61 @@ where
 {
     type Output = Result<Response>;
 
-    async fn call(&self, mut req: Request) -> Self::Output {
-        let cookies = req.cookies().map_err(Error::from)?;
-        let cookie = self.config.get_cookie(&cookies);
+    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+        let Self { config, h } = self.clone();
 
-        let mut session_id = cookie.as_ref().map(Cookie::value).map(ToString::to_string);
-        let data = match &session_id {
-            Some(sid) if (self.config.store().verify)(sid) => self.config.store().get(sid).await?,
-            _ => None,
-        };
-        if data.is_none() && session_id.is_some() {
-            session_id.take();
-        }
-        let session = Session::new(data.unwrap_or_default());
-        req.extensions_mut().insert(session.clone());
+        Box::pin(async move {
+            let cookies = req.cookies().map_err(Error::from)?;
+            let cookie = config.get_cookie(&cookies);
 
-        let resp = self.h.call(req).await.map(IntoResponse::into_response);
+            let mut session_id = cookie.as_ref().map(Cookie::value).map(ToString::to_string);
+            let data = match &session_id {
+                Some(sid) if (config.store().verify)(sid) => config.store().get(sid).await?,
+                _ => None,
+            };
+            if data.is_none() && session_id.is_some() {
+                session_id.take();
+            }
+            let session = Session::new(data.unwrap_or_default());
+            req.extensions_mut().insert(session.clone());
 
-        let status = session.status().load(Ordering::Acquire);
+            let resp = h.call(req).await.map(IntoResponse::into_response);
 
-        if status == UNCHANGED {
-            return resp;
-        }
+            let status = session.status().load(Ordering::Acquire);
 
-        if status == PURGED {
-            if let Some(sid) = &session_id {
-                self.config.store().remove(sid).await.map_err(Error::from)?;
-                self.config.remove_cookie(&cookies);
+            if status == UNCHANGED {
+                return resp;
             }
 
-            return resp;
-        }
+            if status == PURGED {
+                if let Some(sid) = &session_id {
+                    config.store().remove(sid).await.map_err(Error::from)?;
+                    config.remove_cookie(&cookies);
+                }
 
-        if status == RENEWED {
-            if let Some(sid) = &session_id.take() {
-                self.config.store().remove(sid).await.map_err(Error::from)?;
+                return resp;
             }
-        }
 
-        let sid = session_id.unwrap_or_else(|| {
-            let sid = (self.config.store().generate)();
-            self.config.set_cookie(&cookies, &sid);
-            sid
-        });
+            if status == RENEWED {
+                if let Some(sid) = &session_id.take() {
+                    config.store().remove(sid).await.map_err(Error::from)?;
+                }
+            }
 
-        self.config
-            .store()
-            .set(
-                &sid,
-                session.data()?,
-                &self.config.ttl().unwrap_or_else(max_age),
-            )
-            .await
-            .map_err(Error::from)?;
+            let sid = session_id.unwrap_or_else(|| {
+                let sid = (config.store().generate)();
+                config.set_cookie(&cookies, &sid);
+                sid
+            });
 
-        resp
+            config
+                .store()
+                .set(&sid, session.data()?, &config.ttl().unwrap_or_else(max_age))
+                .await
+                .map_err(Error::from)?;
+
+            resp
+        })
     }
 }
 

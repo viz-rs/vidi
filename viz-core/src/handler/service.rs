@@ -1,7 +1,8 @@
 use hyper::service::Service;
 
 use crate::{
-    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+    future::{BoxFuture, TryFutureExt},
+    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
 };
 
 /// Converts a hyper [`Service`] to a viz [`Handler`].
@@ -15,7 +16,6 @@ impl<S> ServiceHandler<S> {
     }
 }
 
-#[async_trait]
 impl<I, O, S> Handler<Request<I>> for ServiceHandler<S>
 where
     I: HttpBody + Send + 'static,
@@ -28,11 +28,12 @@ where
 {
     type Output = Result<Response>;
 
-    async fn call(&self, req: Request<I>) -> Self::Output {
-        self.0
+    fn call(&self, req: Request<I>) -> BoxFuture<'static, Self::Output> {
+        let fut = self
+            .0
             .call(req)
-            .await
-            .map(|resp| resp.map(Body::wrap))
-            .map_err(Error::boxed)
+            .map_ok(|resp| resp.map(Body::wrap))
+            .map_err(Error::boxed);
+        Box::pin(fut)
     }
 }

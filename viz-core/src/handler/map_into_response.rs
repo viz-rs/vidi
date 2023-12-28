@@ -1,6 +1,7 @@
-use futures_util::{future::BoxFuture, TryFutureExt};
-
-use crate::{Handler, IntoResponse, Response, Result};
+use crate::{
+    future::{BoxFuture, TryFutureExt},
+    Handler, IntoResponse, Response, Result,
+};
 
 /// Maps the handler's output type to the [`Response`].
 #[derive(Debug, Clone)]
@@ -16,8 +17,8 @@ impl<H> MapInToResponse<H> {
 
 impl<H, I, O> Handler<I> for MapInToResponse<H>
 where
-    H: Handler<I, Output = Result<O>> + Clone,
-    O: IntoResponse + Send,
+    H: Handler<I, Output = Result<O>>,
+    O: IntoResponse + 'static,
 {
     type Output = Result<Response>;
 

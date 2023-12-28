@@ -1,6 +1,4 @@
-use crate::{FromRequest, IntoResponse, Request, Result};
-
-use super::{FnExt, FnExtHandler, Handler};
+use crate::{handler::FnExtHandler, FnExt, FromRequest, Handler, IntoResponse, Request, Result};
 
 /// The trait implemented by types that can be converted to a [`Handler`].
 pub trait IntoHandler<E, I> {
@@ -15,8 +13,8 @@ pub trait IntoHandler<E, I> {
 impl<H, E, O> IntoHandler<E, Request> for H
 where
     E: FromRequest + 'static,
-    E::Error: IntoResponse + Send,
-    H: FnExt<E, Output = Result<O>>,
+    E::Error: IntoResponse,
+    H: FnExt<E, Output = Result<O>> + Send + Copy + 'static,
     O: 'static,
 {
     type Handler = FnExtHandler<H, E, O>;

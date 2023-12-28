@@ -1,6 +1,7 @@
-use futures_util::{future::BoxFuture, FutureExt};
-
-use crate::{Handler, Result};
+use crate::{
+    future::{BoxFuture, FutureExt},
+    Handler, Result,
+};
 
 /// Maps the output `Result<T>` after the handler called.
 #[derive(Debug, Clone)]
@@ -20,12 +21,13 @@ impl<H, F> After<H, F> {
 impl<H, F, I, O> Handler<I> for After<H, F>
 where
     H: Handler<I, Output = Result<O>>,
-    F: Handler<H::Output, Output = H::Output> + Send,
+    F: Handler<H::Output, Output = H::Output> + Send + Clone + 'static,
+    O: 'static,
 {
     type Output = F::Output;
 
     fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
-        let f = self.f;
+        let f = self.f.clone();
         let fut = self.h.call(i).then(move |o| f.call(o));
         Box::pin(fut)
     }
