@@ -1,8 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    future::{BoxFuture, TryFutureExt},
-    FnExt, FromRequest, Handler, IntoResponse, Request, Result,
+    future::TryFutureExt, BoxFuture, FnExt, FromRequest, Handler, IntoResponse, Request, Result,
 };
 
 /// A wrapper of the extractors handler.
@@ -34,7 +33,7 @@ where
 {
     type Output = H::Output;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let fut = self.0.call(req).map_err(IntoResponse::into_error);
         Box::pin(fut)
     }

@@ -1,8 +1,8 @@
 use hyper::service::Service;
 
 use crate::{
-    future::{BoxFuture, TryFutureExt},
-    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+    future::TryFutureExt, Body, BoxError, BoxFuture, Bytes, Error, Handler, HttpBody, Request,
+    Response, Result,
 };
 
 /// Converts a hyper [`Service`] to a viz [`Handler`].
@@ -28,7 +28,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request<I>) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request<I>) -> BoxFuture<Self::Output> {
         let fut = self
             .0
             .call(req)

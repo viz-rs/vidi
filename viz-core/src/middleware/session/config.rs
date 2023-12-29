@@ -5,10 +5,10 @@ use std::{
 };
 
 use crate::{
-    future::BoxFuture,
     middleware::helper::{CookieOptions, Cookieable},
     types::{Cookie, Session},
-    Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode, Transform,
+    BoxFuture, Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode,
+    Transform,
 };
 
 use super::{Error as SessionError, Storage, Store, PURGED, RENEWED, UNCHANGED};
@@ -99,7 +99,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
         let Self { config, h } = self.clone();
 
         Box::pin(async move {

@@ -15,8 +15,7 @@ use opentelemetry_semantic_conventions::trace::{
 };
 
 use crate::{
-    future::BoxFuture, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
-    Transform,
+    BoxFuture, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
 };
 
 const HTTP_SERVER_ACTIVE_REQUESTS: &str = "http.server.active_requests";
@@ -103,7 +102,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let Self {
             active_requests,
             duration,

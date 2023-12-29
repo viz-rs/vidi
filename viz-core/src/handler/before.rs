@@ -1,7 +1,4 @@
-use crate::{
-    future::{BoxFuture, TryFutureExt},
-    Handler, Result,
-};
+use crate::{future::TryFutureExt, BoxFuture, Handler, Result};
 
 /// Maps the input before the handler calls.
 #[derive(Debug, Clone)]
@@ -27,7 +24,7 @@ where
 {
     type Output = H::Output;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let h = self.h.clone();
         let fut = self.f.call(i).and_then(move |i| h.call(i));
         Box::pin(fut)

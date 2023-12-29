@@ -1,11 +1,11 @@
-use crate::{future::BoxFuture, Handler};
+use crate::{BoxFuture, Handler};
 
 pub trait TryHandler<Input>: Handler<Input> {
     type Ok;
 
     type Error;
 
-    fn try_call(&self, input: Input) -> BoxFuture<'static, Result<Self::Ok, Self::Error>>;
+    fn try_call(&self, input: Input) -> BoxFuture<Result<Self::Ok, Self::Error>>;
 }
 
 impl<F, I, O, E> TryHandler<I> for F
@@ -16,7 +16,7 @@ where
     type Error = E;
 
     #[inline]
-    fn try_call(&self, input: I) -> BoxFuture<'static, Result<Self::Ok, Self::Error>> {
+    fn try_call(&self, input: I) -> BoxFuture<Result<Self::Ok, Self::Error>> {
         self.call(input)
     }
 }

@@ -6,9 +6,8 @@ use async_compression::tokio::bufread;
 use tokio_util::io::{ReaderStream, StreamReader};
 
 use crate::{
-    future::BoxFuture,
     header::{HeaderValue, ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH},
-    Body, Handler, IntoResponse, Request, Response, Result, Transform,
+    Body, BoxFuture, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// Compress response body.
@@ -39,7 +38,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let h = self.h.clone();
 
         Box::pin(async move {

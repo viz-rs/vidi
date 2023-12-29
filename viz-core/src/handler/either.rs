@@ -1,4 +1,4 @@
-use crate::{future::BoxFuture, Handler};
+use crate::{BoxFuture, Handler};
 
 /// Combines two different handlers having the same associated types into a single type.
 #[derive(Debug, Clone)]
@@ -18,7 +18,7 @@ where
 {
     type Output = O;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         Box::pin(match self {
             Self::Left(l) => l.call(i),
             Self::Right(r) => r.call(i),

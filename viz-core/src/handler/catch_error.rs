@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{
-    future::{BoxFuture, TryFutureExt},
-    Error, Handler, IntoResponse, Response, Result,
-};
+use crate::{future::TryFutureExt, BoxFuture, Error, Handler, IntoResponse, Response, Result};
 
 /// Catches rejected error while calling the handler.
 #[derive(Debug)]
@@ -49,7 +46,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let f = self.f.clone();
         let fut = self
             .h

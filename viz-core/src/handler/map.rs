@@ -1,7 +1,4 @@
-use crate::{
-    future::{BoxFuture, TryFutureExt},
-    Handler, Result,
-};
+use crate::{future::TryFutureExt, BoxFuture, Handler, Result};
 
 /// Maps the `Ok` value of the output if after the handler called.
 #[derive(Debug, Clone)]
@@ -26,7 +23,7 @@ where
 {
     type Output = Result<T>;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let fut = self.h.call(i).map_ok(self.f.clone());
         Box::pin(fut)
     }

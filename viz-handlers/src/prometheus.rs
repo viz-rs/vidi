@@ -7,9 +7,8 @@ use opentelemetry::{global::handle_error, metrics::MetricsError};
 use prometheus::{Encoder, TextEncoder};
 
 use viz_core::{
-    future::BoxFuture,
     header::{HeaderValue, CONTENT_TYPE},
-    Handler, IntoResponse, Request, Response, Result, StatusCode,
+    BoxFuture, Handler, IntoResponse, Request, Response, Result, StatusCode,
 };
 
 #[doc(inline)]
@@ -34,7 +33,7 @@ impl Prometheus {
 impl Handler<Request> for Prometheus {
     type Output = Result<Response>;
 
-    fn call(&self, _: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, _: Request) -> BoxFuture<Self::Output> {
         let Self { registry } = self.clone();
 
         Box::pin(async move {

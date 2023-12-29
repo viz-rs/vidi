@@ -4,8 +4,8 @@
 use std::sync::Arc;
 
 use crate::{
-    future::{BoxFuture, TryFutureExt},
-    types, Handler, IntoResponse, Request, Response, Result, Transform,
+    future::TryFutureExt, types, BoxFuture, Handler, IntoResponse, Request, Response, Result,
+    Transform,
 };
 
 /// A configuration for [`LimitsMiddleware`].
@@ -77,7 +77,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
         req.extensions_mut().insert(self.config.limits.clone());
         #[cfg(feature = "multipart")]
         req.extensions_mut().insert(self.config.multipart.clone());

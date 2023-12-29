@@ -1,4 +1,4 @@
-use crate::{future::BoxFuture, Request};
+use crate::{BoxFuture, Request};
 
 /// A handler with extractors.
 pub trait FnExt<E> {
@@ -6,5 +6,5 @@ pub trait FnExt<E> {
     type Output;
 
     /// Performs the call operation.
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output>;
+    fn call(&self, req: Request) -> BoxFuture<Self::Output>;
 }

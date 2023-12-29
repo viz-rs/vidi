@@ -6,11 +6,10 @@ use base64::Engine as _;
 
 use crate::{
     async_trait,
-    future::BoxFuture,
     header::{HeaderName, HeaderValue, VARY},
     middleware::helper::{CookieOptions, Cookieable},
-    Error, FromRequest, Handler, IntoResponse, Method, Request, RequestExt, Response, Result,
-    StatusCode, Transform,
+    BoxFuture, Error, FromRequest, Handler, IntoResponse, Method, Request, RequestExt, Response,
+    Result, StatusCode, Transform,
 };
 
 #[derive(Debug)]
@@ -197,7 +196,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
         let Self { config, h } = self.clone();
 
         Box::pin(async move {

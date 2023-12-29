@@ -1,4 +1,4 @@
-use crate::{future::BoxFuture, Handler, Result};
+use crate::{BoxFuture, Handler, Result};
 
 /// Represents a middleware parameter, which is a tuple that includes Requset and `BoxHandler`.
 pub type Next<I, H> = (I, H);
@@ -26,7 +26,7 @@ where
 {
     type Output = F::Output;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let h = self.h.clone();
         Box::pin(self.f.call((i, h)))
     }

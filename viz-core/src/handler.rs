@@ -1,6 +1,6 @@
 //! Traits and types for handling an HTTP.
 
-use crate::future::{BoxFuture, Future};
+use crate::{BoxFuture, Future};
 
 mod cloneable;
 pub use cloneable::{BoxCloneable, Cloneable};
@@ -67,7 +67,7 @@ pub trait Handler<Input> {
     type Output;
 
     /// Performs the call operation.
-    fn call(&self, input: Input) -> BoxFuture<'static, Self::Output>;
+    fn call(&self, input: Input) -> BoxFuture<Self::Output>;
 }
 
 impl<F, I, Fut, O> Handler<I> for F
@@ -78,7 +78,7 @@ where
 {
     type Output = Fut::Output;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         Box::pin((self)(i))
     }
 }

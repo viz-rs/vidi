@@ -1,7 +1,4 @@
-use crate::{
-    future::{BoxFuture, TryFutureExt},
-    Handler, Result,
-};
+use crate::{future::TryFutureExt, BoxFuture, Handler, Result};
 
 /// Calls `op` if the output is `Ok`, otherwise returns the `Err` value of the output.
 #[derive(Debug, Clone)]
@@ -26,7 +23,7 @@ where
 {
     type Output = F::Output;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let f = self.f.clone();
         let fut = self.h.call(i).and_then(move |o| f.call(o));
         Box::pin(fut)

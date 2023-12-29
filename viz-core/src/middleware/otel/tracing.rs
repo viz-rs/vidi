@@ -19,10 +19,10 @@ use opentelemetry_semantic_conventions::trace::{
 };
 
 use crate::{
-    future::BoxFuture,
     header::{HeaderMap, HeaderName},
     headers::UserAgent,
-    Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
+    BoxFuture, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    Transform,
 };
 
 /// `OpenTelemetry` tracing config.
@@ -67,7 +67,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let Self { tracer, h } = self.clone();
 
         Box::pin(async move {

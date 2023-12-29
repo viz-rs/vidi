@@ -3,10 +3,9 @@
 use std::fmt;
 
 use crate::{
-    future::BoxFuture,
     header::{HeaderValue, COOKIE, SET_COOKIE},
     types::{Cookie, CookieJar, CookieKey, Cookies},
-    Handler, IntoResponse, Request, Response, Result, Transform,
+    BoxFuture, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// A configure for [`CookieMiddleware`].
@@ -87,7 +86,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
         let jar = req
             .headers()
             .get_all(COOKIE)

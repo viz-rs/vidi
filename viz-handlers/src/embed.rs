@@ -5,9 +5,8 @@ use std::{borrow::Cow, marker::PhantomData};
 use http_body_util::Full;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use viz_core::{
-    future::BoxFuture,
     header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
-    Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
+    BoxFuture, Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
 };
 
 /// Serve a single embedded file.
@@ -34,7 +33,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         Box::pin(serve::<E>(self.0.to_string(), req))
     }
 }
@@ -61,7 +60,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let path = match req.route_info().params.first().map(|(_, v)| v) {
             Some(p) => p,
             None => "index.html",

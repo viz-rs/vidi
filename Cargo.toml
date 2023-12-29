@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "viz",
+  # "viz",
   "viz-core",
   "viz-handlers",
   "viz-macros",

@@ -1,7 +1,4 @@
-use crate::{
-    future::{BoxFuture, TryFutureExt},
-    Handler, IntoResponse, Response, Result,
-};
+use crate::{future::TryFutureExt, BoxFuture, Handler, IntoResponse, Response, Result};
 
 /// Maps the handler's output type to the [`Response`].
 #[derive(Debug, Clone)]
@@ -22,7 +19,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let fut = self.0.call(i).map_ok(IntoResponse::into_response);
         Box::pin(fut)
     }

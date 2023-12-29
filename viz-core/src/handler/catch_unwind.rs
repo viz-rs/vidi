@@ -1,6 +1,6 @@
 use crate::{
-    future::{BoxFuture, FutureExt, TryFutureExt},
-    Handler, IntoResponse, Response, Result,
+    future::{FutureExt, TryFutureExt},
+    BoxFuture, Handler, IntoResponse, Response, Result,
 };
 
 /// Catches unwinding panics while calling the handler.
@@ -27,7 +27,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let f = self.f.clone();
         let fut = ::core::panic::AssertUnwindSafe(self.h.call(i))
             .catch_unwind()

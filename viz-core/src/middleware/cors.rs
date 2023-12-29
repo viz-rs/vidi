@@ -3,7 +3,6 @@
 use std::{collections::HashSet, fmt, sync::Arc};
 
 use crate::{
-    future::BoxFuture,
     header::{
         HeaderMap, HeaderName, HeaderValue, ACCESS_CONTROL_ALLOW_CREDENTIALS,
         ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_HEADERS,
@@ -13,7 +12,8 @@ use crate::{
         AccessControlAllowHeaders, AccessControlAllowMethods, AccessControlExposeHeaders,
         HeaderMapExt,
     },
-    Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode, Transform,
+    BoxFuture, Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
+    Transform,
 };
 
 /// A configuration for [`CorsMiddleware`].
@@ -210,7 +210,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let Self {
             config,
             acam,

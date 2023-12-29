@@ -11,12 +11,12 @@ use tokio::io::AsyncReadExt;
 use tokio_util::io::ReaderStream;
 
 use viz_core::{
-    future::BoxFuture,
     headers::{
         AcceptRanges, ContentLength, ContentRange, ContentType, ETag, HeaderMap, HeaderMapExt,
         IfMatch, IfModifiedSince, IfNoneMatch, IfUnmodifiedSince, LastModified, Range,
     },
-    Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result, StatusCode,
+    BoxFuture, Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result,
+    StatusCode,
 };
 
 mod directory;
@@ -50,7 +50,7 @@ impl File {
 impl Handler<Request> for File {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let path = self.path.clone();
         Box::pin(async move { serve(&path, req.headers()) })
     }
@@ -101,7 +101,7 @@ impl Dir {
 impl Handler<Request> for Dir {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         let Self {
             mut path,
             listing,
