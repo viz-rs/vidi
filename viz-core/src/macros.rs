@@ -32,7 +32,7 @@ macro_rules! tuple_impls {
             type Output =  Fut::Output;
 
             #[allow(unused, unused_mut, non_snake_case)]
-            fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+            fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
                 let this = *self;
                 let fut = async move {
                     <($($T,)*)>::extract(&mut req).and_then(move |($($T,)*)| this($($T,)*)).await
