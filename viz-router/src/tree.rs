@@ -20,7 +20,7 @@ impl Tree {
     ) -> Option<(&'a BoxHandler, Path<'a, 'b>)> {
         self.0
             .iter()
-            .find_map(|(m, t)| (m == method).then(|| t.find(path)).flatten())
+            .find_map(|(m, t)| if m == method { t.find(path) } else { None })
     }
 
     /// Consumes the Tree, returning the wrapped value.

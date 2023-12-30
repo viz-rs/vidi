@@ -1,12 +1,12 @@
 #![deny(warnings)]
 #![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, str::FromStr, sync::Arc};
+use std::{net::SocketAddr, str::FromStr};
 use tokio::net::TcpListener;
 use viz::{serve, Request, Result, Router, Tree};
 
-async fn index(_: Request) -> Result<&'static str> {
-    Ok("Hello, World!")
+async fn index(_: Request) -> Result<String> {
+    Ok(String::from("Hello, World!"))
 }
 
 #[tokio::main]
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
         app = app.get(&format!("/{}", n), index);
     }
 
-    let tree = Arc::new(Tree::from(app));
+    let tree = Tree::from(app);
 
     loop {
         let (stream, addr) = listener.accept().await?;

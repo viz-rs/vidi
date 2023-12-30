@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 
 use hyper_util::{rt::TokioExecutor, server::conn::auto::Builder};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -13,7 +13,7 @@ use crate::Responder;
 /// # Errors
 ///
 /// Will return `Err` if the connection does not be served.
-pub async fn serve<I>(stream: I, tree: Arc<Tree>, addr: Option<SocketAddr>) -> Result<()>
+pub async fn serve<I>(stream: I, tree: Tree, addr: Option<SocketAddr>) -> Result<()>
 where
     I: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
@@ -28,11 +28,7 @@ where
 /// # Errors
 ///
 /// Will return `Err` if the connection does not be served.
-pub async fn serve_with_upgrades<I>(
-    stream: I,
-    tree: Arc<Tree>,
-    addr: Option<SocketAddr>,
-) -> Result<()>
+pub async fn serve_with_upgrades<I>(stream: I, tree: Tree, addr: Option<SocketAddr>) -> Result<()>
 where
     I: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
