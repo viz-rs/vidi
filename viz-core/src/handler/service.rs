@@ -22,7 +22,7 @@ where
     O: HttpBody + Send + 'static,
     O::Data: Into<Bytes>,
     O::Error: Into<BoxError>,
-    S: Service<Request<I>, Response = Response<O>> + Send + Sync + Clone + 'static,
+    S: Service<Request<I>, Response = Response<O>> + 'static,
     S::Future: Send,
     S::Error: Into<BoxError>,
 {
