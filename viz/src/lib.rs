@@ -526,12 +526,9 @@
 mod responder;
 #[cfg(any(feature = "http1", feature = "http2"))]
 pub use responder::Responder;
-
 #[cfg(any(feature = "http1", feature = "http2"))]
-// mod serve;
-#[cfg(any(feature = "http1", feature = "http2"))]
-// pub use serve::{serve, serve_with_upgrades};
 mod server;
+#[cfg(any(feature = "http1", feature = "http2"))]
 pub use server::*;
 
 /// TLS
