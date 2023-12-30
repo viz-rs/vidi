@@ -48,12 +48,12 @@ where
 
     fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let f = self.f.clone();
-        let fut = self
-            .h
-            .call(i)
-            .map_ok(IntoResponse::into_response)
-            .map_err(Error::downcast::<E>)
-            .or_else(move |r| async move { Ok(f.call(r?).await.into_response()) });
-        Box::pin(fut)
+        Box::pin(
+            self.h
+                .call(i)
+                .map_ok(IntoResponse::into_response)
+                .map_err(Error::downcast::<E>)
+                .or_else(move |r| async move { Ok(f.call(r?).await.into_response()) }),
+        )
     }
 }

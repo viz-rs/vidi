@@ -29,11 +29,11 @@ where
     type Output = Result<Response>;
 
     fn call(&self, req: Request<I>) -> BoxFuture<Self::Output> {
-        let fut = self
-            .0
-            .call(req)
-            .map_ok(|resp| resp.map(Body::wrap))
-            .map_err(Error::boxed);
-        Box::pin(fut)
+        Box::pin(
+            self.0
+                .call(req)
+                .map_ok(|resp| resp.map(Body::wrap))
+                .map_err(Error::boxed),
+        )
     }
 }

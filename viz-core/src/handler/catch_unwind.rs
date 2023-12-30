@@ -29,10 +29,11 @@ where
 
     fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let f = self.f.clone();
-        let fut = ::core::panic::AssertUnwindSafe(self.h.call(i))
-            .catch_unwind()
-            .map_ok(IntoResponse::into_response)
-            .or_else(move |e| f.call(e).map(IntoResponse::into_response).map(Result::Ok));
-        Box::pin(fut)
+        Box::pin(
+            ::core::panic::AssertUnwindSafe(self.h.call(i))
+                .catch_unwind()
+                .map_ok(IntoResponse::into_response)
+                .or_else(move |e| f.call(e).map(IntoResponse::into_response).map(Result::Ok)),
+        )
     }
 }

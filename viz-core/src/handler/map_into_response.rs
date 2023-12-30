@@ -20,7 +20,6 @@ where
     type Output = Result<Response>;
 
     fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        let fut = self.0.call(i).map_ok(IntoResponse::into_response);
-        Box::pin(fut)
+        Box::pin(self.0.call(i).map_ok(IntoResponse::into_response))
     }
 }

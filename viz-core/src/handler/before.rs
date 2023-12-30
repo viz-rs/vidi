@@ -26,7 +26,6 @@ where
 
     fn call(&self, i: I) -> BoxFuture<Self::Output> {
         let h = self.h.clone();
-        let fut = self.f.call(i).and_then(move |i| h.call(i));
-        Box::pin(fut)
+        Box::pin(self.f.call(i).and_then(move |i| h.call(i)))
     }
 }

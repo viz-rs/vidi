@@ -34,7 +34,6 @@ where
     type Output = H::Output;
 
     fn call(&self, req: Request) -> BoxFuture<Self::Output> {
-        let fut = self.0.call(req).map_err(IntoResponse::into_error);
-        Box::pin(fut)
+        Box::pin(self.0.call(req).map_err(IntoResponse::into_error))
     }
 }

@@ -24,7 +24,6 @@ where
     type Output = Result<T>;
 
     fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        let fut = self.h.call(i).map_ok(self.f.clone());
-        Box::pin(fut)
+        Box::pin(self.h.call(i).map_ok(self.f.clone()))
     }
 }
