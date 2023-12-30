@@ -126,7 +126,7 @@ fn generate_handler(input: TokenStream) -> Result<TokenStream> {
             type Output = viz_core::Result<viz_core::Response>;
 
             #[allow(unused, unused_mut)]
-            fn call(&self, mut req: viz_core::Request) -> viz_core::future::BoxFuture<'static, Self::Output> {
+            fn call(&self, mut req: viz_core::Request) -> viz_core::BoxFuture<Self::Output> {
                 Box::pin(async move {
                     #ast
                     let res = #name(#(#extractors),*)#asyncness;

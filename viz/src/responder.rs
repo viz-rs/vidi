@@ -1,4 +1,4 @@
-use std::{convert::Infallible, net::SocketAddr, sync::Arc};
+use std::{convert::Infallible, sync::Arc};
 
 use crate::{
     future::{FutureExt, TryFutureExt},
@@ -8,36 +8,40 @@ use crate::{
 
 /// Handles the HTTP [`Request`] and retures the HTTP [`Response`].
 #[derive(Debug)]
-pub struct Responder {
+pub struct Responder<A> {
     tree: Tree,
-    addr: Option<SocketAddr>,
+    remote_addr: Option<A>,
 }
 
-impl Responder {
+impl<A> Responder<A> {
     /// Creates a Responder for handling the [`Request`].
     #[must_use]
-    pub fn new(tree: Tree, addr: Option<SocketAddr>) -> Self {
-        Self { tree, addr }
+    pub fn new(tree: Tree, remote_addr: Option<A>) -> Self {
+        Self { tree, remote_addr }
     }
 }
 
-impl Handler<Request<Incoming>> for Responder {
+impl<A> Handler<Request<Incoming>> for Responder<A>
+where
+    A: Clone + Send + Sync + 'static,
+{
     type Output = Result<Response, Infallible>;
 
     fn call(&self, mut req: Request<Incoming>) -> BoxFuture<Self::Output> {
+        let Self { remote_addr, tree } = self;
         let method = req.method().clone();
         let path = req.uri().path().to_string();
 
-        let matched = self.tree.find(&method, &path).or_else(|| {
+        let matched = tree.find(&method, &path).or_else(|| {
             if method == Method::HEAD {
-                self.tree.find(&Method::GET, &path)
+                tree.find(&Method::GET, &path)
             } else {
                 None
             }
         });
 
         if let Some((handler, route)) = matched {
-            req.extensions_mut().insert(self.addr);
+            req.extensions_mut().insert(remote_addr.clone());
             req.extensions_mut().insert(Arc::from(RouteInfo {
                 id: *route.id,
                 pattern: route.pattern(),
@@ -56,7 +60,10 @@ impl Handler<Request<Incoming>> for Responder {
     }
 }
 
-impl hyper::service::Service<Request<Incoming>> for Responder {
+impl<A> hyper::service::Service<Request<Incoming>> for Responder<A>
+where
+    A: Clone + Send + Sync + 'static,
+{
     type Response = Response;
     type Error = Infallible;
     type Future = BoxFuture<Result<Self::Response, Self::Error>>;

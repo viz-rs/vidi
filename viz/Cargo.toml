@@ -64,8 +64,8 @@ otel-tracing = ["otel", "viz-core/otel-tracing"]
 otel-metrics = ["otel", "viz-core/otel-metrics"]
 otel-prometheus = ["handlers", "viz-handlers?/prometheus"]
 
-rustls = ["dep:rustls-pemfile", "dep:tokio-rustls", "dep:futures-util"]
-native-tls = ["dep:tokio-native-tls", "dep:futures-util"]
+rustls = ["dep:rustls-pemfile", "dep:tokio-rustls"]
+native-tls = ["dep:tokio-native-tls"]
 
 [dependencies]
 viz-core.workspace = true
@@ -75,10 +75,10 @@ viz-macros = { workspace = true, optional = true }
 
 hyper.workspace = true
 hyper-util.workspace = true
+futures-util.workspace = true
 
 rustls-pemfile = { workspace = true, optional = true }
 
-futures-util = { workspace = true, optional = true }
 tokio-native-tls = { workspace = true, optional = true }
 tokio-rustls = { workspace = true, optional = true }
 tokio.workspace = true

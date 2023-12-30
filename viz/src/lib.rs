@@ -528,9 +528,11 @@ mod responder;
 pub use responder::Responder;
 
 #[cfg(any(feature = "http1", feature = "http2"))]
-mod serve;
+// mod serve;
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub use serve::{serve, serve_with_upgrades};
+// pub use serve::{serve, serve_with_upgrades};
+mod server;
+pub use server::*;
 
 /// TLS
 pub mod tls;
@@ -543,8 +545,7 @@ pub use viz_router::*;
 pub use viz_handlers as handlers;
 
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub use hyper::server;
-
+// pub use hyper::server;
 #[cfg(feature = "macros")]
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[doc(inline)]

@@ -1,13 +1,13 @@
 [workspace]
 resolver = "2"
 members = [
-  # "viz",
+  "viz",
   "viz-core",
   "viz-handlers",
   "viz-macros",
   "viz-router",
   "viz-tower",
-  "viz-test",
+  # "viz-test",
 
   "examples/hello-world",
   # "examples/unix-socket",

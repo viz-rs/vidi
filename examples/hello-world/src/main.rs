@@ -3,7 +3,7 @@
 
 use std::{net::SocketAddr, str::FromStr};
 use tokio::net::TcpListener;
-use viz::{serve, Request, Result, Router, Tree};
+use viz::{Request, Result, Router, Server, Tree};
 
 async fn index(_: Request) -> Result<String> {
     Ok(String::from("Hello, World!"))
@@ -23,8 +23,9 @@ async fn main() -> Result<()> {
 
     let tree = Tree::from(app);
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        tokio::task::spawn(serve(stream, tree.clone(), Some(addr)));
-    }
+    let server = Server::new(listener, tree);
+
+    if let Err(_) = server.await {}
+
+    Ok(())
 }
