@@ -1,5 +1,5 @@
 use reqwest::Client;
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{serve, Error, Result, Router, Tree};
 
@@ -22,7 +22,7 @@ impl TestServer {
     /// Will return `Err` if the server fails to start.
     pub async fn new(router: Router) -> Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:0").await?;
-        let tree = Arc::new(Tree::from(router));
+        let tree = Tree::from(router);
         let addr = listener.local_addr()?;
         let client = reqwest::Client::builder()
             .redirect(reqwest::redirect::Policy::none())
@@ -60,7 +60,7 @@ impl TestServer {
     }
 }
 
-async fn run(listener: TcpListener, tree: Arc<Tree>) -> Result<()> {
+async fn run(listener: TcpListener, tree: Tree) -> Result<()> {
     loop {
         let (stream, addr) = listener.accept().await?;
         let tree = tree.clone();
