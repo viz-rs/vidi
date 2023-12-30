@@ -2,8 +2,8 @@
 
 use tower::{Service, ServiceExt};
 use viz_core::{
-    future::{BoxFuture, TryFutureExt},
-    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
+    future::TryFutureExt, Body, BoxError, BoxFuture, Bytes, Error, Handler, HttpBody, Request,
+    Response, Result,
 };
 
 mod service;
@@ -37,7 +37,7 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
+    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
         Box::pin(
             self.0
                 .clone()
