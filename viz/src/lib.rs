@@ -532,9 +532,8 @@ mod server;
 pub use server::*;
 
 /// TLS
+#[cfg(any(feature = "native_tls", feature = "rustls"))]
 pub mod tls;
-pub use viz_core::*;
-pub use viz_router::*;
 
 #[cfg(feature = "handlers")]
 #[cfg_attr(docsrs, doc(cfg(feature = "handlers")))]
@@ -547,3 +546,6 @@ pub use viz_handlers as handlers;
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[doc(inline)]
 pub use viz_macros::handler;
+
+pub use viz_core::*;
+pub use viz_router::*;
