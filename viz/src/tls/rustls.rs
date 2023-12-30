@@ -149,15 +149,16 @@ impl Config {
     }
 }
 
-impl Listener<TcpListener, TlsAcceptor> {
-    /// Accepts a new incoming connection from this listener.
-    ///
-    /// Returns a [`TlsStream`] and [`SocketAddr`] part.
+impl crate::Accept for Listener<TcpListener, TlsAcceptor> {
+    type Conn = TlsStream<TcpStream>;
+    type Addr = SocketAddr;
+
+    /// A [`TlsStream`] and [`SocketAddr`] part for accepting TLS.
     ///
     /// # Errors
     ///
-    /// This function throws if it is not accepted from the listener.
-    pub async fn accept(&self) -> Result<(TlsStream<TcpStream>, SocketAddr)> {
+    /// Will return `Err` if accepting the stream fails.
+    async fn accept(&self) -> std::io::Result<(Self::Conn, Self::Addr)> {
         let (stream, addr) = self.inner.accept().await?;
         let tls_stream = self.acceptor.accept(stream).await?;
         Ok((tls_stream, addr))

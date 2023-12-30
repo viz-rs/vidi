@@ -1,4 +1,8 @@
-use std::{fmt, net::SocketAddr};
+use std::{
+    fmt,
+    io::{Error as IoError, ErrorKind},
+    net::SocketAddr,
+};
 
 use tokio::net::{TcpListener, TcpStream};
 use tokio_native_tls::{native_tls::TlsAcceptor as TlsAcceptorWrapper, TlsStream};
@@ -38,15 +42,22 @@ impl Config {
     }
 }
 
-impl Listener<TcpListener, TlsAcceptor> {
+impl crate::Accept for Listener<TcpListener, TlsAcceptor> {
+    type Conn = TlsStream<TcpStream>;
+    type Addr = SocketAddr;
+
     /// A [`TlsStream`] and [`SocketAddr`] part for accepting TLS.
     ///
     /// # Errors
     ///
     /// Will return `Err` if accepting the stream fails.
-    pub async fn accept(&self) -> Result<(TlsStream<TcpStream>, SocketAddr)> {
+    async fn accept(&self) -> std::io::Result<(Self::Conn, Self::Addr)> {
         let (stream, addr) = self.inner.accept().await?;
-        let tls_stream = self.acceptor.accept(stream).await.map_err(Error::boxed)?;
+        let tls_stream = self
+            .acceptor
+            .accept(stream)
+            .await
+            .map_err(|e| IoError::new(ErrorKind::Other, e))?;
         Ok((tls_stream, addr))
     }
 }
