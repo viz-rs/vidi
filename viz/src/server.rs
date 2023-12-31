@@ -48,7 +48,7 @@ impl<L> Server<L, TokioExecutor> {
 impl<L> IntoFuture for Server<L, TokioExecutor>
 where
     L: Accept + Send + 'static,
-    L::Conn: AsyncWrite + AsyncRead + Unpin + Send,
+    L::Conn: AsyncWrite + AsyncRead + Send + Unpin,
     L::Addr: Clone + Send + Sync + 'static,
 {
     type Output = Result<()>;
@@ -60,7 +60,6 @@ where
             listener,
             builder,
         } = self;
-
         Box::pin(async move {
             loop {
                 let (stream, remote_addr) = listener.accept().await?;

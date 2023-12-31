@@ -55,7 +55,7 @@ where
                     .map(Result::Ok),
             )
         } else {
-            Box::pin(async { Ok(StatusCode::NOT_FOUND.into_response()) })
+            Box::pin(not_found())
         }
     }
 }
@@ -71,4 +71,9 @@ where
     fn call(&self, req: Request<Incoming>) -> Self::Future {
         Handler::call(self, req)
     }
+}
+
+#[inline(always)]
+async fn not_found() -> Result<Response, Infallible> {
+    Ok(StatusCode::NOT_FOUND.into_response())
 }
