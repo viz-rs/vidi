@@ -2,7 +2,7 @@ use std::task::{Context, Poll};
 
 use viz_core::{BoxFuture, Error, Handler, Request, Response, Result};
 
-/// An adapter that makes a [`Handler`] into a [`Service`].
+/// An adapter that makes a [`Handler`] into a [`Service`](tower::Service).
 #[derive(Debug)]
 pub struct HandlerService<H>(H);
 
