@@ -1,4 +1,4 @@
-use crate::{future::FutureExt, BoxFuture, Handler, Result};
+use crate::{async_trait, Handler, Result};
 
 /// Maps the output `Result<T>` after the handler called.
 #[derive(Debug, Clone)]
@@ -15,16 +15,17 @@ impl<H, F> After<H, F> {
     }
 }
 
+#[async_trait]
 impl<H, F, I, O> Handler<I> for After<H, F>
 where
+    I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    F: Handler<H::Output, Output = H::Output> + Send + Clone + 'static,
+    F: Handler<H::Output, Output = H::Output> + Clone + 'static,
     O: 'static,
 {
     type Output = F::Output;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        let f = self.f.clone();
-        Box::pin(self.h.call(i).then(move |o| f.call(o)))
+    async fn call(&self, i: I) -> Self::Output {
+        self.f.call(self.h.call(i).await).await
     }
 }

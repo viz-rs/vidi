@@ -1,7 +1,4 @@
-use crate::{
-    future::{FutureExt, TryFutureExt},
-    BoxFuture, Handler, IntoResponse, Response, Result,
-};
+use crate::{async_trait, future::FutureExt, Handler, IntoResponse, Response, Result};
 
 /// Catches unwinding panics while calling the handler.
 #[derive(Debug, Clone)]
@@ -18,22 +15,24 @@ impl<H, F> CatchUnwind<H, F> {
     }
 }
 
+#[async_trait]
 impl<H, F, I, O, R> Handler<I> for CatchUnwind<H, F>
 where
-    H: Handler<I, Output = Result<O>> + 'static,
-    O: IntoResponse + 'static,
-    F: Handler<Box<dyn ::core::any::Any + Send>, Output = R> + Send + Clone + 'static,
+    I: Send + 'static,
+    H: Handler<I, Output = Result<O>>,
+    O: IntoResponse + Send,
+    F: Handler<Box<dyn ::core::any::Any + Send>, Output = R>,
     R: IntoResponse + 'static,
 {
     type Output = Result<Response>;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        let f = self.f.clone();
-        Box::pin(
-            ::core::panic::AssertUnwindSafe(self.h.call(i))
-                .catch_unwind()
-                .map_ok(IntoResponse::into_response)
-                .or_else(move |e| f.call(e).map(IntoResponse::into_response).map(Result::Ok)),
-        )
+    async fn call(&self, i: I) -> Self::Output {
+        match ::core::panic::AssertUnwindSafe(self.h.call(i))
+            .catch_unwind()
+            .await
+        {
+            Ok(r) => r.map(IntoResponse::into_response),
+            Err(e) => Ok(self.f.call(e).await.into_response()),
+        }
     }
 }

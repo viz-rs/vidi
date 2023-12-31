@@ -6,8 +6,9 @@ use async_compression::tokio::bufread;
 use tokio_util::io::{ReaderStream, StreamReader};
 
 use crate::{
+    async_trait,
     header::{HeaderValue, ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH},
-    Body, BoxFuture, Handler, IntoResponse, Request, Response, Result, Transform,
+    Body, Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// Compress response body.
@@ -31,30 +32,27 @@ pub struct CompressionMiddleware<H> {
     h: H,
 }
 
+#[async_trait]
 impl<H, O> Handler<Request> for CompressionMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
-        let h = self.h.clone();
+    async fn call(&self, req: Request) -> Self::Output {
+        let accept_encoding = req
+            .headers()
+            .get(ACCEPT_ENCODING)
+            .map(HeaderValue::to_str)
+            .and_then(Result::ok)
+            .and_then(parse_accept_encoding);
 
-        Box::pin(async move {
-            let accept_encoding = req
-                .headers()
-                .get(ACCEPT_ENCODING)
-                .map(HeaderValue::to_str)
-                .and_then(Result::ok)
-                .and_then(parse_accept_encoding);
+        let raw = self.h.call(req).await?;
 
-            let raw = h.call(req).await?;
-
-            Ok(match accept_encoding {
-                Some(algo) => Compress::new(raw, algo).into_response(),
-                None => raw.into_response(),
-            })
+        Ok(match accept_encoding {
+            Some(algo) => Compress::new(raw, algo).into_response(),
+            None => raw.into_response(),
         })
     }
 }

@@ -1,4 +1,4 @@
-use crate::{future::TryFutureExt, BoxFuture, Error, Handler, Result};
+use crate::{async_trait, Error, Handler, Result};
 
 /// Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.
 #[derive(Debug, Clone)]
@@ -15,16 +15,20 @@ impl<H, F> OrElse<H, F> {
     }
 }
 
+#[async_trait]
 impl<H, F, I, O> Handler<I> for OrElse<H, F>
 where
+    I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    F: Handler<Error, Output = H::Output> + Send + Clone + 'static,
-    O: 'static,
+    F: Handler<Error, Output = H::Output>,
+    O: Send + 'static,
 {
     type Output = F::Output;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        let f = self.f.clone();
-        Box::pin(self.h.call(i).or_else(move |e| f.call(e)))
+    async fn call(&self, i: I) -> Self::Output {
+        match self.h.call(i).await {
+            Ok(o) => Ok(o),
+            Err(e) => self.f.call(e).await,
+        }
     }
 }

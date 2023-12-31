@@ -44,9 +44,6 @@ pub type Request<T = Body> = http::Request<T>;
 pub type Response<T = Body> = http::Response<T>;
 /// Represents either success (Ok) or failure (Err).
 pub type Result<T, E = Error> = ::core::result::Result<T, E>;
-/// An owned dynamically typed [`Future`] for use in cases where you can't
-/// statically type your result or need to add some indirection.
-pub type BoxFuture<T> = ::core::pin::Pin<Box<dyn Future<Output = T> + Send>>;
 
 pub use async_trait::async_trait;
 pub use bytes::{Bytes, BytesMut};
@@ -61,10 +58,7 @@ pub use thiserror::Error as ThisError;
 
 #[doc(hidden)]
 mod tuples {
-    use super::{
-        async_trait, future::TryFutureExt, BoxFuture, Error, FnExt, FromRequest, Future,
-        IntoResponse, Request, Result,
-    };
+    use super::{async_trait, Error, FnExt, FromRequest, Future, IntoResponse, Request, Result};
 
     tuple_impls!(A B C D E F G H I J K L);
 }

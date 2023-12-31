@@ -1,61 +1,25 @@
-use std::{convert::Infallible, sync::Arc};
+use std::{convert::Infallible, future::Future, pin::Pin, sync::Arc};
 
 use crate::{
-    future::{FutureExt, TryFutureExt},
-    types::RouteInfo,
-    Body, BoxFuture, Handler, Incoming, IntoResponse, Method, Request, Response, StatusCode, Tree,
+    types::RouteInfo, Body, Handler, Incoming, IntoResponse, Method, Request, Response, StatusCode,
+    Tree,
 };
 
 /// Handles the HTTP [`Request`] and retures the HTTP [`Response`].
 #[derive(Debug)]
 pub struct Responder<A> {
-    tree: Tree,
+    tree: Arc<Tree>,
     remote_addr: Option<A>,
 }
 
-impl<A> Responder<A> {
-    /// Creates a Responder for handling the [`Request`].
-    #[must_use]
-    pub fn new(tree: Tree, remote_addr: Option<A>) -> Self {
-        Self { tree, remote_addr }
-    }
-}
-
-impl<A> Handler<Request<Incoming>> for Responder<A>
+impl<A> Responder<A>
 where
     A: Clone + Send + Sync + 'static,
 {
-    type Output = Result<Response, Infallible>;
-
-    fn call(&self, mut req: Request<Incoming>) -> BoxFuture<Self::Output> {
-        let method = req.method().clone();
-        let path = req.uri().path().to_string();
-
-        let matched = self.tree.find(&method, &path).or_else(|| {
-            if method == Method::HEAD {
-                self.tree.find(&Method::GET, &path)
-            } else {
-                None
-            }
-        });
-
-        if let Some((handler, route)) = matched {
-            req.extensions_mut().insert(self.remote_addr.clone());
-            req.extensions_mut().insert(Arc::from(RouteInfo {
-                id: *route.id,
-                pattern: route.pattern(),
-                params: route.params().into(),
-            }));
-
-            Box::pin(
-                handler
-                    .call(req.map(Body::Incoming))
-                    .unwrap_or_else(IntoResponse::into_response)
-                    .map(Result::Ok),
-            )
-        } else {
-            Box::pin(not_found())
-        }
+    /// Creates a Responder for handling the [`Request`].
+    #[must_use]
+    pub fn new(tree: Arc<Tree>, remote_addr: Option<A>) -> Self {
+        Self { tree, remote_addr }
     }
 }
 
@@ -65,15 +29,37 @@ where
 {
     type Response = Response;
     type Error = Infallible;
-    type Future = BoxFuture<Result<Self::Response, Self::Error>>;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
-    fn call(&self, req: Request<Incoming>) -> Self::Future {
-        Handler::call(self, req)
+    fn call(&self, mut req: Request<Incoming>) -> Self::Future {
+        let method = req.method().clone();
+        let path = req.uri().path().to_owned();
+
+        let Some((handler, route)) = self.tree.find(&method, &path).or_else(|| {
+            if method == Method::HEAD {
+                self.tree.find(&Method::GET, &path)
+            } else {
+                None
+            }
+        }) else {
+            return Box::pin(async move { Ok(StatusCode::NOT_FOUND.into_response()) });
+        };
+
+        req.extensions_mut().insert(self.remote_addr.clone());
+        req.extensions_mut().insert(Arc::from(RouteInfo {
+            id: *route.id,
+            pattern: route.pattern(),
+            params: route.params().into(),
+        }));
+
+        let req = req.map(Body::Incoming);
+        let handler = handler.clone();
+
+        Box::pin(async move {
+            Ok(handler
+                .call(req)
+                .await
+                .unwrap_or_else(IntoResponse::into_response))
+        })
     }
-}
-
-#[allow(clippy::unused_async)]
-#[inline]
-async fn not_found() -> Result<Response, Infallible> {
-    Ok(StatusCode::NOT_FOUND.into_response())
 }

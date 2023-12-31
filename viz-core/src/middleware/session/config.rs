@@ -5,10 +5,10 @@ use std::{
 };
 
 use crate::{
+    async_trait,
     middleware::helper::{CookieOptions, Cookieable},
     types::{Cookie, Session},
-    BoxFuture, Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode,
-    Transform,
+    Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode, Transform,
 };
 
 use super::{Error as SessionError, Storage, Store, PURGED, RENEWED, UNCHANGED};
@@ -89,9 +89,10 @@ where
     }
 }
 
+#[async_trait]
 impl<H, O, S, G, V> Handler<Request> for SessionMiddleware<H, S, G, V>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
     S: Storage + 'static,
     G: Fn() -> String + Send + Sync + 'static,
@@ -99,61 +100,59 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
-        let Self { config, h } = self.clone();
+    async fn call(&self, mut req: Request) -> Self::Output {
+        let Self { h, config } = self;
 
-        Box::pin(async move {
-            let cookies = req.cookies().map_err(Error::from)?;
-            let cookie = config.get_cookie(&cookies);
+        let cookies = req.cookies().map_err(Error::from)?;
+        let cookie = config.get_cookie(&cookies);
 
-            let mut session_id = cookie.as_ref().map(Cookie::value).map(ToString::to_string);
-            let data = match &session_id {
-                Some(sid) if (config.store().verify)(sid) => config.store().get(sid).await?,
-                _ => None,
-            };
-            if data.is_none() && session_id.is_some() {
-                session_id.take();
-            }
-            let session = Session::new(data.unwrap_or_default());
-            req.extensions_mut().insert(session.clone());
+        let mut session_id = cookie.as_ref().map(Cookie::value).map(ToString::to_string);
+        let data = match &session_id {
+            Some(sid) if (config.store().verify)(sid) => config.store().get(sid).await?,
+            _ => None,
+        };
+        if data.is_none() && session_id.is_some() {
+            session_id.take();
+        }
+        let session = Session::new(data.unwrap_or_default());
+        req.extensions_mut().insert(session.clone());
 
-            let resp = h.call(req).await.map(IntoResponse::into_response);
+        let resp = h.call(req).await.map(IntoResponse::into_response);
 
-            let status = session.status().load(Ordering::Acquire);
+        let status = session.status().load(Ordering::Acquire);
 
-            if status == UNCHANGED {
-                return resp;
-            }
+        if status == UNCHANGED {
+            return resp;
+        }
 
-            if status == PURGED {
-                if let Some(sid) = &session_id {
-                    config.store().remove(sid).await.map_err(Error::from)?;
-                    config.remove_cookie(&cookies);
-                }
-
-                return resp;
+        if status == PURGED {
+            if let Some(sid) = &session_id {
+                config.store().remove(sid).await.map_err(Error::from)?;
+                config.remove_cookie(&cookies);
             }
 
-            if status == RENEWED {
-                if let Some(sid) = &session_id.take() {
-                    config.store().remove(sid).await.map_err(Error::from)?;
-                }
+            return resp;
+        }
+
+        if status == RENEWED {
+            if let Some(sid) = &session_id.take() {
+                config.store().remove(sid).await.map_err(Error::from)?;
             }
+        }
 
-            let sid = session_id.unwrap_or_else(|| {
-                let sid = (config.store().generate)();
-                config.set_cookie(&cookies, &sid);
-                sid
-            });
+        let sid = session_id.unwrap_or_else(|| {
+            let sid = (config.store().generate)();
+            config.set_cookie(&cookies, &sid);
+            sid
+        });
 
-            config
-                .store()
-                .set(&sid, session.data()?, &config.ttl().unwrap_or_else(max_age))
-                .await
-                .map_err(Error::from)?;
+        config
+            .store()
+            .set(&sid, session.data()?, &config.ttl().unwrap_or_else(max_age))
+            .await
+            .map_err(Error::from)?;
 
-            resp
-        })
+        resp
     }
 }
 

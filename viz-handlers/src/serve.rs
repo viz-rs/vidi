@@ -11,12 +11,12 @@ use tokio::io::AsyncReadExt;
 use tokio_util::io::ReaderStream;
 
 use viz_core::{
+    async_trait,
     headers::{
         AcceptRanges, ContentLength, ContentRange, ContentType, ETag, HeaderMap, HeaderMapExt,
         IfMatch, IfModifiedSince, IfNoneMatch, IfUnmodifiedSince, LastModified, Range,
     },
-    BoxFuture, Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result,
-    StatusCode,
+    Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result, StatusCode,
 };
 
 mod directory;
@@ -47,12 +47,12 @@ impl File {
     }
 }
 
+#[async_trait]
 impl Handler<Request> for File {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
-        let path = self.path.clone();
-        Box::pin(async move { serve(&path, req.headers()) })
+    async fn call(&self, req: Request) -> Self::Output {
+        serve(&self.path, req.headers())
     }
 }
 
@@ -98,52 +98,47 @@ impl Dir {
     }
 }
 
+#[async_trait]
 impl Handler<Request> for Dir {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
-        let Self {
-            mut path,
-            listing,
-            unlisted,
-        } = self.clone();
+    async fn call(&self, req: Request) -> Self::Output {
+        let mut path = self.path.clone();
 
-        Box::pin(async move {
-            if req.method() != Method::GET {
-                Err(Error::MethodNotAllowed)?;
-            }
+        if req.method() != Method::GET {
+            Err(Error::MethodNotAllowed)?;
+        }
 
-            let mut prev = false;
+        let mut prev = false;
 
-            if let Some(param) = req.route_info().params.first().map(|(_, v)| v) {
-                let p = percent_encoding::percent_decode_str(param)
-                    .decode_utf8()
-                    .map_err(|_| Error::InvalidPath)?;
-                sanitize_path(&mut path, &p)?;
-                prev = true;
-            }
+        if let Some(param) = req.route_info().params.first().map(|(_, v)| v) {
+            let p = percent_encoding::percent_decode_str(param)
+                .decode_utf8()
+                .map_err(|_| Error::InvalidPath)?;
+            sanitize_path(&mut path, &p)?;
+            prev = true;
+        }
 
-            if !path.exists() {
-                Err(StatusCode::NOT_FOUND.into_error())?;
-            }
+        if !path.exists() {
+            Err(StatusCode::NOT_FOUND.into_error())?;
+        }
 
-            if path.is_file() {
-                return serve(&path, req.headers());
-            }
+        if path.is_file() {
+            return serve(&path, req.headers());
+        }
 
-            let index = path.join("index.html");
-            if index.exists() {
-                return serve(&index, req.headers());
-            }
+        let index = path.join("index.html");
+        if index.exists() {
+            return serve(&index, req.headers());
+        }
 
-            if listing {
-                return Directory::new(req.path(), prev, &path, &unlisted)
-                    .ok_or_else(|| StatusCode::INTERNAL_SERVER_ERROR.into_error())
-                    .map(IntoResponse::into_response);
-            }
+        if self.listing {
+            return Directory::new(req.path(), prev, &path, &self.unlisted)
+                .ok_or_else(|| StatusCode::INTERNAL_SERVER_ERROR.into_error())
+                .map(IntoResponse::into_response);
+        }
 
-            Ok(StatusCode::NOT_FOUND.into_response())
-        })
+        Ok(StatusCode::NOT_FOUND.into_response())
     }
 }
 

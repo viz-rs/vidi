@@ -3,7 +3,6 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::wildcard_imports)]
 
-use futures_util::future::BoxFuture;
 use http_body_util::Full;
 use viz_core::handler::CatchError;
 use viz_core::*;
@@ -160,11 +159,12 @@ async fn handler() -> Result<()> {
             name: String,
         }
 
+        #[async_trait]
         impl<I: Send + 'static> Handler<I> for MyBefore {
             type Output = Result<I>;
 
-            fn call(&self, i: I) -> BoxFuture<'static, Self::Output> {
-                Box::pin(async move { Ok(i) })
+            async fn call(&self, i: I) -> Self::Output {
+                Ok(i)
             }
         }
 
@@ -173,11 +173,12 @@ async fn handler() -> Result<()> {
             name: String,
         }
 
+        #[async_trait]
         impl<O: Send + 'static> Handler<Result<O>> for MyAfter {
             type Output = Result<O>;
 
-            fn call(&self, o: Self::Output) -> BoxFuture<'static, Self::Output> {
-                Box::pin(async move { o })
+            async fn call(&self, o: Self::Output) -> Self::Output {
+                o
             }
         }
 
@@ -186,6 +187,7 @@ async fn handler() -> Result<()> {
             name: String,
         }
 
+        #[async_trait]
         impl<H, I, O> Handler<Next<I, H>> for MyAround
         where
             I: Send + 'static,
@@ -194,8 +196,8 @@ async fn handler() -> Result<()> {
         {
             type Output = H::Output;
 
-            fn call(&self, (i, h): Next<I, H>) -> BoxFuture<'static, Self::Output> {
-                Box::pin(h.call(i))
+            async fn call(&self, (i, h): Next<I, H>) -> Self::Output {
+                h.call(i).await
             }
         }
 

@@ -9,31 +9,31 @@ members = [
   "viz-tower",
   "viz-test",
 
-  "examples/hello-world",
-  "examples/unix-socket",
-  "examples/static-files/embed",
-  "examples/static-files/serve",
-  "examples/static-files/include-dir",
-  "examples/limits",
-  "examples/forms/form",
-  "examples/forms/multipart",
-  "examples/websocket-chat",
-  "examples/sse",
-  "examples/session",
-  "examples/csrf",
-  "examples/cors",
-  "examples/rustls",
+  # "examples/hello-world",
+  # "examples/unix-socket",
+  # "examples/static-files/embed",
+  # "examples/static-files/serve",
+  # "examples/static-files/include-dir",
+  # "examples/limits",
+  # "examples/forms/form",
+  # "examples/forms/multipart",
+  # "examples/websocket-chat",
+  # "examples/sse",
+  # "examples/session",
+  # "examples/csrf",
+  # "examples/cors",
+  # "examples/rustls",
   # "examples/static-routes",
-  "examples/routing/todos",
-  "examples/routing/openapi",
-  "examples/otel/*",
-  "examples/compression",
-  "examples/templates/*",
-  "examples/tracing",
-  "examples/graceful-shutdown",
-  "examples/databases/*",
-  "examples/htmlx",
-  "examples/tower",
+  # "examples/routing/todos",
+  # "examples/routing/openapi",
+  # "examples/otel/*",
+  # "examples/compression",
+  # "examples/templates/*",
+  # "examples/tracing",
+  # "examples/graceful-shutdown",
+  # "examples/databases/*",
+  # "examples/htmlx",
+  # "examples/tower",
 ]
 
 [workspace.package]
@@ -121,7 +121,6 @@ opt-level = 3
 debug = false
 
 [workspace.lints.rust]
-unsafe_code = "forbid"
 rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 non_ascii_idents = "warn"

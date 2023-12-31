@@ -4,7 +4,7 @@
 use std::sync::Arc;
 
 use crate::{
-    future::TryFutureExt, types, BoxFuture, Handler, IntoResponse, Request, Response, Result,
+    async_trait, future::TryFutureExt, types, Handler, IntoResponse, Request, Response, Result,
     Transform,
 };
 
@@ -70,6 +70,7 @@ pub struct LimitsMiddleware<H> {
     config: Config,
 }
 
+#[async_trait]
 impl<H, O> Handler<Request> for LimitsMiddleware<H>
 where
     H: Handler<Request, Output = Result<O>>,
@@ -77,11 +78,11 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
+    async fn call(&self, mut req: Request) -> Self::Output {
         req.extensions_mut().insert(self.config.limits.clone());
         #[cfg(feature = "multipart")]
         req.extensions_mut().insert(self.config.multipart.clone());
 
-        Box::pin(self.h.call(req).map_ok(IntoResponse::into_response))
+        self.h.call(req).map_ok(IntoResponse::into_response).await
     }
 }

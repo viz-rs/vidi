@@ -11,7 +11,7 @@ macro_rules! export_verb {
         pub fn $name<S, H, O>(self, path: S, handler: H) -> Self
         where
             S: AsRef<str>,
-            H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+            H: Handler<Request, Output = Result<O>> + Clone,
             O: IntoResponse + Send + 'static,
         {
             self.route(path, Route::new().$name(handler))
@@ -130,7 +130,7 @@ impl Router {
     pub fn any<S, H, O>(self, path: S, handler: H) -> Self
     where
         S: AsRef<str>,
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.route(path, Route::new().any(handler))
@@ -165,7 +165,7 @@ impl Router {
     pub fn with<T>(self, t: T) -> Self
     where
         T: Transform<BoxHandler<Request, Result<Response>>>,
-        T::Output: Handler<Request, Output = Result<Response>> + Send + Clone + 'static,
+        T::Output: Handler<Request, Output = Result<Response>> + Clone,
     {
         self.map_handler(|handler| t.transform(handler).boxed())
     }
@@ -175,9 +175,7 @@ impl Router {
     pub fn with_handler<H>(self, f: H) -> Self
     where
         H: Handler<Next<Request, BoxHandler<Request, Result<Response>>>, Output = Result<Response>>
-            + Send
-            + Clone
-            + 'static,
+            + Clone,
     {
         self.map_handler(|handler| handler.around(f.clone()).boxed())
     }
@@ -189,7 +187,7 @@ mod tests {
     use http_body_util::{BodyExt, Full};
     use std::sync::Arc;
     use viz_core::{
-        future::BoxFuture,
+        async_trait,
         types::{Params, RouteInfo},
         Body, Error, Handler, HandlerExt, IntoResponse, Method, Next, Request, RequestExt,
         Response, ResponseExt, Result, StatusCode, Transform,
@@ -217,14 +215,15 @@ mod tests {
     #[derive(Clone)]
     struct LoggerHandler<H>(H);
 
+    #[async_trait]
     impl<H> Handler<Request> for LoggerHandler<H>
     where
         H: Handler<Request> + Clone + 'static,
     {
         type Output = H::Output;
 
-        fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
-            Box::pin(self.0.call(req))
+        async fn call(&self, req: Request) -> Self::Output {
+            self.0.call(req).await
         }
     }
 

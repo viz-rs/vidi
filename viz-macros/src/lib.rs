@@ -121,17 +121,16 @@ fn generate_handler(input: TokenStream) -> Result<TokenStream> {
         #[derive(Clone)]
         #vis struct #name;
 
+        #[viz_core::async_trait]
         impl viz_core::Handler<viz_core::Request> for #name
         {
             type Output = viz_core::Result<viz_core::Response>;
 
             #[allow(unused, unused_mut)]
-            fn call(&self, mut req: viz_core::Request) -> viz_core::BoxFuture<Self::Output> {
-                Box::pin(async move {
-                    #ast
-                    let res = #name(#(#extractors),*)#asyncness;
-                    #out.map(viz_core::IntoResponse::into_response)
-                })
+            async fn call(&self, mut req: viz_core::Request) -> Self::Output {
+                #ast
+                let res = #name(#(#extractors),*)#asyncness;
+                #out.map(viz_core::IntoResponse::into_response)
             }
         }
     };

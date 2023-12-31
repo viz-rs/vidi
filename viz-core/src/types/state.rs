@@ -6,11 +6,8 @@ use std::{
 };
 
 use crate::{
-    async_trait,
-    future::{BoxFuture, TryFutureExt},
-    handler::Transform,
-    Error, FromRequest, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode,
-    ThisError,
+    async_trait, future::TryFutureExt, handler::Transform, Error, FromRequest, Handler,
+    IntoResponse, Request, RequestExt, Response, Result, StatusCode, ThisError,
 };
 
 /// Extracts state from the extensions of a request.
@@ -75,6 +72,7 @@ where
     }
 }
 
+#[async_trait]
 impl<T, H, O> Handler<Request> for State<(T, H)>
 where
     T: Clone + Send + Sync + 'static,
@@ -83,10 +81,10 @@ where
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<'static, Self::Output> {
+    async fn call(&self, mut req: Request) -> Self::Output {
         let Self((t, h)) = self;
         req.extensions_mut().insert(t.clone());
-        Box::pin(h.call(req).map_ok(IntoResponse::into_response))
+        h.call(req).map_ok(IntoResponse::into_response).await
     }
 }
 

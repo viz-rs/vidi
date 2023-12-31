@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{future::TryFutureExt, BoxFuture, Error, Handler, IntoResponse, Response, Result};
+use crate::{async_trait, Handler, IntoResponse, Response, Result};
 
 /// Catches rejected error while calling the handler.
 #[derive(Debug)]
@@ -36,24 +36,22 @@ impl<H, F, E, R> CatchError<H, F, E, R> {
     }
 }
 
+#[async_trait]
 impl<H, I, O, F, E, R> Handler<I> for CatchError<H, F, E, R>
 where
+    I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    O: IntoResponse + 'static,
+    O: IntoResponse + Send,
     E: std::error::Error + Send + 'static,
-    F: Handler<E, Output = R> + Send + Clone + 'static,
-    R: IntoResponse,
+    F: Handler<E, Output = R>,
+    R: IntoResponse + 'static,
 {
     type Output = Result<Response>;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        let f = self.f.clone();
-        Box::pin(
-            self.h
-                .call(i)
-                .map_ok(IntoResponse::into_response)
-                .map_err(Error::downcast::<E>)
-                .or_else(move |r| async move { Ok(f.call(r?).await.into_response()) }),
-        )
+    async fn call(&self, i: I) -> Self::Output {
+        match self.h.call(i).await {
+            Ok(r) => Ok(r.into_response()),
+            Err(e) => Ok(self.f.call(e.downcast::<E>()?).await.into_response()),
+        }
     }
 }

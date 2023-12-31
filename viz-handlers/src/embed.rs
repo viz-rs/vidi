@@ -5,8 +5,9 @@ use std::{borrow::Cow, marker::PhantomData};
 use http_body_util::Full;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use viz_core::{
+    async_trait,
     header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
-    BoxFuture, Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
+    Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
 };
 
 /// Serve a single embedded file.
@@ -27,14 +28,15 @@ impl<E> File<E> {
     }
 }
 
+#[async_trait]
 impl<E> Handler<Request> for File<E>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
-        Box::pin(serve::<E>(self.0.to_string(), req))
+    async fn call(&self, req: Request) -> Self::Output {
+        serve::<E>(self.0.to_string(), req).await
     }
 }
 
@@ -54,20 +56,21 @@ impl<E> Default for Dir<E> {
     }
 }
 
+#[async_trait]
 impl<E> Handler<Request> for Dir<E>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
+    async fn call(&self, req: Request) -> Self::Output {
         let path = match req.route_info().params.first().map(|(_, v)| v) {
             Some(p) => p,
             None => "index.html",
         }
         .to_string();
 
-        Box::pin(serve::<E>(path, req))
+        serve::<E>(path, req).await
     }
 }
 

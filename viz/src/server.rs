@@ -2,6 +2,7 @@ use std::{
     fmt::Debug,
     future::{pending, Future, IntoFuture, Pending},
     io,
+    pin::Pin,
     sync::Arc,
 };
 
@@ -16,7 +17,7 @@ use tokio::{
     sync::watch,
 };
 
-use crate::{BoxFuture, Responder, Router, Tree};
+use crate::{Responder, Router, Tree};
 
 mod accept;
 pub use accept::Accept;
@@ -82,7 +83,7 @@ where
     F: Future + Send + 'static,
 {
     type Output = io::Result<()>;
-    type IntoFuture = BoxFuture<Self::Output>;
+    type IntoFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
 
     fn into_future(self) -> Self::IntoFuture {
         let Self {
@@ -102,6 +103,8 @@ where
         });
 
         let (close_tx, close_rx) = watch::channel(());
+
+        let tree = Arc::new(tree);
 
         Box::pin(async move {
             loop {

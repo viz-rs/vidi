@@ -1,4 +1,4 @@
-use crate::{BoxFuture, Handler, Result};
+use crate::{async_trait, Handler, Result};
 
 /// Represents a middleware parameter, which is a tuple that includes Requset and `BoxHandler`.
 pub type Next<I, H> = (I, H);
@@ -18,15 +18,17 @@ impl<H, F> Around<H, F> {
     }
 }
 
+#[async_trait]
 impl<H, F, I, O> Handler<I> for Around<H, F>
 where
-    H: Handler<I, Output = Result<O>> + Clone + 'static,
+    I: Send + 'static,
+    H: Handler<I, Output = Result<O>> + Clone,
     F: Handler<Next<I, H>, Output = H::Output>,
     O: 'static,
 {
     type Output = F::Output;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        Box::pin(self.f.call((i, self.h.clone())))
+    async fn call(&self, i: I) -> Self::Output {
+        self.f.call((i, self.h.clone())).await
     }
 }

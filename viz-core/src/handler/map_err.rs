@@ -1,4 +1,4 @@
-use crate::{future::TryFutureExt, BoxFuture, Error, Handler, Result};
+use crate::{async_trait, Error, Handler, Result};
 
 /// Maps the `Err` value of the output if after the handler called.
 #[derive(Debug, Clone)]
@@ -15,16 +15,18 @@ impl<H, F> MapErr<H, F> {
     }
 }
 
+#[async_trait]
 impl<H, F, I, O, E> Handler<I> for MapErr<H, F>
 where
+    I: Send + 'static,
     H: Handler<I, Output = Result<O, E>>,
-    F: FnOnce(E) -> Error + Send + Clone + 'static,
+    F: FnOnce(E) -> Error + Send + Sync + Copy + 'static,
     O: 'static,
     E: 'static,
 {
     type Output = Result<O>;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        Box::pin(self.h.call(i).map_err(self.f.clone()))
+    async fn call(&self, i: I) -> Self::Output {
+        self.h.call(i).await.map_err(self.f)
     }
 }

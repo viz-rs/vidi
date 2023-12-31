@@ -71,7 +71,7 @@ impl Resources {
 
     pub(crate) fn on<H, O>(mut self, kind: Kind, method: Method, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         match self
@@ -94,7 +94,7 @@ impl Resources {
     #[must_use]
     pub fn index<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Empty, Method::GET, handler)
@@ -104,7 +104,7 @@ impl Resources {
     #[must_use]
     pub fn new<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::New, Method::GET, handler)
@@ -114,7 +114,7 @@ impl Resources {
     #[must_use]
     pub fn create<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Empty, Method::POST, handler)
@@ -124,7 +124,7 @@ impl Resources {
     #[must_use]
     pub fn show<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Id, Method::GET, handler)
@@ -134,7 +134,7 @@ impl Resources {
     #[must_use]
     pub fn edit<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Edit, Method::GET, handler)
@@ -144,7 +144,7 @@ impl Resources {
     #[must_use]
     pub fn update<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Id, Method::PUT, handler)
@@ -154,7 +154,7 @@ impl Resources {
     #[must_use]
     pub fn update_with_patch<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Id, Method::PATCH, handler)
@@ -164,7 +164,7 @@ impl Resources {
     #[must_use]
     pub fn destroy<H, O>(self, handler: H) -> Self
     where
-        H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+        H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse + Send + 'static,
     {
         self.on(Kind::Id, Method::DELETE, handler)
@@ -200,7 +200,7 @@ impl Resources {
     pub fn with<T>(self, t: T) -> Self
     where
         T: Transform<BoxHandler>,
-        T::Output: Handler<Request, Output = Result<Response>> + Send + Clone + 'static,
+        T::Output: Handler<Request, Output = Result<Response>> + Clone,
     {
         self.map_handler(|handler| t.transform(handler).boxed())
     }
@@ -209,7 +209,7 @@ impl Resources {
     #[must_use]
     pub fn with_handler<H>(self, f: H) -> Self
     where
-        H: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Send + Clone + 'static,
+        H: Handler<Next<Request, BoxHandler>, Output = Result<Response>> + Clone,
     {
         self.map_handler(|handler| handler.around(f.clone()).boxed())
     }
@@ -259,7 +259,7 @@ mod tests {
     use crate::{get, Resources};
     use http_body_util::BodyExt;
     use viz_core::{
-        future::BoxFuture, Handler, HandlerExt, IntoResponse, Method, Next, Request, Response,
+        async_trait, Handler, HandlerExt, IntoResponse, Method, Next, Request, Response,
         ResponseExt, Result, Transform,
     };
 
@@ -285,14 +285,15 @@ mod tests {
         #[derive(Clone)]
         struct LoggerHandler<H>(H);
 
+        #[async_trait]
         impl<H> Handler<Request> for LoggerHandler<H>
         where
             H: Handler<Request> + Send + Clone + 'static,
         {
             type Output = H::Output;
 
-            fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
-                Box::pin(self.0.call(req))
+            async fn call(&self, req: Request) -> Self::Output {
+                self.0.call(req).await
             }
         }
 

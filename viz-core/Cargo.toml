@@ -25,7 +25,7 @@ default = [
   "websocket",
   "cookie",
   "session",
-  "fs"
+  "fs",
 ]
 
 state = []

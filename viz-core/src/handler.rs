@@ -1,6 +1,6 @@
 //! Traits and types for handling an HTTP.
 
-use crate::{BoxFuture, Future};
+use crate::{async_trait, Future};
 
 mod cloneable;
 
@@ -49,9 +49,6 @@ pub use map_into_response::MapInToResponse;
 mod or_else;
 pub use or_else::OrElse;
 
-mod try_handler;
-pub use try_handler::TryHandler;
-
 mod transform;
 pub use transform::Transform;
 
@@ -61,24 +58,26 @@ pub use service::ServiceHandler;
 /// A simplified asynchronous interface for handling input and output.
 ///
 /// Composable request handlers.
-pub trait Handler<Input> {
+#[async_trait]
+pub trait Handler<Input>: Send + Sync + 'static {
     /// The returned type after the call operator is used.
     type Output;
 
     /// Performs the call operation.
-    fn call(&self, input: Input) -> BoxFuture<Self::Output>;
+    async fn call(&self, input: Input) -> Self::Output;
 }
 
+#[async_trait]
 impl<F, I, Fut, O> Handler<I> for F
 where
     I: Send + 'static,
-    F: Fn(I) -> Fut + ?Sized + Clone + Send + 'static,
+    F: Fn(I) -> Fut + ?Sized + Clone + Send + Sync + 'static,
     Fut: Future<Output = O> + Send + 'static,
 {
     type Output = Fut::Output;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        Box::pin((self)(i))
+    async fn call(&self, i: I) -> Self::Output {
+        (self)(i).await
     }
 }
 

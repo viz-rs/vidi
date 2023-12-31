@@ -1,4 +1,4 @@
-use crate::{future::TryFutureExt, BoxFuture, Handler, Result};
+use crate::{async_trait, Handler, Result};
 
 /// Maps the `Ok` value of the output if after the handler called.
 #[derive(Debug, Clone)]
@@ -15,15 +15,17 @@ impl<H, F> Map<H, F> {
     }
 }
 
+#[async_trait]
 impl<H, F, I, O, T> Handler<I> for Map<H, F>
 where
+    I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    F: FnOnce(O) -> T + Send + Clone + 'static,
+    F: FnOnce(O) -> T + Send + Sync + Copy + 'static,
     O: 'static,
 {
     type Output = Result<T>;
 
-    fn call(&self, i: I) -> BoxFuture<Self::Output> {
-        Box::pin(self.h.call(i).map_ok(self.f.clone()))
+    async fn call(&self, i: I) -> Self::Output {
+        self.h.call(i).await.map(self.f)
     }
 }

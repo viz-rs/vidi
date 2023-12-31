@@ -3,9 +3,10 @@
 use std::fmt;
 
 use crate::{
+    async_trait,
     header::{HeaderValue, COOKIE, SET_COOKIE},
     types::{Cookie, CookieJar, CookieKey, Cookies},
-    BoxFuture, Handler, IntoResponse, Request, Response, Result, Transform,
+    Handler, IntoResponse, Request, Response, Result, Transform,
 };
 
 /// A configure for [`CookieMiddleware`].
@@ -79,14 +80,15 @@ impl<H> fmt::Debug for CookieMiddleware<H> {
     }
 }
 
+#[async_trait]
 impl<H, O> Handler<Request> for CookieMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse + 'static,
 {
     type Output = Result<Response>;
 
-    fn call(&self, mut req: Request) -> BoxFuture<Self::Output> {
+    async fn call(&self, mut req: Request) -> Self::Output {
         let jar = req
             .headers()
             .get_all(COOKIE)
@@ -101,26 +103,23 @@ where
 
         req.extensions_mut().insert::<Cookies>(cookies.clone());
 
-        let h = self.h.clone();
-
-        Box::pin(async move {
-            h.call(req)
-                .await
-                .map(IntoResponse::into_response)
-                .map(|mut res| {
-                    if let Ok(c) = cookies.jar().lock() {
-                        c.delta()
-                            .map(Cookie::encoded)
-                            .map(|cookie| HeaderValue::from_str(&cookie.to_string()))
-                            .filter_map(Result::ok)
-                            .fold(res.headers_mut(), |headers, cookie| {
-                                headers.append(SET_COOKIE, cookie);
-                                headers
-                            });
-                    }
-                    res
-                })
-        })
+        self.h
+            .call(req)
+            .await
+            .map(IntoResponse::into_response)
+            .map(|mut res| {
+                if let Ok(c) = cookies.jar().lock() {
+                    c.delta()
+                        .map(Cookie::encoded)
+                        .map(|cookie| HeaderValue::from_str(&cookie.to_string()))
+                        .filter_map(Result::ok)
+                        .fold(res.headers_mut(), |headers, cookie| {
+                            headers.append(SET_COOKIE, cookie);
+                            headers
+                        });
+                }
+                res
+            })
     }
 }
 
