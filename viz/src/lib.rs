@@ -14,12 +14,14 @@
 //!
 //! * Robust [`Routing`](#routing)
 //!
+//! * Supports Tower [`Service`]
+//!
 //! # Hello Viz
 //!
 //! ```no_run
-//! use std::{net::SocketAddr, sync::Arc};
+//! use std::net::SocketAddr;
 //! use tokio::net::TcpListener;
-//! use viz::{serve, Request, Result, Router, Tree};
+//! use viz::{serve, Request, Result, Router};
 //!
 //! async fn index(_: Request) -> Result<&'static str> {
 //!     Ok("Hello, Viz!")
@@ -32,13 +34,12 @@
 //!     println!("listening on http://{addr}");
 //!
 //!     let app = Router::new().get("/", index);
-//!     let tree = Arc::new(Tree::from(app));
 //!
-//!     loop {
-//!         let (stream, addr) = listener.accept().await?;
-//!         let tree = tree.clone();
-//!         tokio::task::spawn(serve(stream, tree, Some(addr)));
+//!     if let Err(e) = serve(listener, app).await {
+//!         println!("{e}");
 //!     }
+//!
+//!     Ok(())
 //! }
 //! ```
 //!
@@ -513,6 +514,7 @@
 //!
 //! [`FutureExt`]: https://docs.rs/futures/latest/futures/future/trait.FutureExt.html
 //! [`StreamExt`]: https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html
+//! [`Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
 
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
@@ -529,7 +531,7 @@ pub use responder::Responder;
 #[cfg(any(feature = "http1", feature = "http2"))]
 mod server;
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub use server::*;
+pub use server::{serve, Accept, Server};
 
 /// TLS
 #[cfg(any(feature = "native_tls", feature = "rustls"))]
@@ -540,8 +542,6 @@ pub mod tls;
 #[doc(inline)]
 pub use viz_handlers as handlers;
 
-#[cfg(any(feature = "http1", feature = "http2"))]
-// pub use hyper::server;
 #[cfg(feature = "macros")]
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[doc(inline)]

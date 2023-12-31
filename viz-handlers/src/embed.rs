@@ -71,6 +71,7 @@ where
     }
 }
 
+#[allow(clippy::unused_async)]
 async fn serve<E>(path: String, req: Request) -> Result<Response>
 where
     E: RustEmbed + Send + Sync + 'static,

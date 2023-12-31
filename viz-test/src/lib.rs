@@ -1,7 +1,7 @@
 use reqwest::Client;
-use std::net::SocketAddr;
+use std::{future::IntoFuture, net::SocketAddr};
 use tokio::net::TcpListener;
-use viz::{serve, Error, Result, Router, Tree};
+use viz::{serve, Error, Result, Router};
 
 pub use http;
 pub use nano_id;
@@ -22,14 +22,13 @@ impl TestServer {
     /// Will return `Err` if the server fails to start.
     pub async fn new(router: Router) -> Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:0").await?;
-        let tree = Tree::from(router);
         let addr = listener.local_addr()?;
         let client = reqwest::Client::builder()
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .map_err(Error::boxed)?;
 
-        tokio::spawn(run(listener, tree));
+        tokio::spawn(serve(listener, router).into_future());
 
         Ok(Self { addr, client })
     }
@@ -57,13 +56,5 @@ impl TestServer {
 
     pub fn put(&self, url: impl AsRef<str>) -> RequestBuilder {
         self.client.put(self.path(url))
-    }
-}
-
-async fn run(listener: TcpListener, tree: Tree) -> Result<()> {
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(serve(stream, tree, Some(addr)));
     }
 }

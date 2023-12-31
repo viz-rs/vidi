@@ -81,7 +81,8 @@ rustls-pemfile = { workspace = true, optional = true }
 
 tokio-native-tls = { workspace = true, optional = true }
 tokio-rustls = { workspace = true, optional = true }
-tokio.workspace = true
+tokio = { workspace = true, features = ["macros"] }
+tracing.workspace = true
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }

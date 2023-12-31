@@ -5,10 +5,10 @@ use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
 
 impl super::Accept for TcpListener {
-    type Conn = TcpStream;
+    type Stream = TcpStream;
     type Addr = SocketAddr;
 
-    fn accept(&self) -> impl Future<Output = Result<(Self::Conn, Self::Addr)>> + Send {
+    fn accept(&self) -> impl Future<Output = Result<(Self::Stream, Self::Addr)>> + Send {
         TcpListener::accept(self)
     }
 }

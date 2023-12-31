@@ -28,20 +28,19 @@ where
     type Output = Result<Response, Infallible>;
 
     fn call(&self, mut req: Request<Incoming>) -> BoxFuture<Self::Output> {
-        let Self { remote_addr, tree } = self;
         let method = req.method().clone();
         let path = req.uri().path().to_string();
 
-        let matched = tree.find(&method, &path).or_else(|| {
+        let matched = self.tree.find(&method, &path).or_else(|| {
             if method == Method::HEAD {
-                tree.find(&Method::GET, &path)
+                self.tree.find(&Method::GET, &path)
             } else {
                 None
             }
         });
 
         if let Some((handler, route)) = matched {
-            req.extensions_mut().insert(remote_addr.clone());
+            req.extensions_mut().insert(self.remote_addr.clone());
             req.extensions_mut().insert(Arc::from(RouteInfo {
                 id: *route.id,
                 pattern: route.pattern(),
@@ -73,7 +72,8 @@ where
     }
 }
 
-#[inline(always)]
+#[allow(clippy::unused_async)]
+#[inline]
 async fn not_found() -> Result<Response, Infallible> {
     Ok(StatusCode::NOT_FOUND.into_response())
 }

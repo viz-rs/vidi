@@ -1,9 +1,8 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 use std::{net::SocketAddr, str::FromStr};
 use tokio::net::TcpListener;
-use viz::{Request, Result, Router, Server, Tree};
+use viz::{serve, Request, Result, Router};
 
 async fn index(_: Request) -> Result<String> {
     Ok(String::from("Hello, World!"))
@@ -21,11 +20,9 @@ async fn main() -> Result<()> {
         app = app.get(&format!("/{}", n), index);
     }
 
-    let tree = Tree::from(app);
-
-    let server = Server::new(listener, tree);
-
-    if let Err(_) = server.await {}
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
+    }
 
     Ok(())
 }

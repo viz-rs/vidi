@@ -13,7 +13,7 @@ use std::{
 use tokio::net::TcpListener;
 use viz::{
     header::HeaderValue, middleware::limits, serve, types::State, Error, IntoResponse, Request,
-    RequestExt, Response, ResponseExt, Result, Router, StatusCode, Tree,
+    RequestExt, Response, ResponseExt, Result, Router, StatusCode,
 };
 
 /// In-memory todo store
@@ -100,15 +100,10 @@ async fn main() -> Result<()> {
         .any("/*", |_| async { Ok(Response::text("Welcome!")) })
         .with(State::new(DB::default()))
         .with(limits::Config::default());
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

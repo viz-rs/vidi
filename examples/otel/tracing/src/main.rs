@@ -6,9 +6,9 @@ use opentelemetry_sdk::{
     runtime::TokioCurrentThread,
     {propagation::TraceContextPropagator, trace::Tracer},
 };
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{middleware::otel, serve, Request, Result, Router, Tree};
+use viz::{middleware::otel, serve, Request, Result, Router};
 
 fn init_tracer() -> Tracer {
     global::set_text_map_propagator(TraceContextPropagator::new());
@@ -34,15 +34,10 @@ async fn main() -> Result<()> {
         .get("/", index)
         .get("/:username", index)
         .with(otel::tracing::Config::new(tracer));
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

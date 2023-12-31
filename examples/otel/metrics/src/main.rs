@@ -1,7 +1,6 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 use opentelemetry::{global, KeyValue};
@@ -13,7 +12,7 @@ use opentelemetry_sdk::{
 use viz::{
     handlers::prometheus::{ExporterBuilder, Prometheus, Registry},
     middleware::otel,
-    serve, Error, Request, Result, Router, Tree,
+    serve, Error, Request, Result, Router,
 };
 
 async fn index(_: Request) -> Result<&'static str> {
@@ -59,17 +58,12 @@ async fn main() -> Result<()> {
         .get("/:username", index)
         .get("/metrics", Prometheus::new(registry))
         .with(otel::metrics::Config::new(&global::meter("otel")));
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 
     // Ensure all spans have been reported
     // global::shutdown_tracer_provider();

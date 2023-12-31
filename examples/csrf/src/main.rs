@@ -1,7 +1,6 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, sync::Arc, time::Duration};
+use std::{net::SocketAddr, time::Duration};
 use tokio::net::TcpListener;
 
 use viz::{
@@ -10,7 +9,7 @@ use viz::{
         csrf::{self, CsrfToken},
         helper::CookieOptions,
     },
-    serve, Method, Request, RequestExt, Result, Router, Tree,
+    serve, Method, Request, RequestExt, Result, Router,
 };
 
 async fn index(mut req: Request) -> Result<String> {
@@ -39,15 +38,10 @@ async fn main() -> Result<()> {
             csrf::verify,
         ))
         .with(cookie::Config::default());
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

@@ -1,15 +1,14 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 use futures_util::{SinkExt, StreamExt};
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tokio::sync::broadcast::{channel, Sender};
 use viz::{
-    get, serve_with_upgrades,
+    get, serve,
     types::{Message, Params, State, WebSocket},
     HandlerExt, IntoHandler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
-    Router, Tree,
+    Router,
 };
 
 async fn index() -> Result<Response> {
@@ -61,15 +60,10 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .route("/", get(index.into_handler()))
         .route("/ws/:name", get(ws.with(State::new(channel.0))));
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve_with_upgrades(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

@@ -3,11 +3,10 @@
 
 use http_body_util::Full;
 use include_dir::{include_dir, Dir};
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{
     serve, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
-    Tree,
 };
 
 const ASSETS: Dir = include_dir!("examples/static-files/include-dir/html"); // frontend dir
@@ -45,11 +44,10 @@ async fn main() -> Result<()> {
         .any("/*", |_| async { Ok(StatusCode::NOT_FOUND) })
         .get("/", index)
         .get("/*", assets);
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(serve(stream, tree, Some(addr)));
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

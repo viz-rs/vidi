@@ -49,14 +49,14 @@
 
 - Simple + Flexible `Handler` & `Middleware`
 
-- Supports: Tower `Service`
+- Supports Tower `Service`
 
 ## Hello Viz
 
 ```rust
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{serve, Request, Result, Router, Tree};
+use viz::{serve, Request, Result, Router};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, Viz!")
@@ -69,13 +69,12 @@ async fn main() -> Result<()> {
     println!("listening on http://{addr}");
 
     let app = Router::new().get("/", index);
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(serve(stream, tree, Some(addr)));
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }
 ```
 

@@ -1,9 +1,8 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{env, net::SocketAddr, path::PathBuf, sync::Arc};
+use std::{env, net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
-use viz::{handlers::serve, serve, Request, Response, ResponseExt, Result, Router, Tree};
+use viz::{handlers::serve, serve, Request, Response, ResponseExt, Result, Router};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")
@@ -25,15 +24,10 @@ async fn main() -> Result<()> {
             serve::Dir::new(dir.join("../../../examples")).listing(),
         )
         .any("/*", |_| async { Ok(Response::text("Welcome!")) });
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

@@ -11,7 +11,6 @@ use viz::{
     middleware, serve,
     types::{Json, Params, Query, State},
     Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
-    Tree,
 };
 
 /// In-memory todo store
@@ -137,15 +136,10 @@ async fn main() -> Result<()> {
         .with(State::new(db))
         // Set limits for the payload data of request
         .with(middleware::limits::Config::new());
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

@@ -1,15 +1,16 @@
 #![deny(warnings)]
 #![allow(clippy::unused_async)]
 
+use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use once_cell::sync::Lazy;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
+
 use viz::{
-    server::conn::http1,
     types::{Params, RouteInfo},
-    Body, IntoResponse, Io, Method, Request, RequestExt, Response, Result, Router, StatusCode,
-    Tree,
+    Body, Handler, IntoResponse, Io, Method, Request, RequestExt, Response, Result, Router,
+    StatusCode, Tree,
 };
 
 /// Static Lazy Routes
@@ -66,8 +67,7 @@ async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Respons
                     pattern: route.pattern(),
                     params: Into::<Params>::into(route.params()),
                 }));
-                handler
-                    .call(req)
+                Handler::call(handler, req)
                     .await
                     .unwrap_or_else(IntoResponse::into_response)
             }

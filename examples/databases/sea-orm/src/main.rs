@@ -1,11 +1,10 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 //! `SeaOrm` example for Viz framework.
 use sea_orm_example::{api, db::init_db};
-use std::{env, net::SocketAddr, path::PathBuf, sync::Arc};
+use std::{env, net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
-use viz::{handlers::serve, middleware, serve, types::State, Result, Router, Tree};
+use viz::{handlers::serve, middleware, serve, types::State, Result, Router};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -26,11 +25,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .delete("/todos/:id", api::delete)
         .with(State::new(db))
         .with(middleware::limits::Config::new());
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(serve(stream, tree, Some(addr)));
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

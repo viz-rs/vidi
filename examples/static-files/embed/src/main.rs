@@ -1,8 +1,8 @@
 #![deny(warnings)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{handlers::embed, serve, Result, Router, StatusCode, Tree};
+use viz::{handlers::embed, serve, Result, Router, StatusCode};
 
 #[derive(rust_embed::RustEmbed)]
 #[folder = "public"]
@@ -21,15 +21,10 @@ async fn main() -> Result<()> {
         .get("/", embed::File::<Asset>::new("index.html"))
         .get("/static/*", embed::Dir::<Asset>::default())
         .any("/*", |_| async { Ok(StatusCode::NOT_FOUND) });
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

@@ -4,15 +4,12 @@
 //! curl --unix-socket /tmp/viz.sock http://localhost/
 //! ```
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 #[cfg(unix)]
 #[tokio::main]
 async fn main() -> viz::Result<()> {
-    use std::sync::Arc;
-
     use tokio::net::UnixListener;
-    use viz::{get, serve, IntoHandler, Result, Router, Tree};
+    use viz::{get, serve, IntoHandler, Result, Router};
 
     async fn index() -> Result<&'static str> {
         Ok("Hello world!")
@@ -24,17 +21,12 @@ async fn main() -> viz::Result<()> {
     let listener = UnixListener::bind(path)?;
 
     let app = Router::new().route("/", get(index.into_handler()));
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, _) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, None).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }
 
 #[cfg(not(unix))]

@@ -1,15 +1,14 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 use futures_util::TryStreamExt;
-use std::{fs::File, net::SocketAddr, sync::Arc};
+use std::{fs::File, net::SocketAddr};
 use tempfile::tempdir;
 use tokio::net::TcpListener;
 use viz::{
     middleware::limits,
     serve,
     types::{Multipart, PayloadError},
-    IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router, Tree,
+    IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router,
 };
 
 // HTML form for uploading photos
@@ -54,15 +53,10 @@ async fn main() -> Result<()> {
         .post("/", upload.into_handler())
         // limit body size
         .with(limits::Config::default());
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

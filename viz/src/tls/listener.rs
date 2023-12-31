@@ -1,5 +1,4 @@
 /// Unified TLS listener type.
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Listener<T, A> {
     pub(crate) inner: T,

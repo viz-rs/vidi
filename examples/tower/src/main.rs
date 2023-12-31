@@ -1,6 +1,6 @@
 //! Viz + Tower services
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower::{
     service_fn,
@@ -13,7 +13,7 @@ use tower_http::{
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{serve, Body, Error, IntoResponse, Request, Response, Result, Router, Tree};
+use viz::{serve, Body, Error, IntoResponse, Request, Response, Result, Router};
 use viz_tower::{Layered, ServiceHandler};
 
 async fn index(_: Request) -> Result<Response> {
@@ -61,15 +61,14 @@ async fn main() -> Result<()> {
         .get("/about", about)
         .any("/*", any_handler)
         .with(Layered::new(layer));
-    let tree = Arc::new(Tree::from(app));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = TcpListener::bind(addr).await?;
     println!("listening on http://{addr}");
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(serve(stream, tree, Some(addr)));
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

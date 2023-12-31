@@ -1,13 +1,12 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use tera::{Context, Tera};
 use tokio::net::TcpListener;
-use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router, Tree};
+use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router};
 
 static TPLS: Lazy<Tera> =
     Lazy::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());
@@ -51,15 +50,10 @@ async fn main() -> Result<()> {
     println!("listening on http://{addr}");
 
     let app = Router::new().get("/", index);
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

@@ -21,7 +21,7 @@ use viz::{
     middleware, serve,
     types::{Json, Params, Query, State, StateError},
     Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
-    StatusCode, Tree,
+    StatusCode,
 };
 
 /// In-memory todo store
@@ -329,15 +329,10 @@ async fn main() -> Result<(), Error> {
             "#,
             ))
         });
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

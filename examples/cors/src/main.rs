@@ -1,9 +1,8 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{get, middleware::cors, serve, Method, Request, Result, Router, Tree};
+use viz::{get, middleware::cors, serve, Method, Request, Result, Router};
 
 async fn index(_req: Request) -> Result<&'static str> {
     Ok("Hello, World!")
@@ -27,15 +26,10 @@ async fn main() -> Result<()> {
         .route("/", get(index).options(options))
         // .with(cors::Config::default()); // Default CORS config
         .with(custom_cors); // Our custom CORS config
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

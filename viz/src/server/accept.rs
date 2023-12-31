@@ -1,9 +1,14 @@
-use std::future::Future;
-use std::io::Result;
+//! The `Accept` trait and supporting types.
 
+use std::{future::Future, io::Result};
+
+/// Asynchronously accept incoming connections.
 pub trait Accept {
-    type Conn;
+    /// An accepted stream of the connection.
+    type Stream;
+    /// An accepted remote address of the connection.
     type Addr;
 
-    fn accept(&self) -> impl Future<Output = Result<(Self::Conn, Self::Addr)>> + Send;
+    /// Accepts a new incoming connection from this listener.
+    fn accept(&self) -> impl Future<Output = Result<(Self::Stream, Self::Addr)>> + Send;
 }

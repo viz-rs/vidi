@@ -1,11 +1,10 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{serve, Request, RequestExt, Result, Router, Tree};
+use viz::{serve, Request, RequestExt, Result, Router};
 
 #[instrument]
 async fn index(req: Request) -> Result<&'static str> {
@@ -28,15 +27,10 @@ async fn main() -> Result<()> {
     info!("listening on http://{addr}");
 
     let app = Router::new().get("/", index);
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                error!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        error!("{e}");
     }
+
+    Ok(())
 }

@@ -1,7 +1,6 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 use sessions::MemoryStorage;
@@ -15,7 +14,7 @@ use viz::{
     },
     serve,
     types::CookieKey,
-    Request, RequestExt, Result, Router, Tree,
+    Request, RequestExt, Result, Router,
 };
 
 async fn index(req: Request) -> Result<&'static str> {
@@ -41,15 +40,10 @@ async fn main() -> Result<()> {
             CookieOptions::default(),
         ))
         .with(cookie::Config::with_key(CookieKey::generate()));
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

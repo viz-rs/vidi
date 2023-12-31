@@ -1,5 +1,4 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 use futures_util::StreamExt;
 use std::{net::SocketAddr, sync::Arc};
@@ -13,7 +12,7 @@ use viz::{
     serve,
     types::{Event, Sse, State},
     Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
-    StatusCode, Tree,
+    StatusCode,
 };
 
 type ArcSystem = Arc<System>;
@@ -64,15 +63,10 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .route("/", get(index))
         .route("/stats", get(stats.with(State::new(sys))));
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }

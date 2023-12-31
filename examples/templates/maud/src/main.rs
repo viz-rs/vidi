@@ -1,12 +1,11 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 #![allow(clippy::must_use_candidate)]
 #![allow(clippy::inherent_to_string_shadow_display)]
 
 use maud::{html, PreEscaped, DOCTYPE};
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{serve, Request, Response, ResponseExt, Result, Router, Tree};
+use viz::{serve, Request, Response, ResponseExt, Result, Router};
 
 pub struct Todo<'a> {
     id: u64,
@@ -53,15 +52,10 @@ async fn main() -> Result<()> {
     println!("listening on http://{addr}");
 
     let app = Router::new().get("/", index);
-    let tree = Arc::new(Tree::from(app));
 
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        let tree = tree.clone();
-        tokio::task::spawn(async move {
-            if let Err(err) = serve(stream, tree, Some(addr)).await {
-                eprintln!("Error while serving HTTP connection: {err}");
-            }
-        });
+    if let Err(e) = serve(listener, app).await {
+        println!("{e}");
     }
+
+    Ok(())
 }
