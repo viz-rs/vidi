@@ -121,6 +121,7 @@ opt-level = 3
 debug = false
 
 [workspace.lints.rust]
+unsafe_code = "forbid"
 rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 non_ascii_idents = "warn"
