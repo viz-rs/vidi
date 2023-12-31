@@ -15,7 +15,8 @@ use opentelemetry_semantic_conventions::trace::{
 };
 
 use crate::{
-    BoxFuture, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
+    async_trait, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    Transform,
 };
 
 const HTTP_SERVER_ACTIVE_REQUESTS: &str = "http.server.active_requests";
@@ -95,52 +96,50 @@ pub struct MetricsMiddleware<H> {
     response_size: Histogram<u64>,
 }
 
+#[async_trait]
 impl<H, O> Handler<Request> for MetricsMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
+    async fn call(&self, req: Request) -> Self::Output {
         let Self {
             active_requests,
             duration,
             request_size,
             response_size,
             h,
-        } = self.clone();
+        } = self;
 
-        Box::pin(async move {
-            let timer = SystemTime::now();
-            let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
+        let timer = SystemTime::now();
+        let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
 
-            active_requests.add(1, &attributes);
+        active_requests.add(1, &attributes);
 
-            request_size.record(req.content_length().unwrap_or(0), &attributes);
+        request_size.record(req.content_length().unwrap_or(0), &attributes);
 
-            let resp = h
-                .call(req)
-                .await
-                .map(IntoResponse::into_response)
-                .map(|resp| {
-                    active_requests.add(-1, &attributes);
+        let resp = h
+            .call(req)
+            .await
+            .map(IntoResponse::into_response)
+            .map(|resp| {
+                active_requests.add(-1, &attributes);
 
-                    attributes
-                        .push(HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
+                attributes.push(HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
 
-                    response_size.record(resp.content_length().unwrap_or(0), &attributes);
+                response_size.record(resp.content_length().unwrap_or(0), &attributes);
 
-                    resp
-                });
+                resp
+            });
 
-            duration.record(
-                timer.elapsed().map(|t| t.as_secs_f64()).unwrap_or_default(),
-                &attributes,
-            );
+        duration.record(
+            timer.elapsed().map(|t| t.as_secs_f64()).unwrap_or_default(),
+            &attributes,
+        );
 
-            resp
-        })
+        resp
     }
 }
 

@@ -73,23 +73,22 @@
 //!
 //! ```
 //! # use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
-//! # use viz::{Handler, IntoResponse, Request, RequestExt, Response, Result, future::BoxFuture};
+//! # use viz::{async_trait, Handler, IntoResponse, Request, RequestExt, Response, Result};
 //! #[derive(Clone)]
 //! struct MyHandler {
 //!     code: Arc<AtomicUsize>,
 //! }
 //!
+//! #[async_trait]
 //! impl Handler<Request> for MyHandler {
 //!     type Output = Result<Response>;
 //!
-//!     fn call(&self, req: Request) -> BoxFuture<'static, Self::Output>  {
+//!     async fn call(&self, req: Request) -> Self::Output  {
 //!         let code = self.code.clone();
-//!         Box::pin(async move {
-//!             let path = req.path();
-//!             let method = req.method().clone();
-//!             let code = code.fetch_add(1, Ordering::SeqCst);
-//!             Ok(format!("code = {}, method = {}, path = {}", code, method, path).into_response())
-//!         })
+//!         let path = req.path();
+//!         let method = req.method().clone();
+//!         let code = code.fetch_add(1, Ordering::SeqCst);
+//!         Ok(format!("code = {}, method = {}, path = {}", code, method, path).into_response())
 //!     }
 //! }
 //! ```
@@ -242,7 +241,7 @@
 //! // middleware fn
 //! async fn around<H>((req, handler): Next<Request, H>) -> Result<Response>
 //! where
-//!     H: Handler<Request, Output = Result<Response>> + Send + Clone,
+//!     H: Handler<Request, Output = Result<Response>> + Clone,
 //! {
 //!     // before ...
 //!     let result = handler.call(req).await;
@@ -254,14 +253,15 @@
 //! #[derive(Clone)]
 //! struct MyMiddleware {}
 //!
+//! #[async_trait]
 //! impl<H> Handler<Next<Request, H>> for MyMiddleware
 //! where
-//!     H: Handler<Request> + Send + Clone + 'static,
+//!     H: Handler<Request> + Clone,
 //! {
 //!     type Output = H::Output;
 //!
-//!     fn call(&self, (i, h): Next<Request, H>) -> BoxFuture<'static, Self::Output> {
-//!         Box::pin(h.call(i))
+//!     async fn call(&self, (i, h): Next<Request, H>) -> Self::Output {
+//!         h.call(i).await
 //!     }
 //! }
 //!
@@ -288,14 +288,15 @@
 //! #[derive(Clone)]
 //! struct TimeoutMiddleware<H>(H, Duration);
 //!
+//! #[async_trait]
 //! impl<H> Handler<Request> for TimeoutMiddleware<H>
 //! where
-//!     H: Handler<Request> + Send + Clone + 'static,
+//!     H: Handler<Request> + Clone,
 //! {
 //!     type Output = H::Output;
 //!
-//!     fn call(&self, req: Request) -> BoxFuture<'static, Self::Output> {
-//!         Box::pin(self.0.call(req))
+//!     async fn call(&self, req: Request) -> Self::Output {
+//!         self.0.call(req).await
 //!     }
 //! }
 //!

@@ -19,10 +19,10 @@ use opentelemetry_semantic_conventions::trace::{
 };
 
 use crate::{
+    async_trait,
     header::{HeaderMap, HeaderName},
     headers::UserAgent,
-    BoxFuture, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
-    Transform,
+    Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
 };
 
 /// `OpenTelemetry` tracing config.
@@ -58,77 +58,76 @@ pub struct TracingMiddleware<H, T> {
     tracer: Arc<T>,
 }
 
+#[async_trait]
 impl<H, O, T> Handler<Request> for TracingMiddleware<H, T>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
     T: Tracer + Send + Sync + Clone + 'static,
     T::Span: Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
-    fn call(&self, req: Request) -> BoxFuture<Self::Output> {
-        let Self { tracer, h } = self.clone();
+    async fn call(&self, req: Request) -> Self::Output {
+        let parent_context = global::get_text_map_propagator(|propagator| {
+            propagator.extract(&RequestHeaderCarrier::new(req.headers()))
+        });
 
-        Box::pin(async move {
-            let parent_context = global::get_text_map_propagator(|propagator| {
-                propagator.extract(&RequestHeaderCarrier::new(req.headers()))
-            });
+        let http_route = &req.route_info().pattern;
+        let attributes = build_attributes(&req, http_route.as_str());
 
-            let http_route = &req.route_info().pattern;
-            let attributes = build_attributes(&req, http_route.as_str());
+        let mut span = self
+            .tracer
+            .span_builder(format!("{} {}", req.method(), http_route))
+            .with_kind(SpanKind::Server)
+            .with_attributes(attributes)
+            .start_with_context(&*self.tracer, &parent_context);
 
-            let mut span = tracer
-                .span_builder(format!("{} {}", req.method(), http_route))
-                .with_kind(SpanKind::Server)
-                .with_attributes(attributes)
-                .start_with_context(&*tracer, &parent_context);
+        span.add_event("request.started".to_string(), vec![]);
 
-            span.add_event("request.started".to_string(), vec![]);
+        let resp = self
+            .h
+            .call(req)
+            .with_context(Context::current_with_span(span))
+            .await;
 
-            let resp = h
-                .call(req)
-                .with_context(Context::current_with_span(span))
-                .await;
+        let cx = Context::current();
+        let span = cx.span();
 
-            let cx = Context::current();
-            let span = cx.span();
-
-            match resp {
-                Ok(resp) => {
-                    let resp = resp.into_response();
-                    span.add_event("request.completed".to_string(), vec![]);
+        match resp {
+            Ok(resp) => {
+                let resp = resp.into_response();
+                span.add_event("request.completed".to_string(), vec![]);
+                span.set_attribute(
+                    HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())),
+                );
+                if let Some(content_length) = resp.content_length() {
                     span.set_attribute(
-                        HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())),
+                        HTTP_RESPONSE_BODY_SIZE
+                            .i64(i64::try_from(content_length).unwrap_or(i64::MAX)),
                     );
-                    if let Some(content_length) = resp.content_length() {
-                        span.set_attribute(
-                            HTTP_RESPONSE_BODY_SIZE
-                                .i64(i64::try_from(content_length).unwrap_or(i64::MAX)),
-                        );
-                    }
-                    if resp.status().is_server_error() {
-                        span.set_status(Status::error(
-                            resp.status()
-                                .canonical_reason()
-                                .map(ToString::to_string)
-                                .unwrap_or_default(),
-                        ));
-                    };
-                    span.end();
-                    Ok(resp)
                 }
-                Err(err) => {
-                    span.add_event(
-                        "request.error".to_string(),
-                        vec![EXCEPTION_MESSAGE.string(err.to_string())],
-                    );
-                    span.set_status(Status::error(err.to_string()));
-                    span.end();
-                    Err(err)
-                }
+                if resp.status().is_server_error() {
+                    span.set_status(Status::error(
+                        resp.status()
+                            .canonical_reason()
+                            .map(ToString::to_string)
+                            .unwrap_or_default(),
+                    ));
+                };
+                span.end();
+                Ok(resp)
             }
-        })
+            Err(err) => {
+                span.add_event(
+                    "request.error".to_string(),
+                    vec![EXCEPTION_MESSAGE.string(err.to_string())],
+                );
+                span.set_status(Status::error(err.to_string()));
+                span.end();
+                Err(err)
+            }
+        }
     }
 }
 

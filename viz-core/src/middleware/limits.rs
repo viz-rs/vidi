@@ -3,10 +3,7 @@
 #[cfg(feature = "multipart")]
 use std::sync::Arc;
 
-use crate::{
-    async_trait, future::TryFutureExt, types, Handler, IntoResponse, Request, Response, Result,
-    Transform,
-};
+use crate::{async_trait, types, Handler, IntoResponse, Request, Response, Result, Transform};
 
 /// A configuration for [`LimitsMiddleware`].
 #[derive(Debug, Clone)]
@@ -83,6 +80,6 @@ where
         #[cfg(feature = "multipart")]
         req.extensions_mut().insert(self.config.multipart.clone());
 
-        self.h.call(req).map_ok(IntoResponse::into_response).await
+        self.h.call(req).await.map(IntoResponse::into_response)
     }
 }
