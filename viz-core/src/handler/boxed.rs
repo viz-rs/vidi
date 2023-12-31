@@ -1,8 +1,13 @@
-use crate::{handler::BoxCloneable, BoxFuture, Handler, Request, Response, Result};
+use std::fmt;
 
+use super::cloneable::BoxCloneable;
+use crate::{BoxFuture, Handler, Request, Response, Result};
+
+/// A [`Clone`] + [`Send`] boxed [`Handler`].
 pub struct BoxHandler<I = Request, O = Result<Response>>(BoxCloneable<I, O>);
 
 impl<I, O> BoxHandler<I, O> {
+    /// Creates a new `BoxHandler`.
     pub fn new<H>(h: H) -> Self
     where
         H: Handler<I, Output = O> + Send + Clone + 'static,
@@ -28,5 +33,11 @@ impl<I, O> Handler<I> for BoxHandler<I, O> {
 impl<I, O> From<BoxCloneable<I, O>> for BoxHandler<I, O> {
     fn from(value: BoxCloneable<I, O>) -> Self {
         Self(value)
+    }
+}
+
+impl<I, O> fmt::Debug for BoxHandler<I, O> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BoxHandler").finish()
     }
 }

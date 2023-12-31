@@ -3,7 +3,6 @@
 use crate::{BoxFuture, Future};
 
 mod cloneable;
-pub use cloneable::{BoxCloneable, Cloneable};
 
 mod after;
 pub use after::After;

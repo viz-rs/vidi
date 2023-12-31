@@ -21,4 +21,4 @@ where
     }
 }
 
-pub trait TryHandlerExt<I>: TryHandler<I> {}
+pub(crate) trait TryHandlerExt<I>: TryHandler<I> {}

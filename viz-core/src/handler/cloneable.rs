@@ -1,8 +1,8 @@
 use super::Handler;
 
-pub type BoxCloneable<Input, Output> = Box<dyn Cloneable<Input, Output = Output> + Send>;
+pub(crate) type BoxCloneable<Input, Output> = Box<dyn Cloneable<Input, Output = Output> + Send>;
 
-pub trait Cloneable<Input>: Handler<Input> {
+pub(crate) trait Cloneable<Input>: Handler<Input> {
     fn clone_box(&self) -> BoxCloneable<Input, Self::Output>;
 }
 
