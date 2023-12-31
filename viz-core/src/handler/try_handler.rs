@@ -1,10 +1,19 @@
 use crate::{BoxFuture, Handler};
 
+/// A convenience for handlers that return `Result` values that includes
+/// a variety of adapters tailored to such futures.
 pub trait TryHandler<Input>: Handler<Input> {
+    /// The type of successful values yielded by this handler
     type Ok;
 
+    /// The type of failures yielded by this handler
     type Error;
 
+    /// Call this `TryHandler` as if it were a `Handler`.
+    ///
+    /// This method is a stopgap for a compiler limitation that prevents us from
+    /// directly inheriting from the `Handler` trait; in the future it won't be
+    /// needed.
     fn try_call(&self, input: Input) -> BoxFuture<Result<Self::Ok, Self::Error>>;
 }
 
