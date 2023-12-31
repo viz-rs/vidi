@@ -34,7 +34,7 @@ where
     L::Stream: AsyncWrite + AsyncRead + Send + Unpin,
     L::Addr: Send + Sync + Debug + 'static,
 {
-    Server::<L>::new(listener, router.into())
+    Server::<L>::new(listener, router)
 }
 
 /// A listening HTTP server that accepts connections.
