@@ -222,9 +222,8 @@
 //! ```
 //! # use std::time::Duration;
 //! # use viz::{
-//! #   get, types::Params, Transform, HandlerExt, IntoResponse, IntoHandler,
+//! #   async_trait, get, types::Params, Transform, HandlerExt, IntoResponse, IntoHandler,
 //! #   Request, Response, ResponseExt, Result, Router, StatusCode, Next, Handler,
-//! #   future::BoxFuture,
 //! # };
 //! async fn index(_: Request) -> Result<Response> {
 //!     Ok(StatusCode::OK.into_response())

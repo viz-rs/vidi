@@ -6,7 +6,6 @@ use std::{
     sync::Arc,
 };
 
-use futures_util::FutureExt;
 use hyper_util::{
     rt::{TokioExecutor, TokioIo},
     server::conn::auto::Builder,
@@ -17,7 +16,7 @@ use tokio::{
     sync::watch,
 };
 
-use crate::{Responder, Router, Tree};
+use crate::{future::FutureExt, Responder, Router, Tree};
 
 mod accept;
 pub use accept::Accept;
