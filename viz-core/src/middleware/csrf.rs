@@ -188,7 +188,7 @@ where
 #[crate::async_trait]
 impl<H, O, S, G, V> Handler<Request> for CsrfMiddleware<H, S, G, V>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
     S: Fn() -> Result<Vec<u8>> + Send + Sync + 'static,
     G: Fn(&[u8], Vec<u8>) -> Vec<u8> + Send + Sync + 'static,

@@ -205,7 +205,7 @@ pub struct CorsMiddleware<H> {
 #[crate::async_trait]
 impl<H, O> Handler<Request> for CorsMiddleware<H>
 where
-    H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
+    H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
 {
     type Output = Result<Response>;
