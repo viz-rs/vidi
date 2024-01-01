@@ -14,7 +14,7 @@ impl<H, E, O> IntoHandler<E, Request> for H
 where
     E: FromRequest + 'static,
     E::Error: IntoResponse,
-    H: FnExt<E, Output = Result<O>> + Send + Copy + 'static,
+    H: FnExt<E, Output = Result<O>>,
     O: 'static,
 {
     type Handler = FnExtHandler<H, E, O>;
