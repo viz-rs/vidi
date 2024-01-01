@@ -10,7 +10,7 @@ impl<I, O> BoxHandler<I, O> {
     /// Creates a new `BoxHandler`.
     pub fn new<H>(h: H) -> Self
     where
-        H: Handler<I, Output = O> + Send + Sync + Clone + 'static,
+        H: Handler<I, Output = O> + Clone,
     {
         Self(Box::new(h))
     }
