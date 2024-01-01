@@ -44,7 +44,7 @@ homepage = "https://viz.rs"
 documentation = "https://docs.rs/viz"
 repository = "https://github.com/viz-rs/viz"
 license = "MIT"
-rust-version = "1.75"                           # follows `tokio` and `hyper`
+rust-version = "1.75"
 
 [workspace.dependencies]
 viz = { version = "0.7.1", path = "viz" }
