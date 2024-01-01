@@ -188,7 +188,7 @@ pub trait HandlerExt<I>: Handler<I> {
     /// Converts this Handler into a [`BoxHandler`].
     fn boxed(self) -> BoxHandler<I, Self::Output>
     where
-        Self: Sized + Send + Clone + 'static,
+        Self: Sized + Clone,
     {
         BoxHandler::new(self)
     }
