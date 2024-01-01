@@ -52,12 +52,11 @@ where
             params: route.params().into(),
         }));
 
-        let req = req.map(Body::Incoming);
         let handler = handler.clone();
 
         Box::pin(async move {
             Ok(handler
-                .call(req)
+                .call(req.map(Body::Incoming))
                 .await
                 .unwrap_or_else(IntoResponse::into_response))
         })

@@ -84,10 +84,9 @@
 //!     type Output = Result<Response>;
 //!
 //!     async fn call(&self, req: Request) -> Self::Output  {
-//!         let code = self.code.clone();
 //!         let path = req.path();
 //!         let method = req.method().clone();
-//!         let code = code.fetch_add(1, Ordering::SeqCst);
+//!         let code = self.code.fetch_add(1, Ordering::SeqCst);
 //!         Ok(format!("code = {}, method = {}, path = {}", code, method, path).into_response())
 //!     }
 //! }
@@ -190,7 +189,7 @@
 //!
 //! async fn around<H>((req, handler): Next<Request, H>) -> Result<Response>
 //! where
-//!     H: Handler<Request, Output = Result<Response>> + Clone,
+//!     H: Handler<Request, Output = Result<Response>>,
 //! {
 //!     // before ...
 //!     let result = handler.call(req).await;
@@ -240,7 +239,7 @@
 //! // middleware fn
 //! async fn around<H>((req, handler): Next<Request, H>) -> Result<Response>
 //! where
-//!     H: Handler<Request, Output = Result<Response>> + Clone,
+//!     H: Handler<Request, Output = Result<Response>>,
 //! {
 //!     // before ...
 //!     let result = handler.call(req).await;
@@ -255,7 +254,7 @@
 //! #[async_trait]
 //! impl<H> Handler<Next<Request, H>> for MyMiddleware
 //! where
-//!     H: Handler<Request> + Clone,
+//!     H: Handler<Request>,
 //! {
 //!     type Output = H::Output;
 //!
@@ -290,7 +289,7 @@
 //! #[async_trait]
 //! impl<H> Handler<Request> for TimeoutMiddleware<H>
 //! where
-//!     H: Handler<Request> + Clone,
+//!     H: Handler<Request>,
 //! {
 //!     type Output = H::Output;
 //!
