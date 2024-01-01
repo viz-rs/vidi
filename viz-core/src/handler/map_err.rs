@@ -21,8 +21,6 @@ where
     I: Send + 'static,
     H: Handler<I, Output = Result<O, E>>,
     F: FnOnce(E) -> Error + Send + Sync + Copy + 'static,
-    O: 'static,
-    E: 'static,
 {
     type Output = Result<O>;
 
