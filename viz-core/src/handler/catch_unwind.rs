@@ -1,4 +1,4 @@
-use crate::{async_trait, future::FutureExt, Handler, IntoResponse, Response, Result};
+use crate::{future::FutureExt, Handler, IntoResponse, Response, Result};
 
 /// Catches unwinding panics while calling the handler.
 #[derive(Debug, Clone)]
@@ -15,7 +15,7 @@ impl<H, F> CatchUnwind<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O, R> Handler<I> for CatchUnwind<H, F>
 where
     I: Send + 'static,

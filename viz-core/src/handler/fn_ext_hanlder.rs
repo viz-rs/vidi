@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{async_trait, FnExt, FromRequest, Handler, IntoResponse, Request, Result};
+use crate::{FnExt, FromRequest, Handler, IntoResponse, Result};
 
 /// A wrapper of the extractors handler.
 #[derive(Debug)]
@@ -22,17 +22,18 @@ impl<H, E, O> FnExtHandler<H, E, O> {
     }
 }
 
-#[async_trait]
-impl<H, E, O> Handler<Request> for FnExtHandler<H, E, O>
+#[crate::async_trait]
+impl<I, H, E, O> Handler<I> for FnExtHandler<H, E, O>
 where
+    I: Send + 'static,
     E: FromRequest + 'static,
     E::Error: IntoResponse,
-    H: FnExt<E, Output = Result<O>>,
+    H: FnExt<I, E, Output = Result<O>>,
     O: 'static,
 {
     type Output = H::Output;
 
-    async fn call(&self, req: Request) -> Self::Output {
-        self.0.call(req).await.map_err(IntoResponse::into_error)
+    async fn call(&self, i: I) -> Self::Output {
+        self.0.call(i).await.map_err(IntoResponse::into_error)
     }
 }

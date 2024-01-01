@@ -1,5 +1,3 @@
-use viz_core::Transform;
-
 use crate::Middleware;
 
 /// Transforms a Tower layer into Viz Middleware.
@@ -13,7 +11,7 @@ impl<L> Layered<L> {
     }
 }
 
-impl<L, H> Transform<H> for Layered<L>
+impl<L, H> viz_core::Transform<H> for Layered<L>
 where
     L: Clone,
 {

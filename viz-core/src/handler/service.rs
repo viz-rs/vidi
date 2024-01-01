@@ -1,8 +1,6 @@
 use hyper::service::Service;
 
-use crate::{
-    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
-};
+use crate::{Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result};
 
 /// Converts a hyper [`Service`] to a viz [`Handler`].
 #[derive(Debug, Clone)]
@@ -15,7 +13,7 @@ impl<S> ServiceHandler<S> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<I, O, S> Handler<Request<I>> for ServiceHandler<S>
 where
     I: HttpBody + Send + 'static,

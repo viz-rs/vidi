@@ -5,7 +5,6 @@ use std::{borrow::Cow, marker::PhantomData};
 use http_body_util::Full;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use viz_core::{
-    async_trait,
     header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
     Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
 };
@@ -28,7 +27,7 @@ impl<E> File<E> {
     }
 }
 
-#[async_trait]
+#[viz_core::async_trait]
 impl<E> Handler<Request> for File<E>
 where
     E: RustEmbed + Send + Sync + 'static,
@@ -36,7 +35,7 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, req: Request) -> Self::Output {
-        serve::<E>(self.0.to_string(), req).await
+        serve::<E>(self.0.to_string(), req)
     }
 }
 
@@ -56,7 +55,7 @@ impl<E> Default for Dir<E> {
     }
 }
 
-#[async_trait]
+#[viz_core::async_trait]
 impl<E> Handler<Request> for Dir<E>
 where
     E: RustEmbed + Send + Sync + 'static,
@@ -64,25 +63,22 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, req: Request) -> Self::Output {
-        let path = match req.route_info().params.first().map(|(_, v)| v) {
-            Some(p) => p,
-            None => "index.html",
-        }
-        .to_string();
-
-        serve::<E>(path, req).await
+        serve::<E>(
+            match req.route_info().params.first().map(|(_, v)| v) {
+                Some(p) => p,
+                None => "index.html",
+            }
+            .to_string(),
+            req,
+        )
     }
 }
 
-#[allow(clippy::unused_async)]
-async fn serve<E>(path: String, req: Request) -> Result<Response>
+fn serve<E>(path: String, req: Request) -> Result<Response>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
-    let method = req.method();
-    let headers = req.headers();
-
-    if method != Method::GET {
+    if Method::GET != req.method() {
         Err(StatusCode::METHOD_NOT_ALLOWED.into_error())?;
     }
 
@@ -90,7 +86,8 @@ where
         Some(EmbeddedFile { data, metadata }) => {
             let hash = hex::encode(metadata.sha256_hash());
 
-            if headers
+            if req
+                .headers()
                 .get(IF_NONE_MATCH)
                 .map_or(false, |etag| etag.to_str().unwrap_or("000000").eq(&hash))
             {

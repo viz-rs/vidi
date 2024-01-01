@@ -2,9 +2,7 @@
 
 use form_data::FormData;
 
-use crate::{
-    async_trait, Body, Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode,
-};
+use crate::{Body, Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode};
 
 use super::{Payload, PayloadError};
 
@@ -28,7 +26,7 @@ impl<T> Payload for Multipart<T> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl FromRequest for Multipart {
     type Error = PayloadError;
 

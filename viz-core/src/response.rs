@@ -1,10 +1,10 @@
 use futures_util::Stream;
 use http_body_util::Full;
 
-use crate::{async_trait, header, Body, BoxError, Bytes, Error, Response, Result, StatusCode};
+use crate::{header, Body, BoxError, Bytes, Error, Response, Result, StatusCode};
 
 /// The [`Response`] Extension.
-#[async_trait]
+#[crate::async_trait]
 pub trait ResponseExt: private::Sealed + Sized {
     /// Get the size of this response's body.
     fn content_length(&self) -> Option<u64>;
@@ -186,7 +186,7 @@ pub trait ResponseExt: private::Sealed + Sized {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl ResponseExt for Response {
     fn content_length(&self) -> Option<u64> {
         self.headers()

@@ -1,4 +1,4 @@
-use crate::{async_trait, Error, Handler, Result};
+use crate::{Error, Handler, Result};
 
 /// Maps the `Err` value of the output if after the handler called.
 #[derive(Debug, Clone)]
@@ -15,7 +15,7 @@ impl<H, F> MapErr<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O, E> Handler<I> for MapErr<H, F>
 where
     I: Send + 'static,

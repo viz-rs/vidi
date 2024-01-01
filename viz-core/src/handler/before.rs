@@ -1,4 +1,4 @@
-use crate::{async_trait, Handler, Result};
+use crate::{Handler, Result};
 
 /// Maps the input before the handler calls.
 #[derive(Debug, Clone)]
@@ -15,13 +15,12 @@ impl<H, F> Before<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O> Handler<I> for Before<H, F>
 where
     I: Send + 'static,
     F: Handler<I, Output = Result<I>>,
     H: Handler<I, Output = Result<O>>,
-    O: 'static,
 {
     type Output = H::Output;
 

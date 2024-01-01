@@ -1,4 +1,4 @@
-use crate::{async_trait, Handler, Result};
+use crate::{Handler, Result};
 
 /// Maps the `Ok` value of the output if after the handler called.
 #[derive(Debug, Clone)]
@@ -15,7 +15,7 @@ impl<H, F> Map<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O, T> Handler<I> for Map<H, F>
 where
     I: Send + 'static,

@@ -5,7 +5,6 @@ use std::{collections::HashSet, fmt, sync::Arc};
 use base64::Engine as _;
 
 use crate::{
-    async_trait,
     header::{HeaderName, HeaderValue, VARY},
     middleware::helper::{CookieOptions, Cookieable},
     Error, FromRequest, Handler, IntoResponse, Method, Request, RequestExt, Response, Result,
@@ -37,7 +36,7 @@ pub enum Store {
 #[derive(Debug, Clone)]
 pub struct CsrfToken(pub String);
 
-#[async_trait]
+#[crate::async_trait]
 impl FromRequest for CsrfToken {
     type Error = Error;
 
@@ -186,7 +185,7 @@ where
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, O, S, G, V> Handler<Request> for CsrfMiddleware<H, S, G, V>
 where
     H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,

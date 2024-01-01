@@ -1,5 +1,5 @@
 use crate::{
-    async_trait, header,
+    header,
     types::{PayloadError, RealIp},
     Body, BodyState, Bytes, FromRequest, Request, Result,
 };
@@ -36,7 +36,7 @@ use crate::types::Session;
 use crate::types::{ParamsError, PathDeserializer, RouteInfo};
 
 /// The [`Request`] Extension.
-#[async_trait]
+#[crate::async_trait]
 pub trait RequestExt: private::Sealed + Sized {
     /// Get URL's schema of this request.
     fn schema(&self) -> Option<&http::uri::Scheme>;
@@ -193,7 +193,7 @@ pub trait RequestExt: private::Sealed + Sized {
     fn realip(&self) -> Option<RealIp>;
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl RequestExt for Request {
     fn schema(&self) -> Option<&http::uri::Scheme> {
         self.uri().scheme()

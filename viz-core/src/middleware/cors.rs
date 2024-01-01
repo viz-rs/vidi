@@ -3,7 +3,6 @@
 use std::{collections::HashSet, fmt, sync::Arc};
 
 use crate::{
-    async_trait,
     header::{
         HeaderMap, HeaderName, HeaderValue, ACCESS_CONTROL_ALLOW_CREDENTIALS,
         ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_HEADERS,
@@ -203,7 +202,7 @@ pub struct CorsMiddleware<H> {
     aceh: AccessControlExposeHeaders,
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, O> Handler<Request> for CorsMiddleware<H>
 where
     H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,

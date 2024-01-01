@@ -6,8 +6,8 @@ use std::{
 };
 
 use crate::{
-    async_trait, future::TryFutureExt, handler::Transform, Error, FromRequest, Handler,
-    IntoResponse, Request, RequestExt, Response, Result, StatusCode, ThisError,
+    handler::Transform, Error, FromRequest, Handler, IntoResponse, Request, RequestExt, Response,
+    Result, StatusCode, ThisError,
 };
 
 /// Extracts state from the extensions of a request.
@@ -49,7 +49,7 @@ impl<T> DerefMut for State<T> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T> FromRequest for State<T>
 where
     T: Clone + Send + Sync + 'static,
@@ -72,19 +72,19 @@ where
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T, H, O> Handler<Request> for State<(T, H)>
 where
     T: Clone + Send + Sync + 'static,
     H: Handler<Request, Output = Result<O>>,
-    O: IntoResponse + 'static,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 
     async fn call(&self, mut req: Request) -> Self::Output {
         let Self((t, h)) = self;
         req.extensions_mut().insert(t.clone());
-        h.call(req).map_ok(IntoResponse::into_response).await
+        h.call(req).await.map(IntoResponse::into_response)
     }
 }
 

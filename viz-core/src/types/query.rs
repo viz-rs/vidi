@@ -7,7 +7,7 @@ use std::{
 
 use serde::de::DeserializeOwned;
 
-use crate::{async_trait, types::PayloadError, FromRequest, Request, RequestExt, Result};
+use crate::{types::PayloadError, FromRequest, Request, RequestExt, Result};
 
 /// Extracts the data from the query string of a URL.
 pub struct Query<T = ()>(pub T);
@@ -64,7 +64,7 @@ where
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T> FromRequest for Query<T>
 where
     T: DeserializeOwned,

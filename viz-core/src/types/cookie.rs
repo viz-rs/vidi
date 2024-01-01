@@ -6,8 +6,7 @@ use std::{
 };
 
 use crate::{
-    async_trait, Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode,
-    ThisError,
+    Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode, ThisError,
 };
 
 pub use ::cookie::{Cookie, CookieJar, SameSite};
@@ -193,7 +192,7 @@ impl Cookies {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl FromRequest for Cookies {
     type Error = CookiesError;
 

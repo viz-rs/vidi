@@ -14,10 +14,7 @@ use opentelemetry_semantic_conventions::trace::{
     HTTP_ROUTE, NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_SCHEME,
 };
 
-use crate::{
-    async_trait, Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
-    Transform,
-};
+use crate::{Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform};
 
 const HTTP_SERVER_ACTIVE_REQUESTS: &str = "http.server.active_requests";
 const HTTP_SERVER_DURATION: &str = "http.server.duration";
@@ -96,7 +93,7 @@ pub struct MetricsMiddleware<H> {
     response_size: Histogram<u64>,
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, O> Handler<Request> for MetricsMiddleware<H>
 where
     H: Handler<Request, Output = Result<O>>,

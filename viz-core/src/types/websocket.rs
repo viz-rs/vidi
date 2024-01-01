@@ -6,7 +6,6 @@ use hyper::upgrade::{OnUpgrade, Upgraded};
 use tokio_tungstenite::tungstenite::protocol::Role;
 
 use crate::{
-    async_trait,
     header::{SEC_WEBSOCKET_PROTOCOL, UPGRADE},
     headers::{
         Connection, HeaderMapExt, HeaderValue, SecWebsocketAccept, SecWebsocketKey,
@@ -99,7 +98,7 @@ impl WebSocket {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl FromRequest for WebSocket {
     type Error = WebSocketError;
 

@@ -1,7 +1,7 @@
 use std::fmt;
 
 use super::cloneable::BoxCloneable;
-use crate::{async_trait, Handler, Request, Response, Result};
+use crate::{Handler, Request, Response, Result};
 
 /// A [`Clone`] + [`Send`] boxed [`Handler`].
 pub struct BoxHandler<I = Request, O = Result<Response>>(BoxCloneable<I, O>);
@@ -18,7 +18,7 @@ impl<I, O> BoxHandler<I, O> {
 
 impl<I, O> Clone for BoxHandler<I, O>
 where
-    I: 'static,
+    I: Send + 'static,
     O: 'static,
 {
     fn clone(&self) -> Self {
@@ -26,7 +26,7 @@ where
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<I, O> Handler<I> for BoxHandler<I, O>
 where
     I: Send + 'static,

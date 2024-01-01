@@ -1,4 +1,4 @@
-use crate::{async_trait, Handler, Result};
+use crate::{Handler, Result};
 
 /// Represents a middleware parameter, which is a tuple that includes Requset and `BoxHandler`.
 pub type Next<I, H> = (I, H);
@@ -18,13 +18,12 @@ impl<H, F> Around<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O> Handler<I> for Around<H, F>
 where
     I: Send + 'static,
     H: Handler<I, Output = Result<O>> + Clone,
     F: Handler<Next<I, H>, Output = H::Output>,
-    O: 'static,
 {
     type Output = F::Output;
 

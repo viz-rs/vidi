@@ -5,9 +5,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use crate::{
-    async_trait, FromRequest, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
-};
+use crate::{FromRequest, IntoResponse, Request, RequestExt, Response, ResponseExt, Result};
 
 use super::{Payload, PayloadError};
 
@@ -82,7 +80,7 @@ impl<T> Payload for Json<T> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T> FromRequest for Json<T>
 where
     T: serde::de::DeserializeOwned,

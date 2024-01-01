@@ -1,11 +1,9 @@
-use crate::{async_trait, Request};
-
 /// A handler with extractors.
-#[async_trait]
-pub trait FnExt<E>: Send + Sync + 'static {
+#[crate::async_trait]
+pub trait FnExt<I, E>: Send + Sync + 'static {
     /// The returned type after the call operator is used.
     type Output;
 
     /// Performs the call operation.
-    async fn call(&self, req: Request) -> Self::Output;
+    async fn call(&self, i: I) -> Self::Output;
 }

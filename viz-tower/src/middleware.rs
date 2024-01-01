@@ -1,7 +1,5 @@
 use tower::{Layer, Service, ServiceExt};
-use viz_core::{
-    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
-};
+use viz_core::{Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result};
 
 use crate::HandlerService;
 
@@ -19,7 +17,7 @@ impl<L, H> Middleware<L, H> {
     }
 }
 
-#[async_trait]
+#[viz_core::async_trait]
 impl<O, L, H> Handler<Request> for Middleware<L, H>
 where
     L: Layer<HandlerService<H>> + Send + Sync + 'static,

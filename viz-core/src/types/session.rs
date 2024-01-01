@@ -14,7 +14,7 @@ use serde_json::{from_value, to_value, Value};
 
 use sessions_core::{Data, State, CHANGED, PURGED, RENEWED, UNCHANGED};
 
-use crate::{async_trait, Error, FromRequest, IntoResponse, Request, RequestExt, StatusCode};
+use crate::{Error, FromRequest, IntoResponse, Request, RequestExt, StatusCode};
 
 /// A session for the current request.
 #[derive(Clone)]
@@ -170,7 +170,7 @@ impl fmt::Debug for Session {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl FromRequest for Session {
     type Error = Infallible;
 

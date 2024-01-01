@@ -7,7 +7,7 @@ use std::{
 
 use serde::de::DeserializeOwned;
 
-use crate::{async_trait, FromRequest, Request, RequestExt, Result};
+use crate::{FromRequest, Request, RequestExt, Result};
 
 use super::{Payload, PayloadError};
 
@@ -81,7 +81,7 @@ impl<T> Payload for Form<T> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T> FromRequest for Form<T>
 where
     T: DeserializeOwned,

@@ -1,4 +1,4 @@
-use crate::{async_trait, Error, Handler, Result};
+use crate::{Error, Handler, Result};
 
 /// Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.
 #[derive(Debug, Clone)]
@@ -15,13 +15,13 @@ impl<H, F> OrElse<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O> Handler<I> for OrElse<H, F>
 where
     I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
     F: Handler<Error, Output = H::Output>,
-    O: Send + 'static,
+    O: Send,
 {
     type Output = F::Output;
 

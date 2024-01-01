@@ -1,4 +1,4 @@
-use crate::{async_trait, Handler, IntoResponse, Response, Result};
+use crate::{Handler, IntoResponse, Response, Result};
 
 /// Maps the handler's output type to the [`Response`].
 #[derive(Debug, Clone)]
@@ -12,12 +12,12 @@ impl<H> MapInToResponse<H> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, I, O> Handler<I> for MapInToResponse<H>
 where
     I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    O: IntoResponse + 'static,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 

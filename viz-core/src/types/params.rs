@@ -11,8 +11,7 @@ use std::{
 use serde::de::DeserializeOwned;
 
 use crate::{
-    async_trait, Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode,
-    ThisError,
+    Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode, ThisError,
 };
 
 pub(crate) use de::PathDeserializer;
@@ -77,7 +76,7 @@ impl Params {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T> FromRequest for Params<T>
 where
     T: DeserializeOwned,

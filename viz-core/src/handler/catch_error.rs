@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{async_trait, Handler, IntoResponse, Response, Result};
+use crate::{Handler, IntoResponse, Response, Result};
 
 /// Catches rejected error while calling the handler.
 #[derive(Debug)]
@@ -36,7 +36,7 @@ impl<H, F, E, R> CatchError<H, F, E, R> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, I, O, F, E, R> Handler<I> for CatchError<H, F, E, R>
 where
     I: Send + 'static,

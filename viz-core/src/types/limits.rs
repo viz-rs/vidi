@@ -1,6 +1,6 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{async_trait, FromRequest, Request, RequestExt};
+use crate::{FromRequest, Request, RequestExt};
 
 #[cfg(feature = "form")]
 use super::Form;
@@ -81,7 +81,7 @@ impl Limits {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl FromRequest for Limits {
     type Error = Infallible;
 

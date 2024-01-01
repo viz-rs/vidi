@@ -5,7 +5,6 @@ use std::{
 };
 
 use crate::{
-    async_trait,
     middleware::helper::{CookieOptions, Cookieable},
     types::{Cookie, Session},
     Error, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode, Transform,
@@ -89,7 +88,7 @@ where
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, O, S, G, V> Handler<Request> for SessionMiddleware<H, S, G, V>
 where
     H: Handler<Request, Output = Result<O>>,

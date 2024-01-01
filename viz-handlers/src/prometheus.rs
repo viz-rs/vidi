@@ -7,7 +7,6 @@ use opentelemetry::{global::handle_error, metrics::MetricsError};
 use prometheus::{Encoder, TextEncoder};
 
 use viz_core::{
-    async_trait,
     header::{HeaderValue, CONTENT_TYPE},
     Handler, IntoResponse, Request, Response, Result, StatusCode,
 };
@@ -31,7 +30,7 @@ impl Prometheus {
     }
 }
 
-#[async_trait]
+#[viz_core::async_trait]
 impl Handler<Request> for Prometheus {
     type Output = Result<Response>;
 

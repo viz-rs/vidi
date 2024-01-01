@@ -1,4 +1,4 @@
-use crate::{async_trait, Handler, Result};
+use crate::{Handler, Result};
 
 /// Maps the output `Result<T>` after the handler called.
 #[derive(Debug, Clone)]
@@ -15,13 +15,12 @@ impl<H, F> After<H, F> {
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<H, F, I, O> Handler<I> for After<H, F>
 where
     I: Send + 'static,
     H: Handler<I, Output = Result<O>>,
-    F: Handler<H::Output, Output = H::Output> + Clone + 'static,
-    O: 'static,
+    F: Handler<H::Output, Output = H::Output>,
 {
     type Output = F::Output;
 

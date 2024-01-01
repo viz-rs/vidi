@@ -1,9 +1,7 @@
 //! An adapter that makes a tower [`Service`] into a [`Handler`].
 
 use tower::{Service, ServiceExt};
-use viz_core::{
-    async_trait, Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result,
-};
+use viz_core::{Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result};
 
 mod service;
 pub use service::HandlerService;
@@ -25,7 +23,7 @@ impl<S> ServiceHandler<S> {
     }
 }
 
-#[async_trait]
+#[viz_core::async_trait]
 impl<O, S> Handler<Request> for ServiceHandler<S>
 where
     O: HttpBody + Send + 'static,

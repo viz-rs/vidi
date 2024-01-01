@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    async_trait, header,
+    header,
     headers::{self, HeaderMapExt},
     Error, FromRequest, IntoResponse, Request, Response, Result, StatusCode, ThisError,
 };
@@ -66,7 +66,7 @@ where
     }
 }
 
-#[async_trait]
+#[crate::async_trait]
 impl<T> FromRequest for Header<T>
 where
     T: headers::Header,
