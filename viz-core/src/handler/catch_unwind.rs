@@ -22,7 +22,7 @@ where
     H: Handler<I, Output = Result<O>>,
     O: IntoResponse + Send,
     F: Handler<Box<dyn ::core::any::Any + Send>, Output = R>,
-    R: IntoResponse + 'static,
+    R: IntoResponse,
 {
     type Output = Result<Response>;
 
