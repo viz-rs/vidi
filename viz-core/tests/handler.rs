@@ -192,7 +192,6 @@ async fn handler() -> Result<()> {
         where
             I: Send + 'static,
             H: Handler<I, Output = Result<O>>,
-            O: 'static,
         {
             type Output = H::Output;
 
