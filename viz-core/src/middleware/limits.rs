@@ -71,7 +71,7 @@ pub struct LimitsMiddleware<H> {
 impl<H, O> Handler<Request> for LimitsMiddleware<H>
 where
     H: Handler<Request, Output = Result<O>>,
-    O: IntoResponse + 'static,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 
