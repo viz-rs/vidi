@@ -206,7 +206,7 @@ pub struct CorsMiddleware<H> {
 impl<H, O> Handler<Request> for CorsMiddleware<H>
 where
     H: Handler<Request, Output = Result<O>> + Send + Clone + 'static,
-    O: IntoResponse + 'static,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 
