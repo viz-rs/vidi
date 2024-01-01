@@ -218,7 +218,7 @@ mod tests {
     #[async_trait]
     impl<H> Handler<Request> for LoggerHandler<H>
     where
-        H: Handler<Request> + Clone + 'static,
+        H: Handler<Request>,
     {
         type Output = H::Output;
 
@@ -281,7 +281,7 @@ mod tests {
 
         async fn middle<H>((req, h): Next<Request, H>) -> Result<Response>
         where
-            H: Handler<Request, Output = Result<Response>> + Clone,
+            H: Handler<Request, Output = Result<Response>>,
         {
             h.call(req).await
         }
