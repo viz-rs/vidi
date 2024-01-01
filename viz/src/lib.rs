@@ -530,7 +530,7 @@ pub use responder::Responder;
 #[cfg(any(feature = "http1", feature = "http2"))]
 mod server;
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub use server::{serve, Accept, Server};
+pub use server::{serve, Server};
 
 /// TLS
 #[cfg(any(feature = "native_tls", feature = "rustls"))]

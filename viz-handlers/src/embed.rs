@@ -35,7 +35,7 @@ where
     type Output = Result<Response>;
 
     async fn call(&self, req: Request) -> Self::Output {
-        serve::<E>(self.0.to_string(), req)
+        serve::<E>(&self.0, &req)
     }
 }
 
@@ -67,14 +67,13 @@ where
             match req.route_info().params.first().map(|(_, v)| v) {
                 Some(p) => p,
                 None => "index.html",
-            }
-            .to_string(),
-            req,
+            },
+            &req,
         )
     }
 }
 
-fn serve<E>(path: String, req: Request) -> Result<Response>
+fn serve<E>(path: &str, req: &Request) -> Result<Response>
 where
     E: RustEmbed + Send + Sync + 'static,
 {
@@ -82,7 +81,7 @@ where
         Err(StatusCode::METHOD_NOT_ALLOWED.into_error())?;
     }
 
-    match E::get(&path) {
+    match E::get(path) {
         Some(EmbeddedFile { data, metadata }) => {
             let hash = hex::encode(metadata.sha256_hash());
 

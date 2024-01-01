@@ -10,29 +10,17 @@ use hyper_util::{
     rt::{TokioExecutor, TokioIo},
     server::conn::auto::Builder,
 };
-use tokio::{
-    io::{AsyncRead, AsyncWrite},
-    pin, select,
-    sync::watch,
-};
+use tokio::{pin, select, sync::watch};
+use tokio_util::net::Listener;
 
 use crate::{future::FutureExt, Responder, Router, Tree};
-
-mod accept;
-pub use accept::Accept;
-
-#[cfg(any(feature = "http1", feature = "http2"))]
-mod tcp;
-
-#[cfg(feature = "unix-socket")]
-mod unix;
 
 /// Starts a server and serves the connections.
 pub fn serve<L>(listener: L, router: Router) -> Server<L>
 where
-    L: Accept + Send + 'static,
-    L::Stream: AsyncWrite + AsyncRead + Send + Unpin,
-    L::Addr: Send + Sync + Debug + 'static,
+    L: Listener + Send + 'static,
+    L::Io: Send + Unpin,
+    L::Addr: Send + Sync + Debug,
 {
     Server::<L>::new(listener, router)
 }
@@ -76,9 +64,9 @@ impl<L, E, F> Server<L, E, F> {
 /// Copied from Axum. Thanks.
 impl<L, F> IntoFuture for Server<L, TokioExecutor, F>
 where
-    L: Accept + Send + 'static,
-    L::Stream: AsyncWrite + AsyncRead + Send + Unpin,
-    L::Addr: Send + Sync + Debug + 'static,
+    L: Listener + Send + 'static,
+    L::Io: Send + Unpin,
+    L::Addr: Send + Sync + Debug,
     F: Future + Send + 'static,
 {
     type Output = io::Result<()>;
@@ -89,7 +77,7 @@ where
             tree,
             signal,
             builder,
-            listener,
+            mut listener,
         } = self;
 
         let (shutdown_tx, shutdown_rx) = watch::channel(());

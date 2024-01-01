@@ -1,9 +1,11 @@
 use std::{
     fmt,
-    io::{Error as IoError, ErrorKind},
+    io::{Error as IoError, ErrorKind, Result as IoResult},
     net::SocketAddr,
+    task::{Context, Poll},
 };
 
+use futures_util::FutureExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio_native_tls::{native_tls::TlsAcceptor as TlsAcceptorWrapper, TlsStream};
 
@@ -42,17 +44,21 @@ impl Config {
     }
 }
 
-impl crate::Accept for Listener<TcpListener, TlsAcceptor> {
-    type Stream = TlsStream<TcpStream>;
+impl tokio_util::net::Listener for Listener<TcpListener, TlsAcceptor> {
+    type Io = TlsStream<TcpStream>;
     type Addr = SocketAddr;
 
-    async fn accept(&self) -> std::io::Result<(Self::Stream, Self::Addr)> {
-        let (stream, addr) = self.inner.accept().await?;
-        let tls_stream = self
-            .acceptor
-            .accept(stream)
-            .await
-            .map_err(|e| IoError::new(ErrorKind::Other, e))?;
-        Ok((tls_stream, addr))
+    fn poll_accept(&mut self, cx: &mut Context<'_>) -> Poll<IoResult<(Self::Io, Self::Addr)>> {
+        let Poll::Ready((stream, addr)) = self.inner.poll_accept(cx)? else {
+            return Poll::Pending;
+        };
+        Box::pin(self.acceptor.accept(stream))
+            .poll_unpin(cx)
+            .map_ok(|stream| (stream, addr))
+            .map_err(|e| IoError::new(ErrorKind::Other, e))
+    }
+
+    fn local_addr(&self) -> IoResult<Self::Addr> {
+        self.inner.local_addr()
     }
 }
