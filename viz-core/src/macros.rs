@@ -32,7 +32,7 @@ macro_rules! tuple_impls {
         {
             type Output =  Fut::Output;
 
-            #[allow(unused, unused_mut, non_snake_case)]
+            #[allow(unused, unused_mut)]
             async fn call(&self, mut req: Request) -> Self::Output {
                 (self)($($T::extract(&mut req).await.map_err(IntoResponse::into_error)?,)*)
                     .await
