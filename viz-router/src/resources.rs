@@ -72,7 +72,7 @@ impl Resources {
     pub(crate) fn on<H, O>(mut self, kind: Kind, method: Method, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         match self
             .routes
@@ -95,7 +95,7 @@ impl Resources {
     pub fn index<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Empty, Method::GET, handler)
     }
@@ -105,7 +105,7 @@ impl Resources {
     pub fn new<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::New, Method::GET, handler)
     }
@@ -115,7 +115,7 @@ impl Resources {
     pub fn create<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Empty, Method::POST, handler)
     }
@@ -125,7 +125,7 @@ impl Resources {
     pub fn show<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Id, Method::GET, handler)
     }
@@ -135,7 +135,7 @@ impl Resources {
     pub fn edit<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Edit, Method::GET, handler)
     }
@@ -145,7 +145,7 @@ impl Resources {
     pub fn update<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Id, Method::PUT, handler)
     }
@@ -155,7 +155,7 @@ impl Resources {
     pub fn update_with_patch<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Id, Method::PATCH, handler)
     }
@@ -165,7 +165,7 @@ impl Resources {
     pub fn destroy<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.on(Kind::Id, Method::DELETE, handler)
     }
@@ -288,7 +288,7 @@ mod tests {
         #[async_trait]
         impl<H> Handler<Request> for LoggerHandler<H>
         where
-            H: Handler<Request> + Send + Clone + 'static,
+            H: Handler<Request>,
         {
             type Output = H::Output;
 
@@ -307,8 +307,8 @@ mod tests {
 
         async fn around<H, O>((req, handler): Next<Request, H>) -> Result<Response>
         where
-            H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse + Send + 'static,
+            H: Handler<Request, Output = Result<O>>,
+            O: IntoResponse,
         {
             handler.call(req).await.map(IntoResponse::into_response)
         }
