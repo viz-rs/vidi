@@ -1,5 +1,4 @@
 #![deny(warnings)]
-#![allow(clippy::unused_async)]
 
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
@@ -67,7 +66,8 @@ async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Respons
                     pattern: route.pattern(),
                     params: Into::<Params>::into(route.params()),
                 }));
-                Handler::call(handler, req)
+                handler
+                    .call(req)
                     .await
                     .unwrap_or_else(IntoResponse::into_response)
             }
