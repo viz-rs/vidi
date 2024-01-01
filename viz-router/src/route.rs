@@ -14,7 +14,7 @@ macro_rules! export_internal_verb {
         pub fn $name<H, O>(self, handler: H) -> Self
         where
             H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse + Send + 'static,
+            O: IntoResponse,
         {
             self.on(Method::$verb, handler)
         }
@@ -28,7 +28,7 @@ macro_rules! export_verb {
         pub fn $name<H, O>(handler: H) -> Route
         where
             H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse + Send + 'static,
+            O: IntoResponse,
         {
             Route::new().$name(handler)
         }
@@ -71,7 +71,7 @@ impl Route {
     pub fn on<H, O>(self, method: Method, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         self.push(method, handler.map_into_response().boxed())
     }
@@ -81,7 +81,7 @@ impl Route {
     pub fn any<H, O>(self, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
-        O: IntoResponse + Send + 'static,
+        O: IntoResponse,
     {
         [
             Method::GET,
@@ -167,7 +167,7 @@ impl FromIterator<(Method, BoxHandler)> for Route {
 pub fn on<H, O>(method: Method, handler: H) -> Route
 where
     H: Handler<Request, Output = Result<O>> + Clone,
-    O: IntoResponse + Send + 'static,
+    O: IntoResponse,
 {
     Route::new().on(method, handler)
 }
@@ -189,7 +189,7 @@ repeat!(
 pub fn any<H, O>(handler: H) -> Route
 where
     H: Handler<Request, Output = Result<O>> + Clone,
-    O: IntoResponse + Send + 'static,
+    O: IntoResponse,
 {
     Route::new().any(handler)
 }
@@ -272,23 +272,23 @@ mod tests {
 
         async fn around<H, O>((req, handler): Next<Request, H>) -> Result<Response>
         where
-            H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse + Send + 'static,
+            H: Handler<Request, Output = Result<O>>,
+            O: IntoResponse,
         {
             handler.call(req).await.map(IntoResponse::into_response)
         }
 
         async fn around_1<H, O>((req, handler): Next<Request, H>) -> Result<Response>
         where
-            H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse + Send + 'static,
+            H: Handler<Request, Output = Result<O>>,
+            O: IntoResponse,
         {
             handler.call(req).await.map(IntoResponse::into_response)
         }
 
         async fn around_2<H>((req, handler): Next<Request, H>) -> Result<Response>
         where
-            H: Handler<Request, Output = Result<Response>> + Clone,
+            H: Handler<Request, Output = Result<Response>>,
         {
             handler.call(req).await
         }
@@ -302,8 +302,7 @@ mod tests {
         impl<H, I, O> Handler<Next<I, H>> for Around2
         where
             I: Send + 'static,
-            H: Handler<I, Output = Result<O>> + Clone,
-            O: 'static,
+            H: Handler<I, Output = Result<O>>,
         {
             type Output = H::Output;
 
@@ -321,7 +320,7 @@ mod tests {
         impl<H, O> Handler<Next<Request, H>> for Around3
         where
             H: Handler<Request, Output = Result<O>> + Clone,
-            O: IntoResponse + 'static,
+            O: IntoResponse,
         {
             type Output = Result<Response>;
 
