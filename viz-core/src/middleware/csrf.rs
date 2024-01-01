@@ -199,27 +199,23 @@ where
     async fn call(&self, mut req: Request) -> Self::Output {
         let mut secret = self.config.get(&req)?;
 
-        let (token, secret) = {
-            let config = self.config.as_ref();
+        let config = self.config.as_ref();
 
-            if !config.ignored_methods.contains(req.method()) {
-                let mut forbidden = true;
-                if let Some(secret) = secret.take() {
-                    if let Some(raw_token) = req.header(&config.header) {
-                        forbidden = !(config.verify)(&secret, raw_token);
-                    }
-                }
-                if forbidden {
-                    return Err((StatusCode::FORBIDDEN, "Invalid csrf token").into_error());
+        if !config.ignored_methods.contains(req.method()) {
+            let mut forbidden = true;
+            if let Some(secret) = secret.take() {
+                if let Some(raw_token) = req.header(&config.header) {
+                    forbidden = !(config.verify)(&secret, raw_token);
                 }
             }
-            let otp = (config.secret)()?;
-            let secret = (config.secret)()?;
-            let token = base64::engine::general_purpose::URL_SAFE_NO_PAD
-                .encode((config.generate)(&secret, otp));
-
-            (token, secret)
-        };
+            if forbidden {
+                return Err((StatusCode::FORBIDDEN, "Invalid csrf token").into_error());
+            }
+        }
+        let otp = (config.secret)()?;
+        let secret = (config.secret)()?;
+        let token = base64::engine::general_purpose::URL_SAFE_NO_PAD
+            .encode((config.generate)(&secret, otp));
 
         req.extensions_mut().insert(CsrfToken(token.to_string()));
         self.config.set(&req, token, secret)?;
