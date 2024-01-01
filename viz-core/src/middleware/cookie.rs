@@ -83,7 +83,7 @@ impl<H> fmt::Debug for CookieMiddleware<H> {
 impl<H, O> Handler<Request> for CookieMiddleware<H>
 where
     H: Handler<Request, Output = Result<O>>,
-    O: IntoResponse + 'static,
+    O: IntoResponse,
 {
     type Output = Result<Response>;
 
