@@ -1,3 +1,5 @@
+//! A TLS listener wrapper.
+
 /// Unified TLS listener type.
 #[derive(Debug)]
 pub struct TlsListener<T, A> {
@@ -12,5 +14,15 @@ impl<T, A> TlsListener<T, A> {
             inner: t,
             acceptor: a,
         }
+    }
+
+    /// Gets the listener.
+    pub fn get_ref(&self) -> &T {
+        &self.inner
+    }
+
+    /// Gets the acceptor.
+    pub fn get_acceptor(&self) -> &A {
+        &self.acceptor
     }
 }

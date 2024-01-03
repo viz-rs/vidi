@@ -1,11 +1,9 @@
 use std::{future::Future, io::Result};
 
-use tokio::io::{AsyncRead, AsyncWrite};
-
 /// A trait for a listener: `TcpListener` and `UnixListener`.
 pub trait Listener {
     /// The stream's type of this listener.
-    type Io: AsyncRead + AsyncWrite;
+    type Io;
     /// The socket address type of this listener.
     type Addr;
 

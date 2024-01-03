@@ -148,7 +148,7 @@ impl Config {
     }
 }
 
-impl crate::Listener for super::TlsListener<TcpListener, TlsAcceptor> {
+impl crate::Listener for crate::tls::TlsListener<TcpListener, TlsAcceptor> {
     type Io = TlsStream<TcpStream>;
     type Addr = SocketAddr;
 

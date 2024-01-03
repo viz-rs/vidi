@@ -67,6 +67,15 @@ otel-prometheus = ["handlers", "viz-handlers?/prometheus"]
 rustls = ["dep:rustls-pemfile", "dep:tokio-rustls", "dep:futures-util"]
 native-tls = ["dep:tokio-native-tls", "dep:futures-util"]
 
+smol = [
+  # "dep:async-channel",
+  "dep:async-executor",
+  # "dep:async-io",
+  "dep:async-net",
+  "dep:smol-hyper",
+  "dep:futures-lite"
+]
+
 [dependencies]
 viz-core.workspace = true
 viz-router.workspace = true
@@ -85,6 +94,14 @@ tokio-rustls = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["macros"] }
 tokio-util = { workspace = true, features = ["net"] }
 tracing.workspace = true
+
+# smol
+# async-channel = { workspace = true, optional = true }
+async-executor = { workspace = true, optional = true }
+# async-io = { workspace = true, optional = true }
+async-net = { workspace = true, optional = true }
+smol-hyper = { workspace = true, optional = true }
+futures-lite = { workspace = true, optional = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }

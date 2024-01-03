@@ -528,9 +528,8 @@ pub use responder::Responder;
 mod server;
 pub use server::{serve, Listener, Server};
 
-/// TLS
 #[cfg(any(feature = "native_tls", feature = "rustls"))]
-pub mod tls;
+pub use server::tls;
 
 pub use viz_core::*;
 pub use viz_router::*;
