@@ -1,6 +1,6 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{FromRequest, Request, RequestExt};
+use crate::{FromRequest, Request, RequestLimitsExt};
 
 #[cfg(feature = "form")]
 use super::Form;

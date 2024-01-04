@@ -33,7 +33,7 @@ mod into_response;
 pub use into_response::IntoResponse;
 
 mod request;
-pub use request::RequestExt;
+pub use request::{RequestExt, RequestLimitsExt};
 
 mod response;
 pub use response::ResponseExt;
