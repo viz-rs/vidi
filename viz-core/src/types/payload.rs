@@ -108,6 +108,32 @@ pub trait Payload {
         limit.unwrap_or(Self::LIMIT)
     }
 
+    /// Detects `Content-Type`
+    ///
+    /// # Errors
+    ///
+    /// Will return [`PayloadError::UnsupportedMediaType`] if the detected media type is not supported.
+    #[inline]
+    fn check_type(m: Option<mime::Mime>) -> Result<mime::Mime, PayloadError> {
+        m.filter(Self::detect)
+            .ok_or_else(|| PayloadError::UnsupportedMediaType(Self::mime()))
+    }
+
+    /// Checks `Content-Length`
+    ///
+    /// # Errors
+    ///
+    /// Will return [`PayloadError::TooLarge`] if the detected content length is too large.
+    #[inline]
+    fn check_length(len: Option<u64>, limit: Option<u64>) -> Result<(), PayloadError> {
+        match len {
+            None => Err(PayloadError::LengthRequired),
+            Some(len) => (len <= Self::limit(limit))
+                .then_some(())
+                .ok_or_else(|| PayloadError::TooLarge),
+        }
+    }
+
     /// Checks `Content-Type` & `Content-Length`
     ///
     /// # Errors
@@ -121,14 +147,8 @@ pub trait Payload {
         len: Option<u64>,
         limit: Option<u64>,
     ) -> Result<mime::Mime, PayloadError> {
-        let m = m
-            .filter(Self::detect)
-            .ok_or_else(|| PayloadError::UnsupportedMediaType(Self::mime()))?;
-
-        match len {
-            None => Err(PayloadError::LengthRequired),
-            Some(len) if len > Self::limit(limit) => Err(PayloadError::TooLarge),
-            Some(_) => Ok(m),
-        }
+        let m = Self::check_type(m)?;
+        Self::check_length(len, limit)?;
+        Ok(m)
     }
 }
