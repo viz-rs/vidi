@@ -284,7 +284,7 @@ impl RequestExt for Request {
     where
         T: serde::de::DeserializeOwned,
     {
-        <Form as Payload>::check_header(self.content_type(), self.content_length(), None)?;
+        <Form as Payload>::check_type(self.content_type())?;
         let bytes = self.bytes().await?;
         serde_urlencoded::from_reader(bytes::Buf::reader(bytes)).map_err(PayloadError::UrlDecode)
     }
@@ -294,15 +294,14 @@ impl RequestExt for Request {
     where
         T: serde::de::DeserializeOwned,
     {
-        <Json as Payload>::check_header(self.content_type(), self.content_length(), None)?;
+        <Json as Payload>::check_type(self.content_type())?;
         let bytes = self.bytes().await?;
         serde_json::from_slice(&bytes).map_err(PayloadError::Json)
     }
 
     #[cfg(feature = "multipart")]
     async fn multipart(&mut self) -> Result<Multipart, PayloadError> {
-        let m =
-            <Multipart as Payload>::check_header(self.content_type(), self.content_length(), None)?;
+        let m = <Multipart as Payload>::check_type(self.content_type())?;
 
         let boundary = m
             .get_param(mime::BOUNDARY)

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use viz::{types, Error, Request, RequestExt, Response, ResponseExt, Result};
+
+use viz::{types, Error, Request, RequestLimitsExt, Response, ResponseExt, Result};
 
 #[tokio::test]
 async fn payload() -> Result<()> {
@@ -9,15 +10,15 @@ async fn payload() -> Result<()> {
 
     let router = Router::new()
         .post("/form", |mut req: Request| async move {
-            let data = req.form::<HashMap<String, String>>().await?;
+            let data = req.limited_form::<HashMap<String, String>>().await?;
             Ok(Response::json(data))
         })
         .post("/json", |mut req: Request| async move {
-            let data = req.json::<HashMap<String, String>>().await?;
+            let data = req.limited_json::<HashMap<String, String>>().await?;
             Ok(Response::json(data))
         })
         .post("/multipart", |mut req: Request| async move {
-            let _ = req.multipart().await?;
+            let _ = req.limited_multipart().await?;
             Ok(())
         })
         .with(

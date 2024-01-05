@@ -13,5 +13,10 @@ pub trait Listener {
     fn accept(&self) -> impl Future<Output = Result<(Self::Io, Self::Addr)>> + Send;
 
     /// Returns the local address that this listener is bound to.
+    ///
+    /// # Errors
+    ///
+    /// An error will return if got the socket address of the local half of this connection is
+    /// failed.
     fn local_addr(&self) -> Result<Self::Addr>;
 }
