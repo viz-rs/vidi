@@ -33,7 +33,9 @@ mod into_response;
 pub use into_response::IntoResponse;
 
 mod request;
-pub use request::{RequestExt, RequestLimitsExt};
+pub use request::RequestExt;
+#[cfg(feature = "limits")]
+pub use request::RequestLimitsExt;
 
 mod response;
 pub use response::ResponseExt;
