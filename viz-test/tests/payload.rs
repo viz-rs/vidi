@@ -10,15 +10,15 @@ async fn payload() -> Result<()> {
 
     let router = Router::new()
         .post("/form", |mut req: Request| async move {
-            let data = req.limited_form::<HashMap<String, String>>().await?;
+            let data = req.form_with_limit::<HashMap<String, String>>().await?;
             Ok(Response::json(data))
         })
         .post("/json", |mut req: Request| async move {
-            let data = req.limited_json::<HashMap<String, String>>().await?;
+            let data = req.json_with_limit::<HashMap<String, String>>().await?;
             Ok(Response::json(data))
         })
         .post("/multipart", |mut req: Request| async move {
-            let _ = req.limited_multipart().await?;
+            let _ = req.multipart_with_limit().await?;
             Ok(())
         })
         .with(

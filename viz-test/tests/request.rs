@@ -90,7 +90,7 @@ async fn request_body() -> Result<()> {
             Ok(Response::json(data))
         })
         .post("/multipart", |mut req: Request| async move {
-            let mut multipart = req.limited_multipart().await?;
+            let mut multipart = req.multipart_with_limit().await?;
             let mut data = HashMap::new();
 
             while let Some(mut field) = multipart.try_next().await? {

@@ -24,7 +24,7 @@ use crate::types::Form;
 use crate::types::Json;
 
 #[cfg(feature = "multipart")]
-use crate::types::{Multipart, MultipartLimits};
+use crate::types::Multipart;
 
 #[cfg(feature = "cookie")]
 use crate::types::{Cookie, Cookies, CookiesError};
@@ -308,15 +308,7 @@ impl RequestExt for Request {
             .ok_or(PayloadError::MissingBoundary)?
             .as_str();
 
-        Ok(Multipart::with_limits(
-            self.incoming()?,
-            boundary,
-            self.extensions()
-                .get::<std::sync::Arc<MultipartLimits>>()
-                .map(AsRef::as_ref)
-                .cloned()
-                .unwrap_or_default(),
-        ))
+        Ok(Multipart::new(self.incoming()?, boundary))
     }
 
     #[cfg(feature = "state")]
@@ -405,14 +397,14 @@ pub trait RequestLimitsExt: private::Sealed + Sized {
     /// Return with a limited [Text][mdn] representation of the request body.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/text>
-    fn limited_text(&mut self) -> impl Future<Output = Result<String, PayloadError>> + Send;
+    fn text_with_limit(&mut self) -> impl Future<Output = Result<String, PayloadError>> + Send;
 
     /// Return with a limited `application/x-www-form-urlencoded` [FormData][mdn] by the specified type
     /// representation of the request body.
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
     #[cfg(feature = "form")]
-    fn limited_form<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
+    fn form_with_limit<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
@@ -420,7 +412,7 @@ pub trait RequestLimitsExt: private::Sealed + Sized {
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/json>
     #[cfg(feature = "json")]
-    fn limited_json<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
+    fn json_with_limit<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
@@ -429,8 +421,9 @@ pub trait RequestLimitsExt: private::Sealed + Sized {
     ///
     /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
     #[cfg(feature = "multipart")]
-    fn limited_multipart(&mut self)
-        -> impl Future<Output = Result<Multipart, PayloadError>> + Send;
+    fn multipart_with_limit(
+        &mut self,
+    ) -> impl Future<Output = Result<Multipart, PayloadError>> + Send;
 }
 
 #[cfg(feature = "limits")]
@@ -460,7 +453,7 @@ impl RequestLimitsExt for Request {
         .map(Collected::to_bytes)
     }
 
-    async fn limited_text(&mut self) -> Result<String, PayloadError> {
+    async fn text_with_limit(&mut self) -> Result<String, PayloadError> {
         let bytes = self
             .bytes_with(self.limits().get("text"), Limits::NORMAL)
             .await?;
@@ -469,7 +462,7 @@ impl RequestLimitsExt for Request {
     }
 
     #[cfg(feature = "form")]
-    async fn limited_form<T>(&mut self) -> Result<T, PayloadError>
+    async fn form_with_limit<T>(&mut self) -> Result<T, PayloadError>
     where
         T: serde::de::DeserializeOwned,
     {
@@ -480,7 +473,7 @@ impl RequestLimitsExt for Request {
     }
 
     #[cfg(feature = "json")]
-    async fn limited_json<T>(&mut self) -> Result<T, PayloadError>
+    async fn json_with_limit<T>(&mut self) -> Result<T, PayloadError>
     where
         T: serde::de::DeserializeOwned,
     {
@@ -491,7 +484,7 @@ impl RequestLimitsExt for Request {
     }
 
     #[cfg(feature = "multipart")]
-    async fn limited_multipart(&mut self) -> Result<Multipart, PayloadError> {
+    async fn multipart_with_limit(&mut self) -> Result<Multipart, PayloadError> {
         let limit = self.limits().get(<Multipart as Payload>::NAME);
 
         let m = <Multipart as Payload>::check_header(
@@ -509,7 +502,7 @@ impl RequestLimitsExt for Request {
             self.incoming()?,
             boundary,
             self.extensions()
-                .get::<std::sync::Arc<MultipartLimits>>()
+                .get::<std::sync::Arc<crate::types::MultipartLimits>>()
                 .map(AsRef::as_ref)
                 .cloned()
                 .unwrap_or_default(),
