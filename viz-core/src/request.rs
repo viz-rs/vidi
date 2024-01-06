@@ -457,7 +457,6 @@ impl RequestLimitsExt for Request {
         let bytes = self
             .bytes_with(self.limits().get("text"), Limits::NORMAL)
             .await?;
-
         String::from_utf8(bytes.to_vec()).map_err(PayloadError::Utf8)
     }
 
@@ -486,18 +485,15 @@ impl RequestLimitsExt for Request {
     #[cfg(feature = "multipart")]
     async fn multipart_with_limit(&mut self) -> Result<Multipart, PayloadError> {
         let limit = self.limits().get(<Multipart as Payload>::NAME);
-
         let m = <Multipart as Payload>::check_header(
             self.content_type(),
             self.content_length(),
             limit,
         )?;
-
         let boundary = m
             .get_param(mime::BOUNDARY)
             .ok_or(PayloadError::MissingBoundary)?
             .as_str();
-
         Ok(Multipart::with_limits(
             self.incoming()?,
             boundary,
