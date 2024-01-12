@@ -1,6 +1,6 @@
 use http_body_util::Full;
 
-use crate::{header, Body, BoxError, Bytes, Error, Future, Response, Result, StatusCode};
+use crate::{header, Body, BoxError, Bytes, Response, Result, StatusCode};
 
 /// The [`Response`] Extension.
 pub trait ResponseExt: private::Sealed + Sized {
@@ -94,7 +94,10 @@ pub trait ResponseExt: private::Sealed + Sized {
 
     /// Downloads transfers the file from path as an attachment.
     #[cfg(feature = "fs")]
-    fn download<T>(path: T, name: Option<&str>) -> impl Future<Output = Result<Self>> + Send
+    fn download<T>(
+        path: T,
+        name: Option<&str>,
+    ) -> impl std::future::Future<Output = Result<Self>> + Send
     where
         T: AsRef<std::path::Path> + Send;
 
@@ -231,7 +234,9 @@ impl ResponseExt for Response {
 
         let mut resp = Self::attachment(&format!("attachment; filename=\"{value}\""));
         *resp.body_mut() = Body::from_stream(tokio_util::io::ReaderStream::new(
-            tokio::fs::File::open(path).await.map_err(Error::from)?,
+            tokio::fs::File::open(path)
+                .await
+                .map_err(crate::Error::from)?,
         ));
         Ok(resp)
     }

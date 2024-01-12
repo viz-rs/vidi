@@ -14,7 +14,7 @@ keywords = ["async", "framework", "http", "service", "web"]
 categories = ["asynchronous", "network-programming", "web-programming"]
 
 [dependencies]
-viz.workspace = true
+viz = { workspace = true, features = ["fs"] }
 
 bytes.workspace = true
 futures-util.workspace = true
