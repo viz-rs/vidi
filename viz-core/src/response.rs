@@ -1,4 +1,3 @@
-use futures_util::Stream;
 use http_body_util::Full;
 
 use crate::{header, Body, BoxError, Bytes, Error, Future, Response, Result, StatusCode};
@@ -86,7 +85,7 @@ pub trait ResponseExt: private::Sealed + Sized {
     /// Responds to a stream.
     fn stream<S, D, E>(stream: S) -> Response
     where
-        S: Stream<Item = Result<D, E>> + Send + 'static,
+        S: futures_util::Stream<Item = Result<D, E>> + Send + 'static,
         D: Into<Bytes> + 'static,
         E: Into<BoxError> + 'static,
     {
@@ -189,8 +188,10 @@ impl ResponseExt for Response {
     fn content_length(&self) -> Option<u64> {
         self.headers()
             .get(header::CONTENT_LENGTH)
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse().ok())
+            .map(header::HeaderValue::to_str)
+            .and_then(Result::ok)
+            .map(str::parse)
+            .and_then(Result::ok)
     }
 
     fn content_type(&self) -> Option<mime::Mime> {
@@ -204,8 +205,10 @@ impl ResponseExt for Response {
     {
         self.headers()
             .get(key)
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse::<T>().ok())
+            .map(header::HeaderValue::to_str)
+            .and_then(Result::ok)
+            .map(str::parse)
+            .and_then(Result::ok)
     }
 
     fn ok(&self) -> bool {
