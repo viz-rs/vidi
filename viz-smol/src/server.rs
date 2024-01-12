@@ -18,7 +18,7 @@ mod unix;
 #[cfg(any(feature = "native_tls", feature = "rustls"))]
 pub mod tls;
 
-/// Serve a future using [`smol`]'s TCP listener.
+/// Serve a server with smol's networking types.
 #[allow(clippy::missing_errors_doc)]
 pub async fn serve<'ex, E, L>(executor: E, listener: L, router: Router) -> io::Result<()>
 where
