@@ -1,16 +1,15 @@
 [package]
-name = "viz"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
+name = "viz-smol"
+version = "0.1.0"
+documentation = "https://docs.rs/viz-smol"
+description = "An adapter for smol runtime"
+readme = "README.md"
 authors.workspace = true
+edition.workspace = true
 homepage.workspace = true
 repository.workspace = true
-documentation.workspace = true
-readme = "README.md"
-description = "Fast, robust, flexible, lightweight web framework for Rust"
-keywords = ["async", "framework", "http", "service", "web"]
-categories = ["asynchronous", "network-programming", "web-programming"]
+license.workspace = true
+rust-version.workspace = true
 
 [features]
 default = [
@@ -42,14 +41,8 @@ cookie-signed = ["viz-core/cookie-signed"]
 
 session = ["cookie", "cookie-private", "viz-core/session"]
 
-websocket = ["viz-core/websocket"]
-sse = ["viz-core/sse"]
-fs = ["viz-core/fs"]
-
 csrf = ["cookie", "cookie-private", "viz-core/csrf"]
 cors = ["viz-core/cors"]
-
-compression = ["viz-core/compression"]
 
 http1 = ["hyper/http1"]
 http2 = ["hyper/http2"]
@@ -59,16 +52,11 @@ unix-socket = []
 macros = ["dep:viz-macros"]
 
 handlers = ["dep:viz-handlers"]
-serve = ["handlers", "viz-handlers?/serve"]
-embed = ["handlers", "viz-handlers?/embed"]
 
 otel = ["viz-core/otel"]
 otel-tracing = ["otel", "viz-core/otel-tracing"]
 otel-metrics = ["otel", "viz-core/otel-metrics"]
 otel-prometheus = ["handlers", "viz-handlers?/prometheus"]
-
-rustls = ["dep:rustls-pemfile", "dep:futures-util", "dep:tokio-rustls"]
-native-tls = ["dep:futures-util", "dep:tokio-native-tls"]
 
 [dependencies]
 viz-core.workspace = true
@@ -78,23 +66,12 @@ viz-macros = { workspace = true, optional = true }
 
 hyper.workspace = true
 hyper-util.workspace = true
-
-futures-util = { workspace = true, optional = true }
 tracing.workspace = true
 
-rustls-pemfile = { workspace = true, optional = true }
-
-tokio-native-tls = { workspace = true, optional = true }
-tokio-rustls = { workspace = true, optional = true }
-tokio = { workspace = true, features = ["macros"] }
-tokio-util = { workspace = true, features = ["net"] }
-
-[dev-dependencies]
-tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }
-
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
+async-executor.workspace = true
+async-net.workspace = true
+smol-hyper.workspace = true
+futures-lite.workspace = true
 
 [lints]
 workspace = true

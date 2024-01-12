@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz = { workspace = true, features = ["smol"] }
+viz-smol.workspace = true
 
 # smol
 async-net.workspace = true

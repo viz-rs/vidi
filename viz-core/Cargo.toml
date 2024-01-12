@@ -17,34 +17,33 @@ categories = ["asynchronous", "network-programming", "web-programming"]
 default = [
   "state",
   "limits",
-  "params",
-  "json",
-  "form",
   "query",
+  "form",
+  "json",
   "multipart",
-  "websocket",
+  "params",
   "cookie",
   "session",
-  "fs",
 ]
 
 state = []
 limits = []
 
-params = ["dep:serde"]
-json = ["dep:serde", "dep:serde_json"]
-form = ["dep:serde", "dep:serde_urlencoded"]
 query = ["dep:serde", "dep:serde_urlencoded"]
+form = ["dep:serde", "dep:serde_urlencoded"]
+json = ["dep:serde", "dep:serde_json"]
 multipart = ["dep:form-data"]
-websocket = ["dep:tokio-tungstenite", "tokio/rt"]
-sse = ["dep:tokio-stream", "tokio/time"]
-fs = ["tokio-util/io", "tokio/fs"]
+params = ["dep:serde"]
 
 cookie = ["dep:cookie"]
 cookie-private = ["cookie", "cookie?/private"]
 cookie-signed = ["cookie", "cookie?/signed"]
 
 session = ["cookie-private", "json", "dep:sessions-core"]
+
+websocket = ["dep:tokio-tungstenite", "tokio/rt"]
+sse = ["dep:tokio-stream", "tokio/time"]
+fs = ["tokio-util/io", "tokio/fs"]
 
 csrf = ["cookie-private", "dep:base64", "dep:getrandom"]
 cors = []

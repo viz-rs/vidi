@@ -7,6 +7,7 @@ members = [
   "viz-macros",
   "viz-router",
   "viz-tower",
+  "viz-smol",
   "viz-test",
 
   "examples/hello-world",
@@ -55,6 +56,8 @@ viz-handlers = { version = "0.7.1", path = "viz-handlers", default-features = fa
 viz-macros = { version = "0.2.0", path = "viz-macros" }
 viz-test = { version = "0.2.0", path = "viz-test" }
 viz-tower = { version = "0.1.0", path = "viz-tower" }
+
+viz-smol = { version = "0.1.0", path = "viz-smol" }
 
 anyhow = "1.0"
 async-trait = "0.1"

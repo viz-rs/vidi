@@ -1,13 +1,5 @@
 //! A TLS listener wrapper.
 
-/// `native_tls`
-#[cfg(feature = "native-tls")]
-pub mod native_tls;
-
-/// `rustls`
-#[cfg(feature = "rustls")]
-pub mod rustls;
-
 /// Unified TLS listener type.
 #[derive(Debug)]
 pub struct TlsListener<T, A> {

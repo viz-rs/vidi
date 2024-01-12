@@ -1,11 +1,4 @@
-use std::{
-    borrow::Borrow,
-    fmt::Debug,
-    future::{pending, Future, IntoFuture, Pending},
-    io,
-    pin::Pin,
-    sync::Arc,
-};
+use std::{borrow::Borrow, fmt::Debug, io, sync::Arc};
 
 use async_executor::Executor;
 use futures_lite::io::{AsyncRead, AsyncWrite};
@@ -13,8 +6,7 @@ use hyper::rt::Timer;
 use hyper_util::server::conn::auto::Builder;
 use smol_hyper::rt::{FuturesIo, SmolExecutor, SmolTimer};
 
-use crate::{future::FutureExt, Responder, Router, Tree};
-use crate::{Listener, Server};
+use crate::{Listener, Responder, Router, Tree};
 
 #[cfg(any(feature = "http1", feature = "http2"))]
 mod tcp;
@@ -25,22 +17,6 @@ mod unix;
 /// TLS
 #[cfg(any(feature = "native_tls", feature = "rustls"))]
 pub mod tls;
-
-// impl<L, E, F, S> Server<L, E, F, S> {
-//     /// Starts a [`Server`] with a listener and a [`Router`].
-//     pub fn new<'ex>(executor: E, listener: L, router: Router) -> Server<L, E, F, Pending<()>>
-//     where
-//         E: Borrow<Executor<'ex>> + Clone + Send + 'ex,
-//     {
-//         Server {
-//             executor,
-//             listener,
-//             signal: pending(),
-//             tree: router.into(),
-//             build:
-//         }
-//     }
-// }
 
 /// Serve a future using [`smol`]'s TCP listener.
 pub async fn serve<'ex, E, L>(executor: E, listener: L, router: Router) -> io::Result<()>
