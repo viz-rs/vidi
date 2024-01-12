@@ -43,6 +43,8 @@
 //!     viz_smol::serve(ex.clone(), listener, app).await
 //! }
 //! ```
+//!
+//! [`Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
 
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
