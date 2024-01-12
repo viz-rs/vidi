@@ -73,5 +73,13 @@ async-net.workspace = true
 smol-hyper.workspace = true
 futures-lite.workspace = true
 
+[dev-dependencies]
+smol-macros.workspace = true
+macro_rules_attribute.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [lints]
 workspace = true

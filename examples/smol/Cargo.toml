@@ -7,7 +7,6 @@ publish = false
 [dependencies]
 viz-smol.workspace = true
 
-# smol
 async-net.workspace = true
-smol-macros = "0.1"
-macro_rules_attribute = "0.2"
+smol-macros.workspace = true
+macro_rules_attribute.workspace = true
