@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
 
 markup::define! {
     TodosTemplate<'a>(items: Vec<Todo<'a>>) {
-        {markup::doctype()}
+        @markup::doctype()
         html {
             head {
                 title { "Todos" }
@@ -55,8 +55,8 @@ markup::define! {
                     tr { th { "ID" } th { "Content" } }
                     @for item in items {
                         tr {
-                            td { {item.id} }
-                            td { {markup::raw(v_htmlescape::escape(item.content).to_string())} }
+                            td { @item.id }
+                            td { @item.content }
                         }
                     }
                 }
