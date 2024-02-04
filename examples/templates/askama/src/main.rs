@@ -4,7 +4,7 @@ use std::net::SocketAddr;
 
 use askama::Template;
 use tokio::net::TcpListener;
-use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router};
+use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
 
 #[derive(Template)]
 #[template(path = "hello.html")]
@@ -13,15 +13,11 @@ struct HelloTemplate<'a> {
 }
 
 async fn index(_: Request) -> Result<Response> {
-    let mut buf = BytesMut::with_capacity(512);
-    buf.extend(
-        HelloTemplate { name: "world" }
-            .render()
-            .map_err(Error::boxed)?
-            .as_bytes(),
-    );
+    let body = HelloTemplate { name: "world" }
+        .render()
+        .map_err(Error::boxed)?;
 
-    Ok(Response::html(buf.freeze()))
+    Ok(Response::html(body))
 }
 
 #[tokio::main]

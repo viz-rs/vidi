@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 use serde::Serialize;
 use tera::{Context, Tera};
 use tokio::net::TcpListener;
-use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router};
+use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
 
 static TPLS: Lazy<Tera> =
     Lazy::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());
@@ -33,14 +33,9 @@ async fn index(_: Request) -> Result<Response> {
             },
         ],
     );
-    let mut buf = BytesMut::with_capacity(512);
-    buf.extend(
-        TPLS.render("index.html", &ctx)
-            .map_err(Error::boxed)?
-            .as_bytes(),
-    );
+    let body = TPLS.render("index.html", &ctx).map_err(Error::boxed)?;
 
-    Ok(Response::html(buf.freeze()))
+    Ok(Response::html(body))
 }
 
 #[tokio::main]

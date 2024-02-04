@@ -7,7 +7,7 @@ use minijinja::{context, path_loader, Environment};
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use tokio::net::TcpListener;
-use viz::{serve, BytesMut, Error, Request, Response, ResponseExt, Result, Router};
+use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
 
 static TPLS: Lazy<Environment> = Lazy::new(|| {
     let dir = env::var("CARGO_MANIFEST_DIR").map(PathBuf::from).unwrap();
@@ -23,28 +23,25 @@ struct User<'a> {
 }
 
 async fn index(_: Request) -> Result<Response> {
-    let mut buf = BytesMut::with_capacity(512);
-    buf.extend(
-        TPLS.get_template("index.html")
-            .map_err(Error::boxed)?
-            .render(context! {
-                title => "Viz.rs",
-                users => &vec![
-                    User {
-                        url: "https://github.com/rust-lang",
-                        username: "rust-lang",
-                    },
-                    User {
-                        url: "https://github.com/viz-rs",
-                        username: "viz-rs",
-                    },
-                ],
-            })
-            .map_err(Error::boxed)?
-            .as_bytes(),
-    );
+    let body = TPLS
+        .get_template("index.html")
+        .map_err(Error::boxed)?
+        .render(context! {
+            title => "Viz.rs",
+            users => &vec![
+                User {
+                    url: "https://github.com/rust-lang",
+                    username: "rust-lang",
+                },
+                User {
+                    url: "https://github.com/viz-rs",
+                    username: "viz-rs",
+                },
+            ],
+        })
+        .map_err(Error::boxed)?;
 
-    Ok(Response::html(buf.freeze()))
+    Ok(Response::html(body))
 }
 
 #[tokio::main]

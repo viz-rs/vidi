@@ -4,7 +4,7 @@
 
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{serve, BytesMut, Request, Response, ResponseExt, Result, Router};
+use viz::{serve, Request, Response, ResponseExt, Result, Router};
 
 pub struct Todo<'a> {
     id: u64,
@@ -22,10 +22,9 @@ async fn index(_: Request) -> Result<Response> {
             content: "Learn English",
         },
     ];
-    let mut buf = BytesMut::with_capacity(512);
-    buf.extend(TodosTemplate { items }.to_string().as_bytes());
+    let body = TodosTemplate { items }.to_string();
 
-    Ok(Response::html(buf.freeze()))
+    Ok(Response::html(body))
 }
 
 #[tokio::main]
