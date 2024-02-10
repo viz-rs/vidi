@@ -93,7 +93,7 @@ rust-embed = "8"
 
 futures-util = "0.3"
 rustls-pemfile = "1.0"
-tokio = { version = "1.35", features = ["net"] }
+tokio = { version = "1.36", features = ["net"] }
 tokio-native-tls = "0.3"
 tokio-rustls = "0.24"
 tokio-stream = "0.1"
@@ -118,7 +118,7 @@ tower = "0.4"
 tower-http = "0.5"
 
 # soml
-async-channel = "2.1"
+async-channel = "2.2"
 async-executor = "1.8"
 async-io = "2.2"
 async-net = "2.0"
