@@ -39,7 +39,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.8.2"
+version = "0.8.3"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
 edition = "2021"
 homepage = "https://viz.rs"
@@ -49,15 +49,15 @@ license = "MIT"
 rust-version = "1.75"
 
 [workspace.dependencies]
-viz = { version = "0.8.2", path = "viz" }
-viz-core = { version = "0.8.2", path = "viz-core" }
-viz-router = { version = "0.8.2", path = "viz-router" }
-viz-handlers = { version = "0.8.2", path = "viz-handlers", default-features = false }
+viz = { version = "0.8.3", path = "viz" }
+viz-core = { version = "0.8.3", path = "viz-core" }
+viz-router = { version = "0.8.3", path = "viz-router" }
+viz-handlers = { version = "0.8.3", path = "viz-handlers", default-features = false }
 viz-macros = { version = "0.2.0", path = "viz-macros" }
-viz-test = { version = "0.2.2", path = "viz-test" }
-viz-tower = { version = "0.1.2", path = "viz-tower" }
+viz-test = { version = "0.2.3", path = "viz-test" }
+viz-tower = { version = "0.1.3", path = "viz-tower" }
 
-viz-smol = { version = "0.1.3", path = "viz-smol" }
+viz-smol = { version = "0.1.4", path = "viz-smol" }
 
 anyhow = "1.0"
 async-trait = "0.1"
@@ -82,7 +82,7 @@ headers = "0.4"
 http = "1"
 http-body = "1"
 http-body-util = "0.1"
-hyper = { version = "1.1", features = ["server"] }
+hyper = { version = "1.2", features = ["server"] }
 hyper-util = { version = "0.1.3", features = ["server-auto", "tokio"] }
 mime = "0.3"
 mime_guess = "2.0"
