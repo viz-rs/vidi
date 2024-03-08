@@ -7,19 +7,19 @@ use crate::types::{Cookie, Cookies, SameSite};
 /// Cookie's Options
 #[derive(Debug)]
 pub struct CookieOptions {
-    /// Cookie's name, `viz.sid` by defaults
+    /// Cookie's `name`, `viz.sid` by defaults
     pub name: &'static str,
-    /// Cookie's path, `/` by defaults
+    /// Cookie's `path`, `/` by defaults
     pub path: &'static str,
-    /// Cookie's secure, `true` by defaults
+    /// Cookie's `secure`, `true` by defaults
     pub secure: bool,
-    /// Cookie's http_only, `true` by defaults
+    /// Cookie's `http_only`, `true` by defaults
     pub http_only: bool,
     /// Cookie's maximum age, `24H` by defaults
     pub max_age: Option<Duration>,
-    /// Cookie's domain
+    /// Cookie's `domain`
     pub domain: Option<&'static str>,
-    /// Cookie's same_site, `Lax` by defaults
+    /// Cookie's `same_site`, `Lax` by defaults
     pub same_site: Option<SameSite>,
 }
 

@@ -35,7 +35,7 @@ pub enum WebSocketError {
     #[error("request upgrade required")]
     ConnectionNotUpgradable,
 
-    /// Transparents [tokio_tungstenite::tungstenite::Error].
+    /// Transparents [`tokio_tungstenite::tungstenite::Error`].
     #[error(transparent)]
     TungsteniteError(#[from] tokio_tungstenite::tungstenite::Error),
 }
