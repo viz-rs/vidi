@@ -10,7 +10,7 @@ use crate::Route;
 /// A Kind for generating Resources path.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Kind {
-    /// index | create: ``
+    /// index | create
     Empty,
     /// new: `new`
     New,
@@ -37,7 +37,7 @@ impl Resources {
     where
         S: AsRef<str>,
     {
-        self.name = name.as_ref().to_owned();
+        name.as_ref().clone_into(&mut self.name);
         self
     }
 

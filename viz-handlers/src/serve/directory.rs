@@ -8,7 +8,6 @@ use std::{
     fs::read_dir,
     path::{Path, PathBuf},
     str::FromStr,
-    string::ToString,
 };
 
 use viz_core::{IntoResponse, Response, ResponseExt};
