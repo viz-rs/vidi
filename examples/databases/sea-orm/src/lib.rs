@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 #![deny(warnings)]
 //! `SeaOrm` example for Viz framework.
 
