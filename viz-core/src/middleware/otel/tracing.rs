@@ -97,14 +97,15 @@ where
             Ok(resp) => {
                 let resp = resp.into_response();
                 span.add_event("request.completed".to_string(), vec![]);
-                span.set_attribute(
-                    HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())),
-                );
+                span.set_attribute(KeyValue::new(
+                    HTTP_RESPONSE_STATUS_CODE,
+                    i64::from(resp.status().as_u16()),
+                ));
                 if let Some(content_length) = resp.content_length() {
-                    span.set_attribute(
-                        HTTP_RESPONSE_BODY_SIZE
-                            .i64(i64::try_from(content_length).unwrap_or(i64::MAX)),
-                    );
+                    span.set_attribute(KeyValue::new(
+                        HTTP_RESPONSE_BODY_SIZE,
+                        i64::try_from(content_length).unwrap_or(i64::MAX),
+                    ));
                 }
                 if resp.status().is_server_error() {
                     span.set_status(Status::error(
@@ -120,7 +121,7 @@ where
             Err(err) => {
                 span.add_event(
                     "request.error".to_string(),
-                    vec![EXCEPTION_MESSAGE.string(err.to_string())],
+                    vec![KeyValue::new(EXCEPTION_MESSAGE, err.to_string())],
                 );
                 span.set_status(Status::error(err.to_string()));
                 span.end();

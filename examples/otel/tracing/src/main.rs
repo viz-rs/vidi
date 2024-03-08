@@ -12,8 +12,9 @@ use viz::{middleware::otel, serve, Request, Result, Router};
 
 fn init_tracer() -> Tracer {
     global::set_text_map_propagator(TraceContextPropagator::new());
-    opentelemetry_jaeger::new_agent_pipeline()
-        .with_service_name("viz")
+    opentelemetry_otlp::new_pipeline()
+        .tracing()
+        .with_exporter(opentelemetry_otlp::new_exporter().http())
         .install_batch(TokioCurrentThread)
         .unwrap()
 }

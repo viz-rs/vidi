@@ -124,7 +124,10 @@ where
             .map(|resp| {
                 active_requests.add(-1, &attributes);
 
-                attributes.push(HTTP_RESPONSE_STATUS_CODE.i64(i64::from(resp.status().as_u16())));
+                attributes.push(KeyValue::new(
+                    HTTP_RESPONSE_STATUS_CODE,
+                    i64::from(resp.status().as_u16()),
+                ));
 
                 response_size.record(resp.content_length().unwrap_or(0), &attributes);
 
@@ -143,37 +146,43 @@ where
 fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
     let mut attributes = Vec::with_capacity(5);
     // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#http-server>
-    attributes.push(HTTP_ROUTE.string(http_route.to_string()));
+    attributes.push(KeyValue::new(HTTP_ROUTE, http_route.to_string()));
 
     // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#common-attributes>
-    attributes.push(HTTP_REQUEST_METHOD.string(req.method().to_string()));
-    attributes.push(NETWORK_PROTOCOL_VERSION.string(format!("{:?}", req.version())));
+    attributes.push(KeyValue::new(HTTP_REQUEST_METHOD, req.method().to_string()));
+    attributes.push(KeyValue::new(
+        NETWORK_PROTOCOL_VERSION,
+        format!("{:?}", req.version()),
+    ));
 
     let remote_addr = req.remote_addr();
     if let Some(remote_addr) = remote_addr {
-        attributes.push(CLIENT_ADDRESS.string(remote_addr.to_string()));
+        attributes.push(KeyValue::new(CLIENT_ADDRESS, remote_addr.to_string()));
     }
     if let Some(realip) = req.realip().map(|value| value.0).filter(|realip| {
         remote_addr
             .map(SocketAddr::ip)
             .map_or(true, |remoteip| &remoteip != realip)
     }) {
-        attributes.push(CLIENT_SOCKET_ADDRESS.string(realip.to_string()));
+        attributes.push(KeyValue::new(CLIENT_SOCKET_ADDRESS, realip.to_string()));
     }
 
     let uri = req.uri();
     if let Some(host) = uri.host() {
-        attributes.push(SERVER_ADDRESS.string(host.to_string()));
+        attributes.push(KeyValue::new(SERVER_ADDRESS, host.to_string()));
     }
     if let Some(port) = uri
         .port_u16()
         .map(i64::from)
         .filter(|port| *port != 80 && *port != 443)
     {
-        attributes.push(SERVER_PORT.i64(port));
+        attributes.push(KeyValue::new(SERVER_PORT, port));
     }
 
-    attributes.push(URL_SCHEME.string(uri.scheme().unwrap_or(&Scheme::HTTP).to_string()));
+    attributes.push(KeyValue::new(
+        URL_SCHEME,
+        uri.scheme().unwrap_or(&Scheme::HTTP).to_string(),
+    ));
 
     attributes
 }

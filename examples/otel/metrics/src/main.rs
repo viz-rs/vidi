@@ -5,7 +5,7 @@ use tokio::net::TcpListener;
 
 use opentelemetry::{global, KeyValue};
 use opentelemetry_sdk::{
-    metrics::{self, Aggregation, Instrument, MeterProvider, Stream},
+    metrics::{self, Aggregation, Instrument, MeterProviderBuilder, Stream},
     Resource,
 };
 
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
             .unwrap(),
         )
     };
-    let provider = MeterProvider::builder()
+    let provider = MeterProviderBuilder::default()
         .with_reader(exporter)
         .with_resource(Resource::new([KeyValue::new("service.name", "viz")]))
         .with_view(controller)
