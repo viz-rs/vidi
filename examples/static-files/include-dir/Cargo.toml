@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 viz.workspace = true
+http-body-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 include_dir = "0.7"
-http-body-util = "0.1"

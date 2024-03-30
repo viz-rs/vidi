@@ -5,12 +5,7 @@ use std::{
 
 use tokio::net::{TcpListener, TcpStream};
 use tokio_rustls::{
-    rustls::{
-        server::{
-            AllowAnyAnonymousOrAuthenticatedClient, AllowAnyAuthenticatedClient, NoClientAuth,
-        },
-        Certificate, PrivateKey, RootCertStore, ServerConfig,
-    },
+    rustls::{pki_types::PrivateKeyDer, server::WebPkiClientVerifier, RootCertStore, ServerConfig},
     server::TlsStream,
 };
 
@@ -95,26 +90,29 @@ impl Config {
     ///
     /// # Errors
     pub fn build(self) -> Result<ServerConfig> {
-        fn read_trust_anchor(trust_anchor: &Certificate) -> Result<RootCertStore> {
+        fn read_trust_anchor(mut trust_anchor: &[u8]) -> Result<RootCertStore> {
+            let certs = rustls_pemfile::certs(&mut trust_anchor)
+                .collect::<IoResult<Vec<_>>>()
+                .map_err(Error::boxed)?;
             let mut store = RootCertStore::empty();
-            store.add(trust_anchor).map_err(Error::boxed)?;
+            for cert in certs {
+                store.add(cert).map_err(Error::boxed)?;
+            }
             Ok(store)
         }
 
         let certs = rustls_pemfile::certs(&mut self.cert.as_slice())
-            .map(|mut certs| certs.drain(..).map(Certificate).collect())
+            .collect::<Result<Vec<_>, _>>()
             .map_err(Error::boxed)?;
 
         let keys = {
-            let mut pkcs8: Vec<PrivateKey> =
-                rustls_pemfile::pkcs8_private_keys(&mut self.key.as_slice())
-                    .map(|mut keys| keys.drain(..).map(PrivateKey).collect())
-                    .map_err(Error::boxed)?;
+            let mut pkcs8 = rustls_pemfile::pkcs8_private_keys(&mut self.key.as_slice())
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(Error::boxed)?;
             if pkcs8.is_empty() {
-                let mut rsa: Vec<PrivateKey> =
-                    rustls_pemfile::rsa_private_keys(&mut self.key.as_slice())
-                        .map(|mut keys| keys.drain(..).map(PrivateKey).collect())
-                        .map_err(Error::boxed)?;
+                let mut rsa = rustls_pemfile::rsa_private_keys(&mut self.key.as_slice())
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(Error::boxed)?;
 
                 if rsa.is_empty() {
                     return Err(Error::boxed(IoError::new(
@@ -122,28 +120,30 @@ impl Config {
                         "failed to parse tls private keys",
                     )));
                 }
-                rsa.remove(0)
+                PrivateKeyDer::Pkcs1(rsa.remove(0))
             } else {
-                pkcs8.remove(0)
+                PrivateKeyDer::Pkcs8(pkcs8.remove(0))
             }
         };
 
         let client_auth = match self.client_auth {
-            ClientAuth::Off => NoClientAuth::boxed(),
-            ClientAuth::Optional(trust_anchor) => AllowAnyAnonymousOrAuthenticatedClient::new(
-                read_trust_anchor(&Certificate(trust_anchor))?,
-            )
-            .boxed(),
+            ClientAuth::Off => WebPkiClientVerifier::no_client_auth(),
+            ClientAuth::Optional(trust_anchor) => {
+                WebPkiClientVerifier::builder(read_trust_anchor(&trust_anchor)?.into())
+                    .allow_unauthenticated()
+                    .build()
+                    .map_err(Error::boxed)?
+            }
             ClientAuth::Required(trust_anchor) => {
-                AllowAnyAuthenticatedClient::new(read_trust_anchor(&Certificate(trust_anchor))?)
-                    .boxed()
+                WebPkiClientVerifier::builder(read_trust_anchor(&trust_anchor)?.into())
+                    .build()
+                    .map_err(Error::boxed)?
             }
         };
 
         ServerConfig::builder()
-            .with_safe_defaults()
             .with_client_cert_verifier(client_auth)
-            .with_single_cert_with_ocsp_and_sct(certs, keys, self.ocsp_resp, Vec::new())
+            .with_single_cert_with_ocsp(certs, keys, self.ocsp_resp)
             .map_err(Error::boxed)
     }
 }

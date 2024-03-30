@@ -63,8 +63,8 @@ pub use listener::Listener;
 mod server;
 pub use server::serve;
 
-#[cfg(any(feature = "native_tls", feature = "rustls"))]
-pub use server::tls;
+// #[cfg(any(feature = "native_tls", feature = "rustls"))]
+// pub use server::tls;
 
 pub use viz_core::*;
 pub use viz_router::*;

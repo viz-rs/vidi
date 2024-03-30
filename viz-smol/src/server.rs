@@ -15,8 +15,8 @@ mod tcp;
 mod unix;
 
 /// TLS
-#[cfg(any(feature = "native_tls", feature = "rustls"))]
-pub mod tls;
+// #[cfg(any(feature = "native_tls", feature = "rustls"))]
+// pub mod tls;
 
 /// Serve a server with smol's networking types.
 #[allow(clippy::missing_errors_doc)]

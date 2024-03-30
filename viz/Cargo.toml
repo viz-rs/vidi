@@ -51,8 +51,8 @@ cors = ["viz-core/cors"]
 
 compression = ["viz-core/compression"]
 
-http1 = ["hyper/http1"]
-http2 = ["hyper/http2"]
+http1 = ["hyper/http1", "hyper-util/http1"]
+http2 = ["hyper/http2", "hyper-util/http2"]
 
 unix-socket = []
 
@@ -83,9 +83,9 @@ futures-util = { workspace = true, optional = true }
 tracing.workspace = true
 
 rustls-pemfile = { workspace = true, optional = true }
-
 tokio-native-tls = { workspace = true, optional = true }
 tokio-rustls = { workspace = true, optional = true }
+
 tokio = { workspace = true, features = ["macros"] }
 tokio-util = { workspace = true, features = ["net"] }
 

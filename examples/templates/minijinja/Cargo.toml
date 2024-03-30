@@ -9,5 +9,5 @@ viz.workspace = true
 
 serde.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-minijinja = { version = "1", features = ["loader"] }
+minijinja = { version = "2", features = ["loader"] }
 once_cell = "1.19"
