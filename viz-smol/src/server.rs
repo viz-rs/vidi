@@ -15,7 +15,7 @@ mod tcp;
 mod unix;
 
 /// TLS
-// #[cfg(any(feature = "native_tls", feature = "rustls"))]
+// #[cfg(any(feature = "native-tls", feature = "rustls"))]
 // pub mod tls;
 
 /// Serve a server with smol's networking types.

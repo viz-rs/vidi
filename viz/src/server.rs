@@ -17,7 +17,7 @@ use tokio::{
 use crate::{future::FutureExt, Listener, Responder, Router};
 
 /// TLS
-#[cfg(any(feature = "native_tls", feature = "rustls"))]
+#[cfg(any(feature = "native-tls", feature = "rustls"))]
 pub mod tls;
 
 #[cfg(any(feature = "http1", feature = "http2"))]

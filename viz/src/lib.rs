@@ -531,7 +531,7 @@ pub use listener::Listener;
 mod server;
 pub use server::{serve, Server};
 
-#[cfg(any(feature = "native_tls", feature = "rustls"))]
+#[cfg(any(feature = "native-tls", feature = "rustls"))]
 pub use server::tls;
 
 pub use viz_core::*;
