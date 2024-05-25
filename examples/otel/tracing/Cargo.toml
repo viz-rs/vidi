@@ -9,5 +9,5 @@ viz = { workspace = true, features = ["otel-tracing"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 opentelemetry.workspace = true
-opentelemetry-otlp = { version = "0.15", default-features = false,  features = ["trace", "http-proto"] }
 opentelemetry_sdk = { workspace = true, features = ["trace", "rt-tokio-current-thread"] }
+opentelemetry-otlp = { version = "0.16", default-features = false,  features = ["trace", "http-proto"] }

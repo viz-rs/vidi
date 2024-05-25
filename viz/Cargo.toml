@@ -51,8 +51,8 @@ cors = ["viz-core/cors"]
 
 compression = ["viz-core/compression"]
 
-http1 = ["hyper/http1", "hyper-util/http1"]
-http2 = ["hyper/http2", "hyper-util/http2"]
+http1 = ["dep:hyper", "dep:hyper-util", "hyper?/http1", "hyper-util?/http1"]
+http2 = ["dep:hyper", "dep:hyper-util", "hyper?/http2", "hyper-util?/http2"]
 
 unix-socket = []
 
@@ -76,8 +76,8 @@ viz-router.workspace = true
 viz-handlers = { workspace = true, optional = true }
 viz-macros = { workspace = true, optional = true }
 
-hyper.workspace = true
-hyper-util.workspace = true
+hyper = { workspace = true, optional = true }
+hyper-util = { workspace = true, optional = true }
 
 futures-util = { workspace = true, optional = true }
 tracing.workspace = true

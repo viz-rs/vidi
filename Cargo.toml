@@ -82,8 +82,8 @@ headers = "0.4"
 http = "1.1"
 http-body = "1"
 http-body-util = "0.1"
-hyper = { version = "1.3", features = ["server"] }
-hyper-util = { version = "0.1.3", features = ["server-auto", "tokio"] }
+hyper = { version = "1.3" }
+hyper-util = { version = "0.1.4", features = ["tokio", "server"] }
 mime = "0.3"
 mime_guess = "2.0"
 percent-encoding = "2.3"
@@ -118,7 +118,7 @@ tower = "0.4"
 tower-http = "0.5"
 
 # Soml
-async-channel = "2.2"
+async-channel = "2.3"
 async-executor = "1.11"
 async-io = "2.3"
 async-net = "2.0"

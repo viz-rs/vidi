@@ -3,6 +3,7 @@ use std::{borrow::Borrow, fmt::Debug, io, sync::Arc};
 use async_executor::Executor;
 use futures_lite::io::{AsyncRead, AsyncWrite};
 use hyper::rt::Timer;
+#[cfg(any(feature = "http1", feature = "http2"))]
 use hyper_util::server::conn::auto::Builder;
 use smol_hyper::rt::{FuturesIo, SmolExecutor, SmolTimer};
 

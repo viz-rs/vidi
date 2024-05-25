@@ -7,6 +7,7 @@ use std::{
 };
 
 use hyper_util::rt::{TokioExecutor, TokioIo};
+#[cfg(any(feature = "http1", feature = "http2"))]
 use hyper_util::server::conn::auto::Builder;
 use tokio::{
     io::{AsyncRead, AsyncWrite},
