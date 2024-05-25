@@ -2,7 +2,7 @@
 //!
 //! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/http-metrics.md
 
-use std::{net::SocketAddr, time::SystemTime};
+use std::time::SystemTime;
 
 use http::uri::Scheme;
 use opentelemetry::{
@@ -10,8 +10,8 @@ use opentelemetry::{
     KeyValue,
 };
 use opentelemetry_semantic_conventions::trace::{
-    CLIENT_ADDRESS, CLIENT_SOCKET_ADDRESS, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE,
-    HTTP_ROUTE, NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_SCHEME,
+    CLIENT_ADDRESS, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
+    NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_SCHEME,
 };
 
 use crate::{Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform};
@@ -155,16 +155,8 @@ fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
         format!("{:?}", req.version()),
     ));
 
-    let remote_addr = req.remote_addr();
-    if let Some(remote_addr) = remote_addr {
+    if let Some(remote_addr) = req.remote_addr() {
         attributes.push(KeyValue::new(CLIENT_ADDRESS, remote_addr.to_string()));
-    }
-    if let Some(realip) = req.realip().map(|value| value.0).filter(|realip| {
-        remote_addr
-            .map(SocketAddr::ip)
-            .map_or(true, |remoteip| &remoteip != realip)
-    }) {
-        attributes.push(KeyValue::new(CLIENT_SOCKET_ADDRESS, realip.to_string()));
     }
 
     let uri = req.uri();

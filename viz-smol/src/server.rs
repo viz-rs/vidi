@@ -56,7 +56,9 @@ where
             let executor = executor.clone();
             async move {
                 let mut builder = Builder::new(SmolExecutor::new(AsRefExecutor(executor.borrow())));
+                #[cfg(feature = "http1")]
                 builder.http1().timer(SmolTimer::new());
+                #[cfg(feature = "http2")]
                 builder.http2().timer(SmolTimer::new());
 
                 if let Err(err) = builder.serve_connection_with_upgrades(io, responder).await {
