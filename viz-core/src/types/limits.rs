@@ -19,10 +19,10 @@ pub struct Limits {
 
 impl Default for Limits {
     fn default() -> Self {
-        let limits = Limits::new()
-            .set("bytes", Limits::NORMAL)
-            .set("payload", Limits::NORMAL)
-            .set("text", Limits::NORMAL);
+        let limits = Self::new()
+            .set("bytes", Self::NORMAL)
+            .set("payload", Self::NORMAL)
+            .set("text", Self::NORMAL);
 
         #[cfg(feature = "json")]
         let limits = limits.set(<Json as Payload>::NAME, <Json as Payload>::LIMIT);
@@ -41,7 +41,7 @@ impl Limits {
     /// Creates a new Limits.
     #[must_use]
     pub fn new() -> Self {
-        Limits {
+        Self {
             inner: Arc::new(Vec::new()),
         }
     }

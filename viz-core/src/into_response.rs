@@ -26,7 +26,7 @@ impl IntoResponse for Response {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         match self {
-            Error::Boxed(error) => {
+            Self::Boxed(error) => {
                 let body = error.to_string();
                 Response::builder()
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -34,7 +34,7 @@ impl IntoResponse for Error {
                     .body(Full::from(body).into())
                     .unwrap()
             }
-            Error::Responder(resp) | Error::Report(_, resp) => resp,
+            Self::Responder(resp) | Self::Report(_, resp) => resp,
         }
     }
 }
@@ -109,10 +109,10 @@ where
     T: IntoResponse,
 {
     fn into_response(self) -> Response {
-        match self {
-            Some(r) => r.into_response(),
-            None => StatusCode::NOT_FOUND.into_response(),
-        }
+        self.map_or_else(
+            || StatusCode::NOT_FOUND.into_response(),
+            IntoResponse::into_response,
+        )
     }
 }
 

@@ -7,10 +7,10 @@ impl super::Listener for UnixListener {
     type Addr = SocketAddr;
 
     fn accept(&self) -> impl Future<Output = Result<(Self::Io, Self::Addr)>> + Send {
-        UnixListener::accept(self)
+        Self::accept(self)
     }
 
     fn local_addr(&self) -> Result<Self::Addr> {
-        UnixListener::local_addr(self)
+        Self::local_addr(self)
     }
 }

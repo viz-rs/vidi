@@ -10,7 +10,7 @@ pub struct Map<H, F> {
 impl<H, F> Map<H, F> {
     /// Creates a [`Map`] handler.
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub const fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

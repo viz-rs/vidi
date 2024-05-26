@@ -141,18 +141,22 @@ debug = false
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
-rust_2018_idioms = "warn"
+# rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 non_ascii_idents = "warn"
+non_local_definitions = 'warn'
 unreachable_pub = "warn"
 missing_debug_implementations = "warn"
 missing_docs = "warn"
 
 [workspace.lints.clippy]
-all = "deny"
-pedantic = "deny"
-missing_errors_doc = "warn"
-needless_pass_by_value = "warn"
+all = "warn" # Downgrade deny-by-default lints
+pedantic = "warn"
+missing_errors_doc = { level = "allow", priority = 1 }
 module_name_repetitions = { level = "allow", priority = 1 }
 too_many_lines = { level = "allow", priority = 1 }
 type_complexity = { level = "allow", priority = 1 }
+lint_groups_priority = { level = "allow", priority = 1 } # https://github.com/rust-lang/rust-clippy/issues/12270
+
+[workspace.lints.rustdoc]
+private_intra_doc_links = 'allow'

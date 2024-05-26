@@ -18,7 +18,7 @@ pub struct ServiceHandler<S>(S);
 
 impl<S> ServiceHandler<S> {
     /// Creates a new [`ServiceHandler`].
-    pub fn new(s: S) -> Self {
+    pub const fn new(s: S) -> Self {
         Self(s)
     }
 }

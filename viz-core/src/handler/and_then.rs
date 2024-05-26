@@ -10,7 +10,7 @@ pub struct AndThen<H, F> {
 impl<H, F> AndThen<H, F> {
     /// Creates an [`AndThen`] handler.
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub const fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

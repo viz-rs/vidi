@@ -60,20 +60,20 @@ impl IntoResponse for PayloadError {
     fn into_response(self) -> Response {
         (
             match self {
-                PayloadError::Empty
-                | PayloadError::Read
-                | PayloadError::Parse
-                | PayloadError::MissingBoundary
-                | PayloadError::Utf8(_)
-                | PayloadError::Hyper(_) => StatusCode::BAD_REQUEST,
+                Self::Empty
+                | Self::Read
+                | Self::Parse
+                | Self::MissingBoundary
+                | Self::Utf8(_)
+                | Self::Hyper(_) => StatusCode::BAD_REQUEST,
                 #[cfg(feature = "json")]
-                PayloadError::Json(_) => StatusCode::BAD_REQUEST,
+                Self::Json(_) => StatusCode::BAD_REQUEST,
                 #[cfg(any(feature = "form", feature = "query"))]
-                PayloadError::UrlDecode(_) => StatusCode::BAD_REQUEST,
-                PayloadError::LengthRequired => StatusCode::LENGTH_REQUIRED,
-                PayloadError::TooLarge => StatusCode::PAYLOAD_TOO_LARGE,
-                PayloadError::UnsupportedMediaType(_) => StatusCode::UNSUPPORTED_MEDIA_TYPE,
-                PayloadError::Used => StatusCode::INTERNAL_SERVER_ERROR,
+                Self::UrlDecode(_) => StatusCode::BAD_REQUEST,
+                Self::LengthRequired => StatusCode::LENGTH_REQUIRED,
+                Self::TooLarge => StatusCode::PAYLOAD_TOO_LARGE,
+                Self::UnsupportedMediaType(_) => StatusCode::UNSUPPORTED_MEDIA_TYPE,
+                Self::Used => StatusCode::INTERNAL_SERVER_ERROR,
             },
             self.to_string(),
         )
@@ -126,12 +126,14 @@ pub trait Payload {
     /// Will return [`PayloadError::TooLarge`] if the detected content length is too large.
     #[inline]
     fn check_length(len: Option<u64>, limit: Option<u64>) -> Result<(), PayloadError> {
-        match len {
-            None => Err(PayloadError::LengthRequired),
-            Some(len) => (len <= Self::limit(limit))
-                .then_some(())
-                .ok_or_else(|| PayloadError::TooLarge),
-        }
+        len.map_or_else(
+            || Err(PayloadError::LengthRequired),
+            |len| {
+                (len <= Self::limit(limit))
+                    .then_some(())
+                    .ok_or_else(|| PayloadError::TooLarge)
+            },
+        )
     }
 
     /// Checks `Content-Type` & `Content-Length`

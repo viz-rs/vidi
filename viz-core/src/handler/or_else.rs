@@ -10,7 +10,7 @@ pub struct OrElse<H, F> {
 impl<H, F> OrElse<H, F> {
     /// Creates an [`OrElse`] handler.
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub const fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

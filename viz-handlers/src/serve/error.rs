@@ -28,11 +28,11 @@ impl IntoResponse for Error {
     fn into_response(self) -> Response {
         (
             match self {
-                Error::MethodNotAllowed => StatusCode::METHOD_NOT_ALLOWED,
-                Error::InvalidPath => StatusCode::BAD_REQUEST,
-                Error::PreconditionFailed => StatusCode::PRECONDITION_FAILED,
-                Error::RangeUnsatisfied(_) => StatusCode::RANGE_NOT_SATISFIABLE,
-                Error::Io(_) => StatusCode::INTERNAL_SERVER_ERROR,
+                Self::MethodNotAllowed => StatusCode::METHOD_NOT_ALLOWED,
+                Self::InvalidPath => StatusCode::BAD_REQUEST,
+                Self::PreconditionFailed => StatusCode::PRECONDITION_FAILED,
+                Self::RangeUnsatisfied(_) => StatusCode::RANGE_NOT_SATISFIABLE,
+                Self::Io(_) => StatusCode::INTERNAL_SERVER_ERROR,
             },
             self.to_string(),
         )

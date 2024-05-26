@@ -17,8 +17,8 @@ pub struct Form<T = ()>(pub T);
 impl<T> Form<T> {
     /// Create new `Form` instance.
     #[inline]
-    pub fn new(data: T) -> Self {
-        Form(data)
+    pub const fn new(data: T) -> Self {
+        Self(data)
     }
 
     /// Consumes the Form, returning the wrapped value.
@@ -33,7 +33,7 @@ where
     T: Clone,
 {
     fn clone(&self) -> Self {
-        Form(self.0.clone())
+        Self(self.0.clone())
     }
 }
 

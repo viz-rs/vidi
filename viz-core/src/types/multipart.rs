@@ -39,18 +39,18 @@ impl IntoResponse for MultipartError {
     fn into_response(self) -> Response {
         (
             match self {
-                MultipartError::InvalidHeader
-                | MultipartError::InvalidContentDisposition
-                | MultipartError::FileTooLarge(_)
-                | MultipartError::FieldTooLarge(_)
-                | MultipartError::PartsTooMany(_)
-                | MultipartError::FieldsTooMany(_)
-                | MultipartError::FilesTooMany(_)
-                | MultipartError::FieldNameTooLong(_) => StatusCode::BAD_REQUEST,
-                MultipartError::PayloadTooLarge(_) => StatusCode::PAYLOAD_TOO_LARGE,
-                MultipartError::Stream(_)
-                | MultipartError::BoxError(_)
-                | MultipartError::TryLockError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+                Self::InvalidHeader
+                | Self::InvalidContentDisposition
+                | Self::FileTooLarge(_)
+                | Self::FieldTooLarge(_)
+                | Self::PartsTooMany(_)
+                | Self::FieldsTooMany(_)
+                | Self::FilesTooMany(_)
+                | Self::FieldNameTooLong(_) => StatusCode::BAD_REQUEST,
+                Self::PayloadTooLarge(_) => StatusCode::PAYLOAD_TOO_LARGE,
+                Self::Stream(_) | Self::BoxError(_) | Self::TryLockError(_) => {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
             },
             self.to_string(),
         )

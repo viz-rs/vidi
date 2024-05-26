@@ -16,7 +16,7 @@ pub struct Header<T: ?Sized>(pub T);
 impl<T> Header<T> {
     /// Create new `Header` instance.
     #[inline]
-    pub fn new(t: T) -> Self {
+    pub const fn new(t: T) -> Self {
         Self(t)
     }
 

@@ -40,13 +40,14 @@ macro_rules! parse_single_value {
     };
 }
 
+#[allow(clippy::redundant_pub_crate)]
 pub(crate) struct PathDeserializer<'de> {
     path: &'de [(String, String)],
 }
 
 impl<'de> PathDeserializer<'de> {
     #[inline]
-    pub(crate) fn new(path: &'de [(String, String)]) -> Self {
+    pub(crate) const fn new(path: &'de [(String, String)]) -> Self {
         Self { path }
     }
 }

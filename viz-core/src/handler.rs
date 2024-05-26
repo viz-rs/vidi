@@ -211,4 +211,4 @@ pub trait HandlerExt<I>: Handler<I> {
     }
 }
 
-impl<I, T: ?Sized> HandlerExt<I> for T where T: Handler<I> {}
+impl<I, T> HandlerExt<I> for T where T: ?Sized + Handler<I> {}

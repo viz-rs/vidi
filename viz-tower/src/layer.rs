@@ -6,7 +6,7 @@ pub struct Layered<L>(L);
 
 impl<L> Layered<L> {
     /// Creates a new tower layer.
-    pub fn new(l: L) -> Self {
+    pub const fn new(l: L) -> Self {
         Self(l)
     }
 }

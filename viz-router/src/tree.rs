@@ -44,7 +44,7 @@ impl AsMut<Vec<(Method, PathTree<BoxHandler>)>> for Tree {
 
 impl From<Router> for Tree {
     fn from(router: Router) -> Self {
-        let mut tree = Tree::default();
+        let mut tree = Self::default();
         if let Some(routes) = router.routes {
             for (mut path, Route { methods }) in routes {
                 if !path.starts_with('/') {

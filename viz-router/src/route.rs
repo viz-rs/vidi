@@ -44,7 +44,7 @@ pub struct Route {
 impl Route {
     /// Creates a new route.
     #[must_use]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             methods: Vec::new(),
         }
@@ -234,7 +234,7 @@ mod tests {
         struct Logger;
 
         impl Logger {
-            fn new() -> Self {
+            const fn new() -> Self {
                 Self
             }
         }

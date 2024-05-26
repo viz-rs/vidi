@@ -44,15 +44,15 @@ impl IntoResponse for WebSocketError {
     fn into_response(self) -> Response {
         (
             match self {
-                WebSocketError::MissingConnectUpgrade
-                | WebSocketError::InvalidConnectUpgrade
-                | WebSocketError::MissingUpgrade
-                | WebSocketError::InvalidUpgrade
-                | WebSocketError::MissingWebSocketVersion
-                | WebSocketError::InvalidWebSocketVersion
-                | WebSocketError::MissingWebSocketKey => StatusCode::BAD_REQUEST,
-                WebSocketError::ConnectionNotUpgradable => StatusCode::UPGRADE_REQUIRED,
-                WebSocketError::TungsteniteError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+                Self::MissingConnectUpgrade
+                | Self::InvalidConnectUpgrade
+                | Self::MissingUpgrade
+                | Self::InvalidUpgrade
+                | Self::MissingWebSocketVersion
+                | Self::InvalidWebSocketVersion
+                | Self::MissingWebSocketKey => StatusCode::BAD_REQUEST,
+                Self::ConnectionNotUpgradable => StatusCode::UPGRADE_REQUIRED,
+                Self::TungsteniteError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             },
             self.to_string(),
         )

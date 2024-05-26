@@ -86,6 +86,6 @@ impl fmt::Display for Event {
 
 impl From<Event> for Bytes {
     fn from(e: Event) -> Self {
-        Bytes::from(e.to_string())
+        Self::from(e.to_string())
     }
 }

@@ -226,7 +226,7 @@ pub enum CookiesError {
 
 impl From<CookiesError> for Error {
     fn from(e: CookiesError) -> Self {
-        Error::Responder(e.into_response())
+        Self::Responder(e.into_response())
     }
 }
 

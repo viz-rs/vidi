@@ -10,7 +10,7 @@ pub struct CatchUnwind<H, F> {
 impl<H, F> CatchUnwind<H, F> {
     /// Creates an [`CatchUnwind`] handler.
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub const fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

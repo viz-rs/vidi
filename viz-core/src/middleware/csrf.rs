@@ -86,23 +86,24 @@ where
     pub fn get(&self, req: &Request) -> Result<Option<Vec<u8>>> {
         let inner = self.as_ref();
         match inner.store {
-            Store::Cookie => {
-                match self
-                    .get_cookie(&req.cookies()?)
-                    .map(|c| c.value().to_string())
-                {
-                    None => Ok(None),
-                    Some(raw_token) => base64::engine::general_purpose::URL_SAFE_NO_PAD
-                        .decode(raw_token)
-                        .ok()
-                        .filter(|b| b.len() == 64)
-                        .map(unmask::<32>)
-                        .map(Option::Some)
-                        .ok_or_else(|| {
-                            (StatusCode::INTERNAL_SERVER_ERROR, "Invalid csrf token").into_error()
-                        }),
-                }
-            }
+            Store::Cookie => self
+                .get_cookie(&req.cookies()?)
+                .map(|c| c.value().to_string())
+                .map_or_else(
+                    || Ok(None),
+                    |raw_token| {
+                        base64::engine::general_purpose::URL_SAFE_NO_PAD
+                            .decode(raw_token)
+                            .ok()
+                            .filter(|b| b.len() == 64)
+                            .map(unmask::<32>)
+                            .map(Option::Some)
+                            .ok_or_else(|| {
+                                (StatusCode::INTERNAL_SERVER_ERROR, "Invalid csrf token")
+                                    .into_error()
+                            })
+                    },
+                ),
             #[cfg(feature = "session")]
             Store::Session => req.session().get(inner.cookie_options.name),
         }
@@ -261,6 +262,7 @@ pub fn verify(secret: &[u8], raw_token: String) -> bool {
 }
 
 /// Retures masked token
+#[allow(clippy::needless_collect)]
 fn mask(secret: &[u8], mut otp: Vec<u8>) -> Vec<u8> {
     otp.extend::<Vec<u8>>(
         secret

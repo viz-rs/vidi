@@ -14,6 +14,7 @@ use crate::{
     Error, FromRequest, IntoResponse, Request, RequestExt, Response, StatusCode, ThisError,
 };
 
+#[allow(clippy::redundant_pub_crate)]
 pub(crate) use de::PathDeserializer;
 
 /// Extracts params from the path of a URL.

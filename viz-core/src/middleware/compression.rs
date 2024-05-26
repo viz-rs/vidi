@@ -66,7 +66,7 @@ pub struct Compress<T> {
 
 impl<T> Compress<T> {
     /// Creates a compressed response with the specified algorithm.
-    pub fn new(inner: T, algo: ContentCoding) -> Self {
+    pub const fn new(inner: T, algo: ContentCoding) -> Self {
         Self { inner, algo }
     }
 }
@@ -100,7 +100,7 @@ impl<T: IntoResponse> IntoResponse for Compress<T> {
 /// [`ContentCoding`]
 ///
 /// [`ContentCoding`]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ContentCoding {
     /// gzip
     Gzip,
@@ -117,13 +117,13 @@ impl FromStr for ContentCoding {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.eq_ignore_ascii_case("deflate") {
-            Ok(ContentCoding::Deflate)
+            Ok(Self::Deflate)
         } else if s.eq_ignore_ascii_case("gzip") {
-            Ok(ContentCoding::Gzip)
+            Ok(Self::Gzip)
         } else if s.eq_ignore_ascii_case("br") {
-            Ok(ContentCoding::Brotli)
+            Ok(Self::Brotli)
         } else if s == "*" {
-            Ok(ContentCoding::Any)
+            Ok(Self::Any)
         } else {
             Err(())
         }

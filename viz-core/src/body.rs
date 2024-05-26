@@ -12,7 +12,7 @@ use sync_wrapper::SyncWrapper;
 use crate::{BoxError, Error, HttpBody, Result};
 
 /// A body state.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BodyState {
     /// The body is inited.
     Normal,
@@ -41,7 +41,7 @@ pub enum Body<D = Bytes> {
 impl Body {
     /// Creates an empty body.
     #[must_use]
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self::Empty
     }
 

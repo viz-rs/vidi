@@ -15,8 +15,8 @@ pub struct Json<T = ()>(pub T);
 impl<T> Json<T> {
     /// Create new `Json` instance.
     #[inline]
-    pub fn new(data: T) -> Self {
-        Json(data)
+    pub const fn new(data: T) -> Self {
+        Self(data)
     }
 
     /// Consumes the JSON, returning the wrapped value.
@@ -31,7 +31,7 @@ where
     T: Clone,
 {
     fn clone(&self) -> Self {
-        Json(self.0.clone())
+        Self(self.0.clone())
     }
 }
 

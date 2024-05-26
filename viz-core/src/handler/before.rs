@@ -10,7 +10,7 @@ pub struct Before<H, F> {
 impl<H, F> Before<H, F> {
     /// Creates a [`Before`] handler.
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub const fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

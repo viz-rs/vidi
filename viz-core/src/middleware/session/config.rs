@@ -149,6 +149,6 @@ where
     }
 }
 
-fn max_age() -> Duration {
+const fn max_age() -> Duration {
     Duration::from_secs(CookieOptions::MAX_AGE)
 }

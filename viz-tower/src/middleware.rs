@@ -12,7 +12,7 @@ pub struct Middleware<L, H> {
 
 impl<L, H> Middleware<L, H> {
     /// Creates a new tower middleware.
-    pub fn new(l: L, h: H) -> Self {
+    pub const fn new(l: L, h: H) -> Self {
         Self { l, h }
     }
 }

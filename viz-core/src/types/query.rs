@@ -15,8 +15,8 @@ pub struct Query<T = ()>(pub T);
 impl<T> Query<T> {
     /// Create new `Query` instance.
     #[inline]
-    pub fn new(data: T) -> Self {
-        Query(data)
+    pub const fn new(data: T) -> Self {
+        Self(data)
     }
 
     /// Consumes the Query, returning the wrapped value.
@@ -31,7 +31,7 @@ where
     T: Clone,
 {
     fn clone(&self) -> Self {
-        Query(self.0.clone())
+        Self(self.0.clone())
     }
 }
 

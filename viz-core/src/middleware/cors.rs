@@ -37,7 +37,7 @@ impl Config {
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age
     #[must_use]
-    pub fn max_age(mut self, max_age: usize) -> Self {
+    pub const fn max_age(mut self, max_age: usize) -> Self {
         self.max_age = max_age;
         self
     }
@@ -46,7 +46,7 @@ impl Config {
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
     #[must_use]
-    pub fn credentials(mut self, credentials: bool) -> Self {
+    pub const fn credentials(mut self, credentials: bool) -> Self {
         self.credentials = credentials;
         self
     }

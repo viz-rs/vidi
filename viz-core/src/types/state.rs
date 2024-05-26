@@ -18,7 +18,7 @@ impl<T> State<T> {
     /// Create new `State` instance.
     #[must_use]
     #[inline]
-    pub fn new(data: T) -> Self {
+    pub const fn new(data: T) -> Self {
         Self(data)
     }
 
@@ -96,7 +96,7 @@ impl StateError {
     /// Creates a `State` Error
     #[must_use]
     pub fn new<T>() -> Self {
-        StateError(type_name::<T>())
+        Self(type_name::<T>())
     }
 }
 

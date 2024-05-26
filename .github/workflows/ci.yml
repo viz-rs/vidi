@@ -5,14 +5,21 @@ on:
   push:
     branches:
       - main
-      - '[0-9]+.[0-9]+.x'
+      - "[0-9]+.[0-9]+.x"
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
 
 env:
   CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 10
   CARGO_TERM_COLOR: always
+  CARGO_PROFILE_TEST_BUILD_OVERRIDE_DEBUG: true
   RUST_BACKTRACE: 1
   RUSTUP_MAX_RETRIES: 10
+  RUSTFLAGS: -D warnings
+  RUSTDOCFLAGS: -D warnings
 
 jobs:
   test:
@@ -26,6 +33,9 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - if: runner.os == 'Windows'
+        name: Install NASM for aws-lc-rs on Windows
+        uses: ilammy/setup-nasm@v1
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo test --workspace --verbose

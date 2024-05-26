@@ -15,7 +15,7 @@ mod tcp;
 #[cfg(all(unix, feature = "unix-socket"))]
 mod unix;
 
-/// TLS
+// TLS
 // #[cfg(any(feature = "native-tls", feature = "rustls"))]
 // pub mod tls;
 

@@ -29,7 +29,7 @@ where
 {
     /// Creates a new Server-Sent Event.
     #[must_use]
-    pub fn new(stream: S) -> Self {
+    pub const fn new(stream: S) -> Self {
         Self {
             stream,
             interval: None,

@@ -118,7 +118,7 @@ impl FromRequest for WebSocket {
             .get(UPGRADE)
             .ok_or(WebSocketError::MissingUpgrade)
             .and_then(|h| {
-                if h.as_bytes().eq_ignore_ascii_case(WebSocket::NAME) {
+                if h.as_bytes().eq_ignore_ascii_case(Self::NAME) {
                     Ok(())
                 } else {
                     Err(WebSocketError::InvalidUpgrade)

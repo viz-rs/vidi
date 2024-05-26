@@ -10,7 +10,7 @@ pub struct After<H, F> {
 impl<H, F> After<H, F> {
     /// Creates an [`After`] handler.
     #[inline]
-    pub fn new(h: H, f: F) -> Self {
+    pub const fn new(h: H, f: F) -> Self {
         Self { h, f }
     }
 }

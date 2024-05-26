@@ -9,7 +9,7 @@ use crate::Route;
 
 /// A Kind for generating Resources path.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum Kind {
+enum Kind {
     /// index | create
     Empty,
     /// new: `new`
@@ -27,7 +27,7 @@ pub(crate) enum Kind {
 pub struct Resources {
     name: String,
     singular: bool,
-    pub(crate) routes: Vec<(Kind, Route)>,
+    routes: Vec<(Kind, Route)>,
 }
 
 impl Resources {
@@ -43,7 +43,7 @@ impl Resources {
 
     /// Without referencing an ID for a resource.
     #[must_use]
-    pub fn singular(mut self) -> Self {
+    pub const fn singular(mut self) -> Self {
         self.singular = true;
         self
     }
@@ -69,7 +69,7 @@ impl Resources {
         self
     }
 
-    pub(crate) fn on<H, O>(mut self, kind: Kind, method: Method, handler: H) -> Self
+    fn on<H, O>(mut self, kind: Kind, method: Method, handler: H) -> Self
     where
         H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse,
@@ -269,7 +269,7 @@ mod tests {
         struct Logger;
 
         impl Logger {
-            fn new() -> Self {
+            const fn new() -> Self {
                 Self
             }
         }

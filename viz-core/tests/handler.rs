@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(non_local_definitions)]
 #![allow(clippy::unused_async)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::wildcard_imports)]
@@ -26,7 +27,7 @@ async fn handler() -> Result<()> {
         type Error = std::convert::Infallible;
 
         async fn extract(_: &mut Request) -> Result<Self, Self::Error> {
-            Ok(MyU8(u8::MAX))
+            Ok(Self(u8::MAX))
         }
     }
 
@@ -36,13 +37,13 @@ async fn handler() -> Result<()> {
         type Error = std::convert::Infallible;
 
         async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
-            Ok(MyString(req.uri().path().to_string()))
+            Ok(Self(req.uri().path().to_string()))
         }
     }
 
     impl From<MyString> for Error {
         fn from(e: MyString) -> Self {
-            Error::Responder(Response::new(Full::from(e.0).into()))
+            Self::Responder(Response::new(Full::from(e.0).into()))
         }
     }
 
@@ -55,7 +56,7 @@ async fn handler() -> Result<()> {
 
         impl From<CustomError> for Error {
             fn from(e: CustomError) -> Self {
-                Error::Responder(e.into_response())
+                Self::Responder(e.into_response())
             }
         }
 
@@ -83,7 +84,7 @@ async fn handler() -> Result<()> {
         impl From<CustomError2> for Error {
             fn from(e: CustomError2) -> Self {
                 // Error::Responder(e.into_response())
-                Error::Report(Box::new(e), CustomError::NotFound.into_response())
+                Self::Report(Box::new(e), CustomError::NotFound.into_response())
             }
         }
 
@@ -198,11 +199,11 @@ async fn handler() -> Result<()> {
             }
         }
 
-        fn map(res: Response) -> Response {
+        const fn map(res: Response) -> Response {
             res
         }
 
-        fn map_err(err: Error) -> Error {
+        const fn map_err(err: Error) -> Error {
             err
         }
 
@@ -313,6 +314,7 @@ async fn handler() -> Result<()> {
             brha, brhb, brhc, brhd, brhe, brhf, brhg, brhh, brhi, brhj, brhk, brhl, brhm,
         ];
 
+        #[allow(clippy::redundant_clone)]
         let y = v.clone();
 
         assert!(!y.is_empty());

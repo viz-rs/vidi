@@ -1,3 +1,5 @@
+#![allow(clippy::redundant_pub_crate)]
+
 use super::Handler;
 
 pub(crate) type BoxCloneable<Input, Output> = Box<dyn Cloneable<Input, Output = Output>>;

@@ -64,10 +64,11 @@ where
 
     async fn call(&self, req: Request) -> Self::Output {
         serve::<E>(
-            match req.route_info().params.first().map(|(_, v)| v) {
-                Some(p) => p,
-                None => "index.html",
-            },
+            req.route_info()
+                .params
+                .first()
+                .map(|(_, v)| v)
+                .map_or("index.html", |p| p),
             &req,
         )
     }

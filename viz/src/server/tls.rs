@@ -17,7 +17,7 @@ pub struct TlsListener<T, A> {
 
 impl<T, A> TlsListener<T, A> {
     /// Creates a new TLS listener.
-    pub fn new(t: T, a: A) -> Self {
+    pub const fn new(t: T, a: A) -> Self {
         Self {
             inner: t,
             acceptor: a,
@@ -25,12 +25,12 @@ impl<T, A> TlsListener<T, A> {
     }
 
     /// Gets the listener.
-    pub fn get_ref(&self) -> &T {
+    pub const fn get_ref(&self) -> &T {
         &self.inner
     }
 
     /// Gets the acceptor.
-    pub fn get_acceptor(&self) -> &A {
+    pub const fn get_acceptor(&self) -> &A {
         &self.acceptor
     }
 }

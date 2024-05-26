@@ -11,7 +11,7 @@ impl FromRequest for Foo {
     type Error = Error;
 
     async fn extract(_: &mut Request) -> Result<Self> {
-        Ok(Foo)
+        Ok(Self)
     }
 }
 
@@ -22,7 +22,7 @@ impl FromRequest for Bar {
     type Error = Error;
 
     async fn extract(_: &mut Request) -> Result<Self> {
-        Ok(Bar)
+        Ok(Self)
     }
 }
 
@@ -30,7 +30,7 @@ struct MyError(String);
 
 impl From<MyError> for Error {
     fn from(MyError(err): MyError) -> Self {
-        Error::Responder((StatusCode::INTERNAL_SERVER_ERROR, err).into_response())
+        Self::Responder((StatusCode::INTERNAL_SERVER_ERROR, err).into_response())
     }
 }
 
@@ -92,28 +92,28 @@ fn cc(_: Foo, _: Bar) -> Result<impl IntoResponse> {
 }
 
 #[handler]
-fn dd() {}
+const fn dd() {}
 
 #[handler]
-fn ee() -> StatusCode {
+const fn ee() -> StatusCode {
     StatusCode::OK
 }
 
 #[handler]
-fn ff() -> (StatusCode, &'static str) {
+const fn ff() -> (StatusCode, &'static str) {
     (StatusCode::OK, "Hello, World!")
 }
 
 #[handler]
-fn gg() {}
+const fn gg() {}
 
 #[handler]
-fn hh(_: Foo) -> Result<()> {
+const fn hh(_: Foo) -> Result<()> {
     Ok(())
 }
 
 #[handler]
-fn ii(_: Foo) -> Result<StatusCode> {
+const fn ii(_: Foo) -> Result<StatusCode> {
     Ok(StatusCode::OK)
 }
 

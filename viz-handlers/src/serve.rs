@@ -84,7 +84,7 @@ impl Dir {
 
     /// Enable directory listing, `disabled` by default.
     #[must_use]
-    pub fn listing(mut self) -> Self {
+    pub const fn listing(mut self) -> Self {
         self.listing = true;
         self
     }

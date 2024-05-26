@@ -135,7 +135,7 @@ struct RequestHeaderCarrier<'a> {
 }
 
 impl<'a> RequestHeaderCarrier<'a> {
-    fn new(headers: &'a HeaderMap) -> Self {
+    const fn new(headers: &'a HeaderMap) -> Self {
         RequestHeaderCarrier { headers }
     }
 }

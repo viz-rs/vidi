@@ -60,7 +60,7 @@ impl Config {
             .with_unit(Unit::new("By"))
             .init();
 
-        Config {
+        Self {
             active_requests,
             duration,
             request_size,

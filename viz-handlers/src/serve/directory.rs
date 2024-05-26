@@ -13,19 +13,19 @@ use std::{
 use viz_core::{IntoResponse, Response, ResponseExt};
 
 #[derive(Debug)]
-pub(crate) struct Directory {
+pub(super) struct Directory {
     name: String,
     paths: Paths,
     files: Files,
 }
 
 impl Directory {
-    pub(crate) fn new(
+    pub(super) fn new(
         base: &str,
         prev: bool,
         root: &Path,
         unlisted: &Option<Vec<&'static str>>,
-    ) -> Option<Directory> {
+    ) -> Option<Self> {
         let mut entries = read_dir(root).ok()?;
 
         let mut files = Vec::new();
@@ -88,7 +88,7 @@ impl Directory {
 
         paths.reverse();
 
-        Some(Directory {
+        Some(Self {
             name: base.to_string(),
             paths: Paths(paths),
             files: Files(files),
@@ -116,7 +116,7 @@ impl Display for Directory {
 
 /// Path: (url, name)
 #[derive(Debug)]
-pub(crate) struct Paths(Vec<(String, String)>);
+struct Paths(Vec<(String, String)>);
 
 impl Display for Paths {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -129,7 +129,7 @@ impl Display for Paths {
 
 /// File: (relative, title, kind, ext, base)
 #[derive(Debug)]
-pub(crate) struct Files(Vec<(String, String, bool, Option<String>, String)>);
+struct Files(Vec<(String, String, bool, Option<String>, String)>);
 
 impl Display for Files {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -141,10 +141,7 @@ impl Display for Files {
                 relative,
                 title,
                 if *kind { "file" } else { "folder" },
-                match ext {
-                    Some(ext) => ext,
-                    None => "",
-                },
+                ext.as_ref().map_or("", |ext| ext),
                 base
             )?;
         }

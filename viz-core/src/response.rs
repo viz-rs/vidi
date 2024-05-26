@@ -223,14 +223,17 @@ impl ResponseExt for Response {
     where
         T: AsRef<std::path::Path> + Send,
     {
-        let value = if let Some(filename) = name {
-            filename
-        } else if let Some(filename) = path.as_ref().file_name().and_then(std::ffi::OsStr::to_str) {
-            filename
-        } else {
-            "download"
-        }
-        .escape_default();
+        let value = name
+            .map_or_else(
+                || {
+                    path.as_ref()
+                        .file_name()
+                        .and_then(std::ffi::OsStr::to_str)
+                        .map_or("download", |filename| filename)
+                },
+                |filename| filename,
+            )
+            .escape_default();
 
         let mut resp = Self::attachment(&format!("attachment; filename=\"{value}\""));
         *resp.body_mut() = Body::from_stream(tokio_util::io::ReaderStream::new(

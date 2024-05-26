@@ -12,7 +12,7 @@ pub struct HandlerService<H>(H);
 
 impl<H> HandlerService<H> {
     /// Creates a new [`HandlerService`].
-    pub fn new(h: H) -> Self {
+    pub const fn new(h: H) -> Self {
         Self(h)
     }
 }
@@ -22,7 +22,7 @@ where
     H: Clone,
 {
     fn clone(&self) -> Self {
-        HandlerService(self.0.clone())
+        Self(self.0.clone())
     }
 }
 

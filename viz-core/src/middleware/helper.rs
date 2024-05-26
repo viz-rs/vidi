@@ -35,7 +35,7 @@ impl CookieOptions {
 
     /// Creates new `CookieOptions` with `name`
     #[must_use]
-    pub fn name(mut self, name: &'static str) -> Self {
+    pub const fn name(mut self, name: &'static str) -> Self {
         self.name = name;
         self
     }
@@ -56,21 +56,21 @@ impl CookieOptions {
 
     /// Creates new `CookieOptions` with `path`
     #[must_use]
-    pub fn path(mut self, path: &'static str) -> Self {
+    pub const fn path(mut self, path: &'static str) -> Self {
         self.path = path;
         self
     }
 
     /// Creates new `CookieOptions` with `secure`
     #[must_use]
-    pub fn secure(mut self, secure: bool) -> Self {
+    pub const fn secure(mut self, secure: bool) -> Self {
         self.secure = secure;
         self
     }
 
     /// Creates new `CookieOptions` with `http_only`
     #[must_use]
-    pub fn http_only(mut self, http_only: bool) -> Self {
+    pub const fn http_only(mut self, http_only: bool) -> Self {
         self.http_only = http_only;
         self
     }

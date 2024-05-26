@@ -7,7 +7,7 @@ pub struct MapInToResponse<H>(pub(crate) H);
 impl<H> MapInToResponse<H> {
     /// Creates a [`MapInToResponse`] handler.
     #[inline]
-    pub fn new(h: H) -> Self {
+    pub const fn new(h: H) -> Self {
         Self(h)
     }
 }
