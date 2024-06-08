@@ -8,3 +8,5 @@ publish = false
 viz = { workspace = true, features = ["unix-socket"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }

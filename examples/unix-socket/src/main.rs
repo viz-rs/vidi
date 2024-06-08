@@ -9,7 +9,16 @@
 #[tokio::main]
 async fn main() -> viz::Result<()> {
     use tokio::net::UnixListener;
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
     use viz::{get, serve, IntoHandler, Result, Router};
+
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "debug,tracing=debug,hyper=debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     async fn index() -> Result<&'static str> {
         Ok("Hello world!")

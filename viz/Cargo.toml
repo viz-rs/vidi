@@ -77,7 +77,7 @@ viz-handlers = { workspace = true, optional = true }
 viz-macros = { workspace = true, optional = true }
 
 hyper = { workspace = true, optional = true }
-hyper-util = { workspace = true, optional = true }
+hyper-util = { workspace = true, optional = true, features = ["server-auto", "server-graceful"] }
 
 futures-util = { workspace = true, optional = true }
 tracing.workspace = true
