@@ -128,10 +128,10 @@ where
             }
 
             tokio::select! {
-                _ = graceful.shutdown() => {
+                () = graceful.shutdown() => {
                     tracing::trace!("Gracefully shutdown!");
                 },
-                _ = tokio::time::sleep(Duration::from_secs(10)) => {
+                () = tokio::time::sleep(Duration::from_secs(10)) => {
                     tracing::error!("Waited 10 seconds for graceful shutdown, aborting...");
                 }
             }
