@@ -3,6 +3,7 @@
 #![allow(clippy::unused_async)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::wildcard_imports)]
+#![allow(dependency_on_unit_never_type_fallback)]
 
 use http_body_util::Full;
 use viz_core::handler::CatchError;
