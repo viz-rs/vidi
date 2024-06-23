@@ -39,7 +39,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.8.7"
+version = "0.8.8"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
 edition = "2021"
 homepage = "https://viz.rs"
@@ -49,15 +49,15 @@ license = "MIT"
 rust-version = "1.75"
 
 [workspace.dependencies]
-viz = { version = "0.8.7", path = "viz" }
-viz-core = { version = "0.8.7", path = "viz-core" }
-viz-router = { version = "0.8.7", path = "viz-router" }
-viz-handlers = { version = "0.8.7", path = "viz-handlers", default-features = false }
+viz = { version = "0.8.8", path = "viz" }
+viz-core = { version = "0.8.8", path = "viz-core" }
+viz-router = { version = "0.8.8", path = "viz-router" }
+viz-handlers = { version = "0.8.8", path = "viz-handlers", default-features = false }
 viz-macros = { version = "0.2.0", path = "viz-macros" }
-viz-test = { version = "0.2.5", path = "viz-test" }
-viz-tower = { version = "0.1.7", path = "viz-tower" }
+viz-test = { version = "0.2.6", path = "viz-test" }
+viz-tower = { version = "0.1.8", path = "viz-tower" }
 
-viz-smol = { version = "0.1.8", path = "viz-smol" }
+viz-smol = { version = "0.1.9", path = "viz-smol" }
 
 anyhow = "1.0"
 async-trait = "0.1"

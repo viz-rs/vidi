@@ -1,6 +1,6 @@
 [package]
 name = "viz-smol"
-version = "0.1.8"
+version = "0.1.9"
 documentation = "https://docs.rs/viz-smol"
 description = "An adapter for smol runtime"
 readme = "README.md"
