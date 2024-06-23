@@ -68,8 +68,16 @@ pub trait ResponseExt: private::Sealed + Sized {
     where
         T: serde::Serialize,
     {
-        serde_json::to_vec(&body)
-            .map(|buf| Self::with(Full::new(buf.into()), mime::APPLICATION_JSON.as_ref()))
+        use bytes::{BufMut, BytesMut};
+
+        let mut buf = BytesMut::with_capacity(128).writer();
+        serde_json::to_writer(&mut buf, &body)
+            .map(|()| {
+                Response::with(
+                    Full::new(buf.into_inner().freeze()),
+                    mime::APPLICATION_JSON.as_ref(),
+                )
+            })
             .map_err(crate::types::PayloadError::Json)
     }
 

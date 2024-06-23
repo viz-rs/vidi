@@ -1,3 +1,8 @@
+#![feature(test)]
+
+extern crate test;
+use test::Bencher;
+
 use futures_util::{stream, Stream, StreamExt};
 use headers::{ContentDisposition, ContentType, HeaderMapExt};
 use http_body_util::{BodyExt, Full};
@@ -128,4 +133,106 @@ async fn response_ext() -> Result<()> {
 #[should_panic(expected = "not a redirection status code")]
 fn response_ext_panic() {
     Response::redirect_with_status("/oauth", StatusCode::OK);
+}
+
+#[cfg(all(feature = "json", not(miri)))]
+#[bench]
+fn response_json_with_to_vec(b: &mut Bencher) {
+    use mime;
+    use viz_core::types::PayloadError;
+
+    #[derive(Serialize)]
+    struct Message {
+        message: &'static str,
+    }
+
+    b.iter(|| {
+        let body = Message {
+            message: "Hello, World!",
+        };
+
+        let body = serde_json::to_vec(&body).map_err(PayloadError::Json)?;
+        Ok::<Response, Error>(Response::with(
+            Full::from(body),
+            mime::APPLICATION_JSON.as_ref(),
+        ))
+    });
+}
+
+#[cfg(all(feature = "json", not(miri)))]
+#[bench]
+fn response_json_with_map_to_vec(b: &mut Bencher) {
+    use mime;
+    use viz_core::types::PayloadError;
+
+    #[derive(Serialize)]
+    struct Message {
+        message: &'static str,
+    }
+
+    b.iter(|| {
+        let body = Message {
+            message: "Hello, World!",
+        };
+
+        serde_json::to_vec(&body)
+            .map(|buf| Response::with(Full::new(buf.into()), mime::APPLICATION_JSON.as_ref()))
+            .map_err(PayloadError::Json)
+    });
+}
+
+#[cfg(all(feature = "json", not(miri)))]
+#[bench]
+fn response_json_with_to_writer(b: &mut Bencher) {
+    use bytes::{BufMut, BytesMut};
+    use mime;
+    use viz_core::types::PayloadError;
+
+    #[derive(Serialize)]
+    struct Message {
+        message: &'static str,
+    }
+
+    b.iter(|| {
+        let body = Message {
+            message: "Hello, World!",
+        };
+
+        let mut buf = BytesMut::with_capacity(128).writer();
+        let () = serde_json::to_writer(&mut buf, &body).map_err(PayloadError::Json)?;
+
+        Ok::<Response, Error>(Response::with(
+            Full::new(buf.into_inner().freeze()),
+            mime::APPLICATION_JSON.as_ref(),
+        ))
+    });
+}
+
+#[cfg(all(feature = "json", not(miri)))]
+#[bench]
+fn response_json_with_map_to_writer(b: &mut Bencher) {
+    use bytes::{BufMut, BytesMut};
+    use mime;
+    use viz_core::types::PayloadError;
+
+    #[derive(Serialize)]
+    struct Message {
+        message: &'static str,
+    }
+
+    b.iter(|| {
+        let body = Message {
+            message: "Hello, World!",
+        };
+
+        let mut buf = BytesMut::with_capacity(128).writer();
+        serde_json::to_writer(&mut buf, &body)
+            .map(|()| {
+                Response::with(
+                    Full::new(buf.into_inner().freeze()),
+                    mime::APPLICATION_JSON.as_ref(),
+                )
+            })
+            .map_err(PayloadError::Json)
+    });
 }
