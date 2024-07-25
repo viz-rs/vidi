@@ -2,8 +2,10 @@
 
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
-use once_cell::sync::Lazy;
-use std::{net::SocketAddr, sync::Arc};
+use std::{
+    net::SocketAddr,
+    sync::{Arc, LazyLock},
+};
 use tokio::net::TcpListener;
 
 use viz::{
@@ -13,7 +15,7 @@ use viz::{
 };
 
 /// Static Lazy Routes
-static TREE: Lazy<Tree> = Lazy::new(|| Router::new().get("/", index).get("/me", me).into());
+static TREE: LazyLock<Tree> = LazyLock::new(|| Router::new().get("/", index).get("/me", me).into());
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")

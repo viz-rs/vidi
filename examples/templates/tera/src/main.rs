@@ -1,15 +1,14 @@
 #![deny(warnings)]
 
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::LazyLock};
 
-use once_cell::sync::Lazy;
 use serde::Serialize;
 use tera::{Context, Tera};
 use tokio::net::TcpListener;
 use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
 
-static TPLS: Lazy<Tera> =
-    Lazy::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());
+static TPLS: LazyLock<Tera> =
+    LazyLock::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());
 
 #[derive(Serialize)]
 struct User<'a> {

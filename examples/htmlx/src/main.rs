@@ -1,14 +1,13 @@
 // #![deny(warnings)]
 
 use handlebars::{DirectorySourceOptions, Handlebars};
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{
     env,
     net::SocketAddr,
     path::PathBuf,
-    sync::{Arc, Mutex, PoisonError},
+    sync::{Arc, LazyLock, Mutex, PoisonError},
 };
 use tokio::net::TcpListener;
 use viz::{
@@ -25,7 +24,7 @@ struct Todo {
     pub completed: bool,
 }
 
-static TPLS: Lazy<Handlebars> = Lazy::new(|| {
+static TPLS: LazyLock<Handlebars> = LazyLock::new(|| {
     let dir = env::var("CARGO_MANIFEST_DIR").map(PathBuf::from).unwrap();
     let mut h = Handlebars::new();
     h.register_templates_directory(dir.join("templates"), DirectorySourceOptions::default())

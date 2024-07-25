@@ -12,4 +12,3 @@ serde_json.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 handlebars = { version = "5", features = ["dir_source"] }
-once_cell = "1"

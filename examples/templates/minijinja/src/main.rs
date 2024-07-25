@@ -1,15 +1,14 @@
 #![deny(warnings)]
 #![allow(clippy::unused_async)]
 
-use std::{env, net::SocketAddr, path::PathBuf};
+use std::{env, net::SocketAddr, path::PathBuf, sync::LazyLock};
 
 use minijinja::{context, path_loader, Environment};
-use once_cell::sync::Lazy;
 use serde::Serialize;
 use tokio::net::TcpListener;
 use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
 
-static TPLS: Lazy<Environment> = Lazy::new(|| {
+static TPLS: LazyLock<Environment> = LazyLock::new(|| {
     let dir = env::var("CARGO_MANIFEST_DIR").map(PathBuf::from).unwrap();
     let mut env = Environment::new();
     env.set_loader(path_loader(dir.join("templates")));
