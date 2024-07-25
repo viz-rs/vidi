@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let mut app = Router::new().get("/", |_| async { Ok("Hello, World!") });
 
     for n in 0..1000 {
-        app = app.get(&format!("/{}", n), index);
+        app = app.get(format!("/{}", n), index);
     }
 
     if let Err(e) = serve(listener, app).await {
