@@ -1,4 +1,3 @@
-#![deny(warnings)]
 #![allow(clippy::unused_async)]
 
 use std::{env, net::SocketAddr, path::PathBuf, sync::LazyLock};

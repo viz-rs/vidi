@@ -1,3 +1,5 @@
+//! `RealIp` type test cases
+
 use viz_core::{
     header::{HeaderValue, FORWARDED},
     types::RealIp,

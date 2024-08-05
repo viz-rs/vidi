@@ -1,5 +1,3 @@
-// #![deny(warnings)]
-
 use handlebars::{DirectorySourceOptions, Handlebars};
 use serde::{Deserialize, Serialize};
 use serde_json::json;

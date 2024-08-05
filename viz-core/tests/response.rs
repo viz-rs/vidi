@@ -1,3 +1,5 @@
+//! HTTP Response test cases
+
 #![feature(test)]
 
 extern crate test;

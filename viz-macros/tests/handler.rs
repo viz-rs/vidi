@@ -1,3 +1,5 @@
+//! Handler test cases
+
 #![allow(clippy::unused_async)]
 #![allow(clippy::unnecessary_wraps)]
 

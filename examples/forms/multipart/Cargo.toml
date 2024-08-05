@@ -9,10 +9,10 @@ viz.workspace = true
 
 futures-util.workspace = true
 tokio = { workspace = true, features = [
-  "fs",
-  "io-util",
-  "macros",
-  "rt-multi-thread",
+    "fs",
+    "io-util",
+    "macros",
+    "rt-multi-thread",
 ] }
 
-tempfile = "3.10"
+tempfile = "3.0"

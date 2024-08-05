@@ -1,4 +1,3 @@
-#![deny(warnings)]
 #![allow(clippy::must_use_candidate)]
 #![allow(clippy::inherent_to_string_shadow_display)]
 

@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use viz::{get, serve, tls, Request, Result, Router};

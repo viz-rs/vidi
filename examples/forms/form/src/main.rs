@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;

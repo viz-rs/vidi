@@ -2,19 +2,19 @@
 //!
 //! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
 
-use std::sync::Arc;
-
 use http::{uri::Scheme, HeaderValue};
 use opentelemetry::{
     global,
     propagation::Extractor,
-    trace::{FutureExt as OtelFutureExt, Span, SpanKind, Status, TraceContextExt, Tracer},
+    trace::{
+        FutureExt as OtelFutureExt, Span, SpanKind, Status, TraceContextExt, Tracer, TracerProvider,
+    },
     Context, KeyValue,
 };
 use opentelemetry_semantic_conventions::trace::{
-    CLIENT_ADDRESS, EXCEPTION_MESSAGE, HTTP_REQUEST_BODY_SIZE, HTTP_REQUEST_METHOD,
-    HTTP_RESPONSE_BODY_SIZE, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE, NETWORK_PROTOCOL_VERSION,
-    SERVER_ADDRESS, SERVER_PORT, URL_PATH, URL_QUERY, URL_SCHEME, USER_AGENT_ORIGINAL,
+    CLIENT_ADDRESS, EXCEPTION_MESSAGE, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
+    NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_PATH, URL_QUERY, URL_SCHEME,
+    USER_AGENT_ORIGINAL,
 };
 
 use crate::{
@@ -23,28 +23,34 @@ use crate::{
     Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
 };
 
+const HTTP_REQUEST_BODY_SIZE: &str = "http.request.body.size";
+const HTTP_RESPONSE_BODY_SIZE: &str = "http.response.body.size";
+
 /// `OpenTelemetry` tracing config.
 #[derive(Debug)]
 pub struct Config<T> {
-    tracer: Arc<T>,
+    tracer: T,
+    name: Option<String>,
 }
 
 impl<T> Config<T> {
     /// Creats new `OpenTelemetry` tracing config.
-    pub fn new(t: T) -> Self {
-        Self {
-            tracer: Arc::new(t),
-        }
+    pub fn new(t: T, name: Option<String>) -> Self {
+        Self { tracer: t, name }
     }
 }
 
-impl<H, T> Transform<H> for Config<T> {
+impl<H, T> Transform<H> for Config<T>
+where
+    T: Clone,
+{
     type Output = TracingMiddleware<H, T>;
 
     fn transform(&self, h: H) -> Self::Output {
         TracingMiddleware {
             h,
             tracer: self.tracer.clone(),
+            name: self.name.clone().unwrap_or("tracing".to_string()),
         }
     }
 }
@@ -53,7 +59,8 @@ impl<H, T> Transform<H> for Config<T> {
 #[derive(Debug, Clone)]
 pub struct TracingMiddleware<H, T> {
     h: H,
-    tracer: Arc<T>,
+    tracer: T,
+    name: String,
 }
 
 #[crate::async_trait]
@@ -61,8 +68,9 @@ impl<H, O, T> Handler<Request> for TracingMiddleware<H, T>
 where
     H: Handler<Request, Output = Result<O>>,
     O: IntoResponse,
-    T: Tracer + Send + Sync + Clone + 'static,
-    T::Span: Send + Sync + 'static,
+    T: TracerProvider + Send + Sync + Clone + 'static,
+    T::Tracer: Tracer + Send + Sync + 'static,
+    <T::Tracer as Tracer>::Span: Span + Send + Sync + 'static,
 {
     type Output = Result<Response>;
 
@@ -74,12 +82,17 @@ where
         let http_route = &req.route_info().pattern;
         let attributes = build_attributes(&req, http_route.as_str());
 
-        let mut span = self
+        let tracer = self
             .tracer
-            .span_builder(format!("{} {}", req.method(), http_route))
-            .with_kind(SpanKind::Server)
+            .tracer_builder(self.name.clone())
             .with_attributes(attributes)
-            .start_with_context(&*self.tracer, &parent_context);
+            .build();
+        let mut span = tracer.build_with_context(
+            tracer
+                .span_builder(format!("{} {}", req.method(), http_route))
+                .with_kind(SpanKind::Server),
+            &parent_context,
+        );
 
         span.add_event("request.started".to_string(), vec![]);
 

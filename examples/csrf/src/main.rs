@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use std::{net::SocketAddr, time::Duration};
 use tokio::net::TcpListener;
 

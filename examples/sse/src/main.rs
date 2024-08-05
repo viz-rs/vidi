@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use futures_util::StreamExt;
 use std::{net::SocketAddr, sync::Arc};
 use systemstat::{Platform, System};

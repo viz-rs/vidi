@@ -1,3 +1,5 @@
+//! Error test cases
+
 use std::error::Error as StdError;
 use viz_core::{Body, Error, Response, StatusCode};
 

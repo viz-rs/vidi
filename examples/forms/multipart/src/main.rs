@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use futures_util::TryStreamExt;
 use std::{fs::File, net::SocketAddr};
 use tempfile::tempdir;

@@ -1,3 +1,5 @@
+//! HTTP Response test cases
+
 use headers::{ContentLength, ContentType, HeaderMapExt};
 use viz_core::{Error, IntoResponse, Response, StatusCode};
 

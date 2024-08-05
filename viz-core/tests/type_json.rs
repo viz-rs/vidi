@@ -1,3 +1,5 @@
+//! JSON type test cases
+
 use viz_core::{types::Json, IntoResponse, ResponseExt};
 
 #[test]

@@ -1,41 +1,41 @@
 [workspace]
 resolver = "2"
 members = [
-  "viz",
-  "viz-core",
-  "viz-handlers",
-  "viz-macros",
-  "viz-router",
-  "viz-tower",
-  "viz-smol",
-  "viz-test",
+    "viz",
+    "viz-core",
+    "viz-handlers",
+    "viz-macros",
+    "viz-router",
+    "viz-tower",
+    "viz-smol",
+    "viz-test",
 
-  "examples/hello-world",
-  "examples/unix-socket",
-  "examples/static-files/embed",
-  "examples/static-files/serve",
-  "examples/static-files/include-dir",
-  "examples/limits",
-  "examples/forms/form",
-  "examples/forms/multipart",
-  "examples/websocket-chat",
-  "examples/sse",
-  "examples/session",
-  "examples/csrf",
-  "examples/cors",
-  "examples/rustls",
-  "examples/static-routes",
-  "examples/routing/todos",
-  "examples/routing/openapi",
-  "examples/otel/*",
-  "examples/compression",
-  "examples/templates/*",
-  "examples/tracing",
-  "examples/graceful-shutdown",
-  "examples/databases/*",
-  "examples/htmlx",
-  "examples/tower",
-  "examples/smol",
+    "examples/hello-world",
+    "examples/unix-socket",
+    "examples/static-files/embed",
+    "examples/static-files/serve",
+    "examples/static-files/include-dir",
+    "examples/limits",
+    "examples/forms/form",
+    "examples/forms/multipart",
+    "examples/websocket-chat",
+    "examples/sse",
+    "examples/session",
+    "examples/csrf",
+    "examples/cors",
+    "examples/rustls",
+    "examples/static-routes",
+    "examples/routing/todos",
+    "examples/routing/openapi",
+    "examples/otel/*",
+    "examples/compression",
+    "examples/templates/*",
+    "examples/tracing",
+    "examples/graceful-shutdown",
+    "examples/databases/*",
+    "examples/htmlx",
+    "examples/tower",
+    "examples/smol",
 ]
 
 [workspace.package]
@@ -61,7 +61,7 @@ viz-smol = { version = "0.1.9", path = "viz-smol" }
 
 anyhow = "1.0"
 async-trait = "0.1"
-bytes = "1.6"
+bytes = "1.7"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
@@ -80,33 +80,39 @@ sessions-memory = "0.6"
 # http
 headers = "0.4"
 http = "1.1"
-http-body = "1"
+http-body = "1.0"
 http-body-util = "0.1"
-hyper = { version = "1.3" }
-hyper-util = { version = "0.1.5", features = ["server", "tokio" ] }
+hyper = { version = "1.4" }
+hyper-util = { version = "0.1.9", features = ["server", "tokio"] }
 mime = "0.3"
 mime_guess = "2.0"
 percent-encoding = "2.3"
 
 hex = "0.4"
-rust-embed = "8"
+rust-embed = "8.5"
 
 futures-util = "0.3"
-rustls-pemfile = "2.0"
 tokio = { version = "1.38", features = ["net"] }
-tokio-native-tls = "0.3"
-tokio-rustls = "0.26"
 tokio-stream = "0.1"
-tokio-tungstenite = "0.21"
+tokio-tungstenite = "0.24"
 tokio-util = "0.7"
 
+# TLS
+rustls-pemfile = "2.1"
+tokio-native-tls = "0.3"
+tokio-rustls = "0.26"
+
 # OpenTelemetry
-opentelemetry = { version = "0.23", default-features = false }
-opentelemetry_sdk = { version = "0.23", default-features = false }
-opentelemetry-prometheus = { version = "0.16", features = [
-  "prometheus-encoding",
+opentelemetry = { version = "0.24", default-features = false }
+opentelemetry_sdk = { version = "0.24", default-features = false }
+opentelemetry-otlp = { version = "0.17", default-features = false, features = [
+    "trace",
+    "http-proto",
 ] }
-opentelemetry-semantic-conventions = { version = "0.15" }
+opentelemetry-prometheus = { version = "0.17", features = [
+    "prometheus-encoding",
+] }
+opentelemetry-semantic-conventions = { version = "0.16" }
 prometheus = "0.13"
 
 # Tracing
@@ -114,15 +120,15 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Tower
-tower = "0.4"
-tower-http = "0.5"
+tower = "0.5"
+tower-http = "0.6"
 
 # Soml
 async-channel = "2.3"
-async-executor = "1.11"
+async-executor = "1.13"
 async-io = "2.3"
 async-net = "2.0"
-smol-hyper = "0.1.1"
+smol-hyper = "0.1"
 smol-macros = "0.1"
 macro_rules_attribute = "0.2"
 futures-lite = { version = "2.3", default-features = false, features = ["std"] }
@@ -141,22 +147,23 @@ debug = false
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
-# rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 non_ascii_idents = "warn"
-non_local_definitions = 'warn'
+rust_2018_idioms = { level = "warn", priority = -1 }
 unreachable_pub = "warn"
+unexpected_cfgs = { level = "warn", check-cfg = [] }
 missing_debug_implementations = "warn"
 missing_docs = "warn"
 
 [workspace.lints.clippy]
-all = "warn" # Downgrade deny-by-default lints
+all = "warn"                                                # Downgrade deny-by-default lints
 pedantic = "warn"
 missing_errors_doc = { level = "allow", priority = 1 }
 module_name_repetitions = { level = "allow", priority = 1 }
 too_many_lines = { level = "allow", priority = 1 }
 type_complexity = { level = "allow", priority = 1 }
-lint_groups_priority = { level = "allow", priority = 1 } # https://github.com/rust-lang/rust-clippy/issues/12270
+lint_groups_priority = { level = "allow", priority = 1 }    # https://github.com/rust-lang/rust-clippy/issues/12270
+needless_return = { level = "allow", priority = 1 }
 
 [workspace.lints.rustdoc]
 private_intra_doc_links = 'allow'

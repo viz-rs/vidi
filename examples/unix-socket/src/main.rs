@@ -3,7 +3,6 @@
 //! ```sh
 //! curl --unix-socket /tmp/viz.sock http://localhost/
 //! ```
-#![deny(warnings)]
 
 #[cfg(unix)]
 #[tokio::main]

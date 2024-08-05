@@ -1,4 +1,3 @@
-#![deny(warnings)]
 #![allow(clippy::unused_async)]
 
 use http_body_util::Full;

@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing::{debug, error, info, instrument};

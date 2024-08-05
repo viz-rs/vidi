@@ -6,7 +6,7 @@ use std::time::SystemTime;
 
 use http::uri::Scheme;
 use opentelemetry::{
-    metrics::{Histogram, Meter, Unit, UpDownCounter},
+    metrics::{Histogram, Meter, UpDownCounter},
     KeyValue,
 };
 use opentelemetry_semantic_conventions::trace::{
@@ -39,25 +39,25 @@ impl Config {
             .with_description(
                 "Measures the number of concurrent HTTP requests that are currently in-flight.",
             )
-            .with_unit(Unit::new("{request}"))
+            .with_unit("{request}")
             .init();
 
         let duration = meter
             .f64_histogram(HTTP_SERVER_DURATION)
             .with_description("Measures the duration of inbound HTTP requests.")
-            .with_unit(Unit::new("s"))
+            .with_unit("s")
             .init();
 
         let request_size = meter
             .u64_histogram(HTTP_SERVER_REQUEST_SIZE)
             .with_description("Measures the size of HTTP request messages (compressed).")
-            .with_unit(Unit::new("By"))
+            .with_unit("By")
             .init();
 
         let response_size = meter
             .u64_histogram(HTTP_SERVER_RESPONSE_SIZE)
             .with_description("Measures the size of HTTP request messages (compressed).")
-            .with_unit(Unit::new("By"))
+            .with_unit("By")
             .init();
 
         Self {

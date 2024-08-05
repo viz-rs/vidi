@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 //! `SeaOrm` example for Viz framework.
 use sea_orm_example::{api, db::init_db};
 use std::{env, net::SocketAddr, path::PathBuf};

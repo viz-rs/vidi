@@ -1,3 +1,5 @@
+//! HTTP Handler test cases
+
 #![allow(dead_code)]
 #![allow(non_local_definitions)]
 #![allow(clippy::unused_async)]

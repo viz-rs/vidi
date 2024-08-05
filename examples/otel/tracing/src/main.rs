@@ -1,16 +1,15 @@
-#![deny(warnings)]
 #![allow(clippy::unused_async)]
 
 use opentelemetry::global;
 use opentelemetry_sdk::{
     runtime::TokioCurrentThread,
-    {propagation::TraceContextPropagator, trace::Tracer},
+    {propagation::TraceContextPropagator, trace::TracerProvider},
 };
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{middleware::otel, serve, Request, Result, Router};
 
-fn init_tracer() -> Tracer {
+fn init_tracer_provider() -> TracerProvider {
     global::set_text_map_propagator(TraceContextPropagator::new());
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -29,12 +28,12 @@ async fn main() -> Result<()> {
     let listener = TcpListener::bind(addr).await?;
     println!("listening on http://{addr}");
 
-    let tracer = init_tracer();
+    let tracer_provider = init_tracer_provider();
 
     let app = Router::new()
         .get("/", index)
         .get("/:username", index)
-        .with(otel::tracing::Config::new(tracer));
+        .with(otel::tracing::Config::new(tracer_provider, None));
 
     if let Err(e) = serve(listener, app).await {
         println!("{e}");
