@@ -9,7 +9,7 @@ viz = { workspace = true, features = ["serve"] }
 serde.workspace = true
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-sea-orm = { version = "0.12", features = ["runtime-tokio-rustls", "sqlx-sqlite"] }
+sea-orm = { version = "1", features = ["runtime-tokio-rustls", "sqlx-sqlite"] }
 
 [lints]
 workspace = true
