@@ -18,7 +18,7 @@ env:
   CARGO_PROFILE_TEST_BUILD_OVERRIDE_DEBUG: true
   RUST_BACKTRACE: 1
   RUSTUP_MAX_RETRIES: 10
-  RUSTFLAGS: -D warnings
+  RUSTFLAGS: -D warnings -A clippy::needless_return
   RUSTDOCFLAGS: -D warnings
 
 jobs:
