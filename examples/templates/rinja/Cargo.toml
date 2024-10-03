@@ -1,0 +1,13 @@
+[package]
+name = "rinja-template-example"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[dependencies]
+viz.workspace = true
+
+serde.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+rinja = { version = "0.3" }
