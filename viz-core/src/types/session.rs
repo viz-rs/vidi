@@ -177,12 +177,12 @@ impl FromRequest for Session {
 }
 
 fn responder_error(e: (StatusCode, String)) -> Error {
-    Error::Responder(e.into_response())
+    Error::Responder(Box::new(e.into_response()))
 }
 
 fn report_error<E: std::error::Error + Send + Sync + 'static>(e: E) -> Error {
     Error::Report(
         Box::new(e),
-        StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+        Box::new(StatusCode::INTERNAL_SERVER_ERROR.into_response()),
     )
 }

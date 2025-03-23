@@ -10,13 +10,13 @@ pub type BoxError = Box<dyn StdError + Send + Sync>;
 pub enum Error {
     /// Receives a [`Response`] as an error.
     #[error("response")]
-    Responder(Response),
+    Responder(Box<Response>),
     /// Receives a boxed [`std::error::Error`][StdError] as an error.
     #[error(transparent)]
     Boxed(BoxError),
     /// Receives a boxed [`std::error::Error`][StdError] and [`Response`] pair as an error.
     #[error("report")]
-    Report(BoxError, Response),
+    Report(BoxError, Box<Response>),
 }
 
 impl Error {
@@ -29,6 +29,7 @@ impl Error {
     }
 
     /// Forwards to the method defined on the type `dyn Error`.
+    #[must_use]
     #[inline]
     pub fn is<T>(&self) -> bool
     where
@@ -66,6 +67,7 @@ impl Error {
     }
 
     /// Downcast this error object by reference.
+    #[must_use]
     #[inline]
     pub fn downcast_ref<T>(&self) -> Option<&T>
     where
@@ -102,7 +104,7 @@ where
     T: IntoResponse,
 {
     fn from((e, t): (E, T)) -> Self {
-        Self::Report(e.into(), t.into_response())
+        Self::Report(e.into(), Box::new(t.into_response()))
     }
 }
 
