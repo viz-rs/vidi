@@ -5,6 +5,7 @@ use bytes::Bytes;
 /// Event Message
 ///
 /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format>
+#[allow(clippy::struct_field_names)]
 #[derive(Debug, Default)]
 pub struct Event {
     id: Option<String>,
