@@ -52,7 +52,7 @@ fn into_response() {
     let content_length = resp.headers().typed_get::<ContentLength>().unwrap();
     assert_eq!(content_length.0, 0);
 
-    let resp = Error::Responder("rust".into_response()).into_response();
+    let resp = "rust".into_error().into_response();
     assert_eq!(resp.status(), StatusCode::OK);
     let content_length = resp.headers().typed_get::<ContentLength>().unwrap();
     assert_eq!(content_length.0, 4);

@@ -42,7 +42,7 @@ async fn request_body() -> Result<()> {
             let jar = cookies
                 .jar()
                 .lock()
-                .map_err(|e| Error::Responder(e.to_string().into_response()))?;
+                .map_err(|e| e.to_string().into_error())?;
             Ok(jar.iter().count().to_string())
         })
         .get("/cookie", |req: Request| async move {

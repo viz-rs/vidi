@@ -8,12 +8,12 @@ pub type BoxError = Box<dyn StdError + Send + Sync>;
 /// Represents errors that can occur handling application.
 #[derive(Debug, ThisError)]
 pub enum Error {
-    /// Receives a [`Response`] as an error.
-    #[error("response")]
-    Responder(Box<Response>),
     /// Receives a boxed [`std::error::Error`][StdError] as an error.
     #[error(transparent)]
     Boxed(BoxError),
+    /// Receives a [`Response`] as an error.
+    #[error("response")]
+    Responder(Box<Response>),
     /// Receives a boxed [`std::error::Error`][StdError] and [`Response`] pair as an error.
     #[error("report")]
     Report(BoxError, Box<Response>),

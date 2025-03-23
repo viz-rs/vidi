@@ -32,7 +32,7 @@ struct MyError(String);
 
 impl From<MyError> for Error {
     fn from(MyError(err): MyError) -> Self {
-        Self::Responder((StatusCode::INTERNAL_SERVER_ERROR, err).into_response())
+        (StatusCode::INTERNAL_SERVER_ERROR, err).into_error()
     }
 }
 

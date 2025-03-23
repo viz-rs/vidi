@@ -46,7 +46,7 @@ async fn handler() -> Result<()> {
 
     impl From<MyString> for Error {
         fn from(e: MyString) -> Self {
-            Self::Responder(Response::new(Full::from(e.0).into()))
+            Response::new(Full::from(e.0).into()).into_error()
         }
     }
 
@@ -59,13 +59,13 @@ async fn handler() -> Result<()> {
 
         impl From<CustomError> for Error {
             fn from(e: CustomError) -> Self {
-                Self::Responder(e.into_response())
+                e.into_error()
             }
         }
 
         impl<T> From<CustomError> for Result<T> {
             fn from(e: CustomError) -> Self {
-                Err(Error::Responder(e.into_response()))
+                Err(e.into_error())
             }
         }
 
@@ -86,8 +86,7 @@ async fn handler() -> Result<()> {
 
         impl From<CustomError2> for Error {
             fn from(e: CustomError2) -> Self {
-                // Error::Responder(e.into_response())
-                Self::Report(Box::new(e), CustomError::NotFound.into_response())
+                Self::Report(Box::new(e), Box::new(CustomError::NotFound.into_response()))
             }
         }
 
