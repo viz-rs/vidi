@@ -42,21 +42,22 @@ where
             return Box::pin(async move { Ok(StatusCode::NOT_FOUND.into_response()) });
         };
 
-        req.extensions_mut().insert(self.remote_addr.clone());
-        req.extensions_mut()
-            .insert(Arc::from(crate::types::RouteInfo {
-                id: *route.id,
-                pattern: route.pattern(),
-                params: route.params().into(),
-            }));
+        let extensions = req.extensions_mut();
+
+        extensions.insert(self.remote_addr.clone());
+        extensions.insert(Arc::from(crate::types::RouteInfo {
+            id: *route.id,
+            pattern: route.pattern(),
+            params: route.params().into(),
+        }));
 
         let handler = handler.clone();
 
         Box::pin(async move {
-            Ok(handler
+            handler
                 .call(req.map(Body::Incoming))
                 .await
-                .unwrap_or_else(IntoResponse::into_response))
+                .or_else(|e| Ok(e.into_response()))
         })
     }
 }
