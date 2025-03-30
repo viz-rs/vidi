@@ -47,7 +47,7 @@ impl crate::Listener for crate::tls::TlsListener<TcpListener, TlsAcceptor> {
             .acceptor
             .accept(stream)
             .await
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+            .map_err(std::io::Error::other)?;
         Ok((stream, addr))
     }
 

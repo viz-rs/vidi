@@ -142,14 +142,14 @@ impl Stream for Body {
             Self::Empty => return Poll::Ready(None),
             Self::Full(inner) => Pin::new(inner)
                 .poll_frame(cx)
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
+                .map_err(std::io::Error::other)?,
             Self::Boxed(inner) => Pin::new(inner)
                 .get_pin_mut()
                 .poll_frame(cx)
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
+                .map_err(std::io::Error::other)?,
             Self::Incoming(inner) => Pin::new(inner)
                 .poll_frame(cx)
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
+                .map_err(std::io::Error::other)?,
         } {
             Poll::Pending => Poll::Pending,
             Poll::Ready(None) => Poll::Ready(None),

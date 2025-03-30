@@ -32,21 +32,17 @@ fn into_response() {
     let content_length = resp.headers().typed_get::<ContentLength>().unwrap();
     assert_eq!(content_length.0, 4);
 
-    let resp = std::io::Error::new(std::io::ErrorKind::Other, "rust").into_response();
+    let resp = std::io::Error::other("rust").into_response();
     assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
     let content_length = resp.headers().typed_get::<ContentLength>().unwrap();
     assert_eq!(content_length.0, 4);
 
-    let resp = Error::from(std::io::Error::new(std::io::ErrorKind::Other, "rust")).into_response();
+    let resp = Error::from(std::io::Error::other("rust")).into_response();
     assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
     let content_length = resp.headers().typed_get::<ContentLength>().unwrap();
     assert_eq!(content_length.0, 4);
 
-    let resp = Err::<Response, Error>(Error::from(std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "rust",
-    )))
-    .into_response();
+    let resp = Err::<Response, Error>(Error::from(std::io::Error::other("rust"))).into_response();
     assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
     let content_length = resp.headers().typed_get::<ContentLength>().unwrap();
     assert_eq!(content_length.0, 4);

@@ -14,25 +14,13 @@ fn error() {
     let mut e: Error = boxed.into();
     assert!(e.downcast_mut::<std::io::Error>().is_some());
 
-    let e: Error = (
-        std::io::Error::new(std::io::ErrorKind::Other, "error"),
-        StatusCode::OK,
-    )
-        .into();
+    let e: Error = (std::io::Error::other("error"), StatusCode::OK).into();
     assert_eq!("report", e.to_string());
     assert!(e.is::<std::io::Error>());
     assert!(e.downcast::<std::io::Error>().is_ok());
-    let e: Error = (
-        std::io::Error::new(std::io::ErrorKind::Other, "error"),
-        StatusCode::OK,
-    )
-        .into();
+    let e: Error = (std::io::Error::other("error"), StatusCode::OK).into();
     assert!(e.downcast_ref::<std::io::Error>().is_some());
-    let mut e: Error = (
-        std::io::Error::new(std::io::ErrorKind::Other, "error"),
-        StatusCode::OK,
-    )
-        .into();
+    let mut e: Error = (std::io::Error::other("error"), StatusCode::OK).into();
     assert!(e.downcast_mut::<std::io::Error>().is_some());
 
     let e = Error::Responder(Response::new(Body::Empty));
