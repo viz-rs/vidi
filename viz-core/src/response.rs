@@ -58,6 +58,14 @@ pub trait ResponseExt: private::Sealed + Sized {
         Self::with(body.into(), mime::TEXT_HTML_UTF_8.as_ref())
     }
 
+    /// The response with `application/octet-stream` media type.
+    fn binary<B>(body: B) -> Response
+    where
+        B: Into<Full<Bytes>>,
+    {
+        Self::with(body.into(), mime::APPLICATION_OCTET_STREAM.as_ref())
+    }
+
     /// The response with `application/javascript; charset=utf-8` media type.
     ///
     /// # Errors

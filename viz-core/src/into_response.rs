@@ -1,9 +1,6 @@
-use http_body_util::Full;
+use std::borrow::Cow;
 
-use crate::{
-    header::{CONTENT_LENGTH, CONTENT_TYPE},
-    Error, Response, Result, StatusCode,
-};
+use crate::{Body, Error, Response, ResponseExt, Result, StatusCode};
 
 /// Trait implemented by types that can be converted to an HTTP [`Response`].
 pub trait IntoResponse: Sized {
@@ -23,16 +20,19 @@ impl IntoResponse for Response {
     }
 }
 
+impl IntoResponse for Body {
+    fn into_response(self) -> Response {
+        Response::new(self)
+    }
+}
+
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         match self {
             Self::Boxed(error) => {
-                let body = error.to_string();
-                Response::builder()
-                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .header(CONTENT_LENGTH, body.len())
-                    .body(Full::from(body).into())
-                    .unwrap()
+                let mut resp = error.to_string().into_response();
+                *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                resp
             }
             Self::Responder(resp) | Self::Report(_, resp) => resp,
         }
@@ -41,12 +41,9 @@ impl IntoResponse for Error {
 
 impl IntoResponse for std::io::Error {
     fn into_response(self) -> Response {
-        let body = self.to_string();
-        Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .header(CONTENT_LENGTH, body.len())
-            .body(Full::from(body).into())
-            .unwrap()
+        let mut resp = self.to_string().into_response();
+        *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+        resp
     }
 }
 
@@ -58,43 +55,41 @@ impl IntoResponse for std::convert::Infallible {
 
 impl IntoResponse for String {
     fn into_response(self) -> Response {
-        Response::builder()
-            .header(CONTENT_TYPE, mime::TEXT_PLAIN_UTF_8.as_ref())
-            .header(CONTENT_LENGTH, self.len())
-            .body(Full::from(self).into())
-            .unwrap()
+        Response::text(self)
     }
 }
 
 impl IntoResponse for &'static str {
     fn into_response(self) -> Response {
-        Response::builder()
-            .header(CONTENT_TYPE, mime::TEXT_PLAIN_UTF_8.as_ref())
-            .header(CONTENT_LENGTH, self.len())
-            .body(Full::from(self).into())
-            .unwrap()
+        Response::text(self)
     }
 }
 
 impl IntoResponse for &'static [u8] {
     fn into_response(self) -> Response {
-        bytes::Bytes::into_response(self.into())
+        bytes::Bytes::from(self).into_response()
     }
 }
 
 impl IntoResponse for Vec<u8> {
     fn into_response(self) -> Response {
-        bytes::Bytes::into_response(self.into())
+        bytes::Bytes::from(self).into_response()
     }
 }
 
 impl IntoResponse for bytes::Bytes {
     fn into_response(self) -> Response {
-        Response::builder()
-            .header(CONTENT_TYPE, mime::APPLICATION_OCTET_STREAM.as_ref())
-            .header(CONTENT_LENGTH, self.len())
-            .body(Full::from(self).into())
-            .unwrap()
+        Response::binary(self)
+    }
+}
+
+impl<B> IntoResponse for Cow<'static, B>
+where
+    bytes::Bytes: From<&'static B> + From<B::Owned>,
+    B: ToOwned + ?Sized,
+{
+    fn into_response(self) -> Response {
+        Response::binary(self)
     }
 }
 
@@ -140,8 +135,8 @@ where
     T: IntoResponse,
 {
     fn into_response(self) -> Response {
-        let mut res = self.1.into_response();
-        *res.status_mut() = self.0;
-        res
+        let mut resp = self.1.into_response();
+        *resp.status_mut() = self.0;
+        resp
     }
 }
