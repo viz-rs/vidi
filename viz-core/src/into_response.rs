@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use http::header::CONTENT_LENGTH;
+
 use crate::{Body, Error, Response, ResponseExt, Result, StatusCode};
 
 /// Trait implemented by types that can be converted to an HTTP [`Response`].
@@ -55,13 +57,19 @@ impl IntoResponse for std::convert::Infallible {
 
 impl IntoResponse for String {
     fn into_response(self) -> Response {
-        Response::text(self)
+        let size = self.len();
+        let mut resp = Response::text(self);
+        resp.headers_mut().insert(CONTENT_LENGTH, size.into());
+        resp
     }
 }
 
 impl IntoResponse for &'static str {
     fn into_response(self) -> Response {
-        Response::text(self)
+        let size = self.len();
+        let mut resp = Response::text(self);
+        resp.headers_mut().insert(CONTENT_LENGTH, size.into());
+        resp
     }
 }
 
@@ -77,19 +85,26 @@ impl IntoResponse for Vec<u8> {
     }
 }
 
-impl IntoResponse for bytes::Bytes {
-    fn into_response(self) -> Response {
-        Response::binary(self)
-    }
-}
-
 impl<B> IntoResponse for Cow<'static, B>
 where
     bytes::Bytes: From<&'static B> + From<B::Owned>,
     B: ToOwned + ?Sized,
 {
     fn into_response(self) -> Response {
-        Response::binary(self)
+        match self {
+            Cow::Borrowed(b) => bytes::Bytes::from(b),
+            Cow::Owned(o) => bytes::Bytes::from(o),
+        }
+        .into_response()
+    }
+}
+
+impl IntoResponse for bytes::Bytes {
+    fn into_response(self) -> Response {
+        let size = self.len();
+        let mut resp = Response::binary(self);
+        resp.headers_mut().insert(CONTENT_LENGTH, size.into());
+        resp
     }
 }
 
