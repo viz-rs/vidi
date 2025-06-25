@@ -2,15 +2,12 @@
 
 use opentelemetry::global;
 use opentelemetry_otlp::{SpanExporter, WithExportConfig};
-use opentelemetry_sdk::{
-    runtime::TokioCurrentThread,
-    {propagation::TraceContextPropagator, trace::TracerProvider},
-};
+use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{middleware::otel, serve, Error, Request, Result, Router};
 
-fn init_tracer_provider() -> TracerProvider {
+fn init_tracer_provider() -> SdkTracerProvider {
     global::set_text_map_propagator(TraceContextPropagator::new());
 
     let exporter = SpanExporter::builder()
@@ -19,8 +16,8 @@ fn init_tracer_provider() -> TracerProvider {
         .build()
         .unwrap();
 
-    TracerProvider::builder()
-        .with_batch_exporter(exporter, TokioCurrentThread)
+    SdkTracerProvider::builder()
+        .with_batch_exporter(exporter)
         .build()
 }
 
@@ -46,7 +43,6 @@ async fn main() -> Result<()> {
     }
 
     // Ensure all spans have been reported
-    global::shutdown_tracer_provider();
     tracer_provider.shutdown().map_err(Error::boxed)?;
 
     Ok(())

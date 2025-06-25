@@ -27,7 +27,11 @@ async fn main() -> Result<()> {
         .map_err(Error::boxed)?;
     let provider = MeterProviderBuilder::default()
         .with_reader(exporter)
-        .with_resource(Resource::new([KeyValue::new("service.name", "viz")]))
+        .with_resource(
+            Resource::builder_empty()
+                .with_attributes([KeyValue::new("service.name", "viz")])
+                .build(),
+        )
         .build();
 
     global::set_meter_provider(provider.clone());
@@ -43,7 +47,6 @@ async fn main() -> Result<()> {
     }
 
     // Ensure all spans have been reported
-    global::shutdown_tracer_provider();
     provider.shutdown().map_err(Error::boxed)?;
 
     Ok(())
