@@ -83,11 +83,11 @@ http = "1.1"
 http-body = "1.0"
 http-body-util = "0.1"
 hyper = { version = "1.6" }
-hyper-util = { version = "0.1.10", features = ["server", "tokio"] }
+hyper-util = { version = "0.1", features = ["server", "tokio"] }
 mime = "0.3"
 mime_guess = "2.0"
 percent-encoding = "2.3"
-rfc7239 = "0.1"                                                               # realip
+rfc7239 = "0.1"                                                  # realip
 form-data = "0.6"
 cookie = { version = "0.18", features = ["percent-encode"] }
 
@@ -142,11 +142,9 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [profile.dev]
 opt-level = 1
-split-debuginfo = "unpacked"
 
 [profile.dev.package."*"]
 opt-level = 3
-debug = false
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
@@ -159,13 +157,13 @@ missing_debug_implementations = "warn"
 missing_docs = "warn"
 
 [workspace.lints.clippy]
-all = "warn"                                                # Downgrade deny-by-default lints
+all = "warn"                                                            # Downgrade deny-by-default lints
 pedantic = "warn"
 missing_errors_doc = { level = "allow", priority = 1 }
 module_name_repetitions = { level = "allow", priority = 1 }
 too_many_lines = { level = "allow", priority = 1 }
 type_complexity = { level = "allow", priority = 1 }
-lint_groups_priority = { level = "allow", priority = 1 }    # https://github.com/rust-lang/rust-clippy/issues/12270
+lint_groups_priority = { level = "allow", priority = 1 }                # https://github.com/rust-lang/rust-clippy/issues/12270
 literal_string_with_formatting_args = { level = "allow", priority = 1 }
 
 [workspace.lints.rustdoc]
