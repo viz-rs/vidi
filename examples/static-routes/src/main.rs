@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
 async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Response, hyper::Error> {
     let method = req.method().clone();
     let path = req.path().to_owned();
-    let responded = Ok(
+    Ok(
         match TREE.find(&method, &path).or_else(|| {
             if method == Method::HEAD {
                 TREE.find(&Method::GET, &path)
@@ -73,6 +73,5 @@ async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Respons
             }
             None => StatusCode::NOT_FOUND.into_response(),
         },
-    );
-    responded
+    )
 }
