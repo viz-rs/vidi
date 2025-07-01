@@ -9,8 +9,8 @@ use std::{
 };
 use tokio::net::TcpListener;
 use viz::{
-    header::HeaderValue, middleware::limits, serve, types::State, Error, IntoResponse, Request,
-    RequestExt, Response, ResponseExt, Result, Router, StatusCode,
+    Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
+    header::HeaderValue, middleware::limits, serve, types::State,
 };
 
 /// In-memory todo store

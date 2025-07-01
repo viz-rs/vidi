@@ -2,14 +2,14 @@
 //!
 //! [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events>
 
-use futures_util::stream::{select, Stream, StreamExt};
-use tokio::time::{interval_at, Duration, Instant};
+use futures_util::stream::{Stream, StreamExt, select};
+use tokio::time::{Duration, Instant, interval_at};
 use tokio_stream::wrappers::IntervalStream;
 
 use crate::{
+    Bytes, IntoResponse, Response, ResponseExt,
     header::{CACHE_CONTROL, CONTENT_TYPE},
     headers::{Connection, HeaderMapExt, HeaderValue},
-    Bytes, IntoResponse, Response, ResponseExt,
 };
 
 mod event;

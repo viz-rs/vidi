@@ -1,6 +1,6 @@
 use http_body_util::Full;
 
-use crate::{header, Body, BoxError, Bytes, Response, Result, StatusCode};
+use crate::{Body, BoxError, Bytes, Response, Result, StatusCode, header};
 
 /// The [`Response`] Extension.
 pub trait ResponseExt: private::Sealed + Sized {

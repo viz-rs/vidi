@@ -1,10 +1,10 @@
 #![allow(clippy::must_use_candidate)]
 #![allow(clippy::inherent_to_string_shadow_display)]
 
-use maud::{html, PreEscaped, DOCTYPE};
+use maud::{DOCTYPE, PreEscaped, html};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{serve, Request, Response, ResponseExt, Result, Router};
+use viz::{Request, Response, ResponseExt, Result, Router, serve};
 
 pub struct Todo<'a> {
     id: u64,

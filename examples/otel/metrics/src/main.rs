@@ -1,13 +1,14 @@
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
-use opentelemetry::{global, KeyValue};
-use opentelemetry_sdk::{metrics::MeterProviderBuilder, Resource};
+use opentelemetry::{KeyValue, global};
+use opentelemetry_sdk::{Resource, metrics::MeterProviderBuilder};
 
 use viz::{
+    Error, Request, Result, Router,
     handlers::prometheus::{ExporterBuilder, Prometheus, Registry},
     middleware::otel,
-    serve, Error, Request, Result, Router,
+    serve,
 };
 
 async fn index(_: Request) -> Result<&'static str> {

@@ -6,8 +6,8 @@ use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, DatabaseConnection, EntityTrait, Set, TryIntoModel,
 };
 use viz::{
-    types::{Json, Params, State},
     IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
+    types::{Json, Params, State},
 };
 
 /// list todos

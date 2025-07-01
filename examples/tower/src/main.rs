@@ -3,9 +3,8 @@
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower::{
-    service_fn,
+    ServiceBuilder, service_fn,
     util::{MapErrLayer, MapRequestLayer, MapResponseLayer},
-    ServiceBuilder,
 };
 use tower_http::{
     limit::RequestBodyLimitLayer,
@@ -13,7 +12,7 @@ use tower_http::{
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{serve, Body, Error, IntoResponse, Request, Response, Result, Router};
+use viz::{Body, Error, IntoResponse, Request, Response, Result, Router, serve};
 use viz_tower::{Layered, ServiceHandler};
 
 async fn index(_: Request) -> Result<Response> {

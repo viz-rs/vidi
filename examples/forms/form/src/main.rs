@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{
-    get, middleware::limits, serve, types::Form, IntoHandler, Request, Response, ResponseExt,
-    Result, Router,
+    IntoHandler, Request, Response, ResponseExt, Result, Router, get, middleware::limits, serve,
+    types::Form,
 };
 
 #[derive(Deserialize, Serialize)]

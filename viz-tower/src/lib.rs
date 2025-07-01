@@ -50,13 +50,13 @@ mod tests {
     use super::*;
     use std::{
         sync::{
-            atomic::{AtomicU64, Ordering},
             Arc,
+            atomic::{AtomicU64, Ordering},
         },
         time::Duration,
     };
     use tower::util::{MapErrLayer, MapRequestLayer, MapResponseLayer};
-    use tower::{service_fn, ServiceBuilder};
+    use tower::{ServiceBuilder, service_fn};
     use tower_http::{
         limit::RequestBodyLimitLayer,
         request_id::{MakeRequestId, RequestId, SetRequestIdLayer},

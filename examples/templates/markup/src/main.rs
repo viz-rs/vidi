@@ -4,7 +4,7 @@
 
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{serve, Request, Response, ResponseExt, Result, Router};
+use viz::{Request, Response, ResponseExt, Result, Router, serve};
 
 pub struct Todo<'a> {
     id: u64,

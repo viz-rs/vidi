@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{get, middleware::cors, serve, Method, Request, Result, Router};
+use viz::{Method, Request, Result, Router, get, middleware::cors, serve};
 
 async fn index(_req: Request) -> Result<&'static str> {
     Ok("Hello, World!")

@@ -1,16 +1,16 @@
 use std::{
     fmt,
-    sync::{atomic::Ordering, Arc},
+    sync::{Arc, atomic::Ordering},
     time::Duration,
 };
 
 use crate::{
+    Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
     middleware::helper::{CookieOptions, Cookieable},
     types::{Cookie, Session},
-    Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
 };
 
-use super::{Storage, Store, PURGED, RENEWED, UNCHANGED};
+use super::{PURGED, RENEWED, Storage, Store, UNCHANGED};
 
 /// A configuration for [`SessionMiddleware`].
 pub struct Config<S, G, V>(Arc<(Store<S, G, V>, CookieOptions)>);
@@ -25,7 +25,7 @@ impl<S, G, V> Config<S, G, V> {
     /// Gets the store.
     #[must_use]
     pub fn store(&self) -> &Store<S, G, V> {
-        &self.0 .0
+        &self.0.0
     }
 
     /// Gets the TTL.
@@ -43,7 +43,7 @@ impl<S, G, V> Clone for Config<S, G, V> {
 
 impl<S, G, V> Cookieable for Config<S, G, V> {
     fn options(&self) -> &CookieOptions {
-        &self.0 .1
+        &self.0.1
     }
 }
 

@@ -2,7 +2,7 @@
 use sea_orm_example::{api, db::init_db};
 use std::{env, net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
-use viz::{handlers::serve, middleware, serve, types::State, Result, Router};
+use viz::{Result, Router, handlers::serve, middleware, serve, types::State};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

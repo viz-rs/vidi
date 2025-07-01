@@ -5,7 +5,7 @@ use std::{
 
 use bytes::Bytes;
 use futures_util::{Stream, TryStream, TryStreamExt};
-use http_body_util::{combinators::UnsyncBoxBody, BodyExt, BodyStream, Full, StreamBody};
+use http_body_util::{BodyExt, BodyStream, Full, StreamBody, combinators::UnsyncBoxBody};
 use hyper::body::{Frame, Incoming, SizeHint};
 use sync_wrapper::SyncWrapper;
 

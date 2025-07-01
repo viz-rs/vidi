@@ -6,8 +6,8 @@ use async_compression::tokio::bufread;
 use tokio_util::io::{ReaderStream, StreamReader};
 
 use crate::{
-    header::{HeaderValue, ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH},
     Body, Handler, IntoResponse, Request, Response, Result, Transform,
+    header::{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH, HeaderValue},
 };
 
 /// Compress response body.

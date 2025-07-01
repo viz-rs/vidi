@@ -1,11 +1,11 @@
 #![allow(clippy::unused_async)]
 
 use http_body_util::Full;
-use include_dir::{include_dir, Dir};
+use include_dir::{Dir, include_dir};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{
-    serve, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
+    IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode, serve,
 };
 
 const ASSETS: Dir = include_dir!("examples/static-files/include-dir/html"); // frontend dir

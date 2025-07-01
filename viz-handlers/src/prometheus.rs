@@ -6,8 +6,8 @@ use http_body_util::Full;
 use prometheus::{Encoder, TextEncoder};
 
 use viz_core::{
-    header::{HeaderValue, CONTENT_TYPE},
     Handler, IntoResponse, Request, Response, Result, StatusCode,
+    header::{CONTENT_TYPE, HeaderValue},
 };
 
 #[doc(inline)]

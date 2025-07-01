@@ -4,15 +4,15 @@ use headers::{ContentType, HeaderValue};
 use http::uri::Scheme;
 use serde::{Deserialize, Serialize};
 use viz_core::{
+    Body,
+    Request,
+    RequestExt,
+    Result,
     // TODO: reqwest and hyper haven't used the same version of `http`.
     // header::{AUTHORIZATION, CONTENT_TYPE, COOKIE, SET_COOKIE},
     // StatusCode,
     header::CONTENT_TYPE,
     types::PayloadError,
-    Body,
-    Request,
-    RequestExt,
-    Result,
 };
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]

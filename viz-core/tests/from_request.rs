@@ -2,9 +2,9 @@
 
 use headers::HeaderValue;
 use viz_core::{
+    Body, Request, RequestExt, Result,
     header::{CONTENT_LENGTH, CONTENT_TYPE},
     types::{Form, Json, Limits, PayloadError, State, StateError},
-    Body, Request, RequestExt, Result,
 };
 
 #[tokio::test]

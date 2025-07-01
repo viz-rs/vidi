@@ -1,8 +1,8 @@
 use std::{
     fmt::Debug,
-    future::{pending, Future, IntoFuture, Pending},
+    future::{Future, IntoFuture, Pending, pending},
     io,
-    pin::{pin, Pin},
+    pin::{Pin, pin},
     sync::Arc,
     time::Duration,
 };

@@ -6,8 +6,8 @@ use std::{
 };
 
 use crate::{
-    handler::Transform, Error, FromRequest, Handler, IntoResponse, Request, RequestExt, Response,
-    Result, StatusCode, ThisError,
+    Error, FromRequest, Handler, IntoResponse, Request, RequestExt, Response, Result, StatusCode,
+    ThisError, handler::Transform,
 };
 
 /// Extracts state from the extensions of a request.

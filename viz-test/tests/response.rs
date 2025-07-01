@@ -1,10 +1,10 @@
-use futures_util::{stream, Stream, StreamExt};
+use futures_util::{Stream, StreamExt, stream};
 use headers::{ContentDisposition, ContentType, HeaderMapExt};
 use http_body_util::{BodyExt, Full};
 use serde::{Deserialize, Serialize};
 use viz::{
-    header::{CONTENT_DISPOSITION, CONTENT_LOCATION, LOCATION},
     Body, Error, HttpBody, Response, ResponseExt, Result, StatusCode,
+    header::{CONTENT_DISPOSITION, CONTENT_LOCATION, LOCATION},
 };
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -165,11 +165,12 @@ async fn response_ext_with_server() -> Result<()> {
         ))
         .as_ref()
     );
-    assert!(resp
-        .text()
-        .await
-        .map_err(Error::boxed)?
-        .starts_with("<p align=\"center\">"));
+    assert!(
+        resp.text()
+            .await
+            .map_err(Error::boxed)?
+            .starts_with("<p align=\"center\">")
+    );
 
     Ok(())
 }

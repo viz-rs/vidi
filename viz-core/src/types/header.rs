@@ -6,8 +6,8 @@ use std::{
 };
 
 use crate::{
-    header, headers::HeaderMapExt, Error, FromRequest, IntoResponse, Request, Response, Result,
-    StatusCode, ThisError,
+    Error, FromRequest, IntoResponse, Request, Response, Result, StatusCode, ThisError, header,
+    headers::HeaderMapExt,
 };
 
 /// Extracts a header from the headers of a request.

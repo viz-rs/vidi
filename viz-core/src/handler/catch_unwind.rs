@@ -1,4 +1,4 @@
-use crate::{future::FutureExt, Handler, IntoResponse, Response, Result};
+use crate::{Handler, IntoResponse, Response, Result, future::FutureExt};
 
 /// Catches unwinding panics while calling the handler.
 #[derive(Clone, Debug)]

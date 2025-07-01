@@ -186,13 +186,12 @@ mod tests {
     use http_body_util::{BodyExt, Full};
     use std::sync::Arc;
     use viz_core::{
-        async_trait,
-        types::{Params, RouteInfo},
         Body, Error, Handler, HandlerExt, IntoResponse, Method, Next, Request, RequestExt,
-        Response, ResponseExt, Result, StatusCode, Transform,
+        Response, ResponseExt, Result, StatusCode, Transform, async_trait,
+        types::{Params, RouteInfo},
     };
 
-    use crate::{any, get, Resources, Route, Router, Tree};
+    use crate::{Resources, Route, Router, Tree, any, get};
 
     #[derive(Clone)]
     struct Logger;

@@ -6,9 +6,9 @@ use tokio::net::TcpListener;
 
 use serde::{Deserialize, Serialize};
 use viz::{
+    Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
     middleware, serve,
     types::{Json, Params, Query, State},
-    Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
 };
 
 /// In-memory todo store

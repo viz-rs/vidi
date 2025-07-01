@@ -2,15 +2,14 @@ use futures_util::StreamExt;
 use std::{net::SocketAddr, sync::Arc};
 use systemstat::{Platform, System};
 use tokio::net::TcpListener;
-use tokio::time::{interval, Duration};
+use tokio::time::{Duration, interval};
 use tokio_stream::wrappers::IntervalStream;
 use viz::{
-    get,
+    Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
+    StatusCode, get,
     header::ACCEPT,
     serve,
     types::{Event, Sse, State},
-    Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
-    StatusCode,
 };
 
 type ArcSystem = Arc<System>;

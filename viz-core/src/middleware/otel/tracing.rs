@@ -2,14 +2,13 @@
 //!
 //! [`OpenTelemetry`]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
 
-use http::{uri::Scheme, HeaderValue};
+use http::{HeaderValue, uri::Scheme};
 use opentelemetry::{
-    global,
+    Context, InstrumentationScope, KeyValue, global,
     propagation::Extractor,
     trace::{
         FutureExt as OtelFutureExt, Span, SpanKind, Status, TraceContextExt, Tracer, TracerProvider,
     },
-    Context, InstrumentationScope, KeyValue,
 };
 use opentelemetry_semantic_conventions::trace::{
     CLIENT_ADDRESS, EXCEPTION_MESSAGE, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
@@ -18,9 +17,9 @@ use opentelemetry_semantic_conventions::trace::{
 };
 
 use crate::{
+    Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
     header::{HeaderMap, HeaderName},
     headers::UserAgent,
-    Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform,
 };
 
 const HTTP_REQUEST_BODY_SIZE: &str = "http.request.body.size";

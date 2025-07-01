@@ -7,7 +7,7 @@ use std::{
 
 use serde::de::DeserializeOwned;
 
-use crate::{types::PayloadError, FromRequest, Request, RequestExt, Result};
+use crate::{FromRequest, Request, RequestExt, Result, types::PayloadError};
 
 /// Extracts the data from the query string of a URL.
 pub struct Query<T = ()>(pub T);

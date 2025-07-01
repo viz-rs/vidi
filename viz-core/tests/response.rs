@@ -5,13 +5,13 @@
 extern crate test;
 use test::Bencher;
 
-use futures_util::{stream, Stream, StreamExt};
+use futures_util::{Stream, StreamExt, stream};
 use headers::{ContentDisposition, ContentType, HeaderMapExt};
 use http_body_util::{BodyExt, Full};
 use serde::{Deserialize, Serialize};
 use viz_core::{
-    header::{CONTENT_DISPOSITION, CONTENT_LOCATION, LOCATION},
     Body, Error, HttpBody, Response, ResponseExt, Result, StatusCode,
+    header::{CONTENT_DISPOSITION, CONTENT_LOCATION, LOCATION},
 };
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]

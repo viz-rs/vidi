@@ -1,12 +1,12 @@
 use std::collections::{BTreeMap, HashMap};
 
-use headers::{authorization::Bearer, Authorization};
+use headers::{Authorization, authorization::Bearer};
 use serde::{Deserialize, Serialize};
 use viz::{
-    header::{AUTHORIZATION, COOKIE, SET_COOKIE},
-    types::{self},
     Error, IntoResponse, Request, RequestExt, RequestLimitsExt, Response, ResponseExt, Result,
     Router, StatusCode,
+    header::{AUTHORIZATION, COOKIE, SET_COOKIE},
+    types::{self},
 };
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -245,7 +245,7 @@ async fn request_body() -> Result<()> {
 #[tokio::test]
 async fn request_session() -> Result<()> {
     use viz::middleware::{cookie, helper::CookieOptions, session};
-    use viz_test::{nano_id, sessions, TestServer};
+    use viz_test::{TestServer, nano_id, sessions};
 
     let router = Router::new()
         .post("/session/set", |req: Request| async move {

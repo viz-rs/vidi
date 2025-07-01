@@ -3,9 +3,9 @@
 use std::fmt;
 
 use crate::{
-    header::{HeaderValue, COOKIE, SET_COOKIE},
-    types::{Cookie, CookieJar, Cookies},
     Handler, IntoResponse, Request, Response, Result, Transform,
+    header::{COOKIE, HeaderValue, SET_COOKIE},
+    types::{Cookie, CookieJar, Cookies},
 };
 
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]

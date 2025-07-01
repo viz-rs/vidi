@@ -3,10 +3,10 @@ use std::{fs::File, net::SocketAddr};
 use tempfile::tempdir;
 use tokio::net::TcpListener;
 use viz::{
+    IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router,
     middleware::limits,
     serve,
     types::{Multipart, PayloadError},
-    IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router,
 };
 
 // HTML form for uploading photos

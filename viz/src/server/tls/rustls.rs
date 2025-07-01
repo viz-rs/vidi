@@ -5,7 +5,7 @@ use std::{
 
 use tokio::net::{TcpListener, TcpStream};
 use tokio_rustls::{
-    rustls::{pki_types::PrivateKeyDer, server::WebPkiClientVerifier, RootCertStore, ServerConfig},
+    rustls::{RootCertStore, ServerConfig, pki_types::PrivateKeyDer, server::WebPkiClientVerifier},
     server::TlsStream,
 };
 

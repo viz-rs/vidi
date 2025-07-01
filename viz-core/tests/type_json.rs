@@ -1,6 +1,6 @@
 //! JSON type test cases
 
-use viz_core::{types::Json, IntoResponse, ResponseExt};
+use viz_core::{IntoResponse, ResponseExt, types::Json};
 
 #[test]
 fn json() {

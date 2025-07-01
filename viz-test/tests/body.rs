@@ -1,4 +1,4 @@
-use http_body_util::{combinators::UnsyncBoxBody, BodyExt, Full};
+use http_body_util::{BodyExt, Full, combinators::UnsyncBoxBody};
 use viz::{Body, Bytes, Error, HttpBody, Request, RequestExt, Result};
 
 #[tokio::test]

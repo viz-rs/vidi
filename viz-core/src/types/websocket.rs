@@ -6,12 +6,12 @@ use hyper::upgrade::{OnUpgrade, Upgraded};
 use tokio_tungstenite::tungstenite::protocol::Role;
 
 use crate::{
+    Body, FromRequest, IntoResponse, Io, Request, RequestExt, Response, Result, StatusCode,
     header::{SEC_WEBSOCKET_PROTOCOL, UPGRADE},
     headers::{
         Connection, HeaderMapExt, HeaderValue, SecWebsocketAccept, SecWebsocketKey,
         SecWebsocketVersion, Upgrade,
     },
-    Body, FromRequest, IntoResponse, Io, Request, RequestExt, Response, Result, StatusCode,
 };
 
 mod error;

@@ -10,17 +10,17 @@ use tokio::net::TcpListener;
 use http_body_util::Full;
 use serde::{Deserialize, Serialize};
 use utoipa::{
-    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
     Modify, OpenApi, ToSchema,
+    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
 };
 use utoipa_swagger_ui::Config;
 use viz::{
+    Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
+    StatusCode,
     header::{self, HeaderMap},
     headers::HeaderValue,
     middleware, serve,
     types::{Json, Params, Query, State, StateError},
-    Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
-    StatusCode,
 };
 
 /// In-memory todo store

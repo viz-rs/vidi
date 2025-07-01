@@ -1,12 +1,11 @@
 use futures_util::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tokio::sync::broadcast::{channel, Sender};
+use tokio::sync::broadcast::{Sender, channel};
 use viz::{
-    get, serve,
-    types::{Message, Params, State, WebSocket},
     HandlerExt, IntoHandler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
-    Router,
+    Router, get, serve,
+    types::{Message, Params, State, WebSocket},
 };
 
 async fn index() -> Result<Response> {

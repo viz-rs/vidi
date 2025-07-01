@@ -2,7 +2,7 @@ use std::net::SocketAddr;
 
 use askama::Template;
 use tokio::net::TcpListener;
-use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
+use viz::{Error, Request, Response, ResponseExt, Result, Router, serve};
 
 #[derive(Template)]
 #[template(path = "hello.html")]

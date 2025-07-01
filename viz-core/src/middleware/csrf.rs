@@ -5,10 +5,10 @@ use std::{collections::HashSet, fmt, sync::Arc};
 use base64::Engine as _;
 
 use crate::{
-    header::{HeaderName, HeaderValue, VARY},
-    middleware::helper::{CookieOptions, Cookieable},
     Error, FromRequest, Handler, IntoResponse, Method, Request, RequestExt, Response, Result,
     StatusCode, Transform,
+    header::{HeaderName, HeaderValue, VARY},
+    middleware::helper::{CookieOptions, Cookieable},
 };
 
 #[derive(Debug)]

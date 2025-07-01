@@ -2,12 +2,13 @@ use std::{net::SocketAddr, time::Duration};
 use tokio::net::TcpListener;
 
 use viz::{
+    Method, Request, RequestExt, Result, Router,
     middleware::{
         cookie,
         csrf::{self, CsrfToken},
         helper::CookieOptions,
     },
-    serve, Method, Request, RequestExt, Result, Router,
+    serve,
 };
 
 async fn index(mut req: Request) -> Result<String> {

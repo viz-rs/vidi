@@ -529,7 +529,7 @@ mod listener;
 pub use listener::Listener;
 
 mod server;
-pub use server::{serve, Server};
+pub use server::{Server, serve};
 
 #[cfg(any(feature = "native-tls", feature = "rustls"))]
 pub use server::tls;

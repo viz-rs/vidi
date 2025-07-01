@@ -4,15 +4,15 @@ use std::{
     convert::Infallible,
     fmt,
     sync::{
-        atomic::{AtomicU8, Ordering},
         Arc, RwLock,
+        atomic::{AtomicU8, Ordering},
     },
 };
 
-use serde::{de::DeserializeOwned, Serialize};
-use serde_json::{from_value, to_value, Value};
+use serde::{Serialize, de::DeserializeOwned};
+use serde_json::{Value, from_value, to_value};
 
-use sessions_core::{Data, State, CHANGED, PURGED, RENEWED, UNCHANGED};
+use sessions_core::{CHANGED, Data, PURGED, RENEWED, State, UNCHANGED};
 
 use crate::{Error, FromRequest, IntoResponse, Request, RequestExt, StatusCode};
 

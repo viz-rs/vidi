@@ -1,4 +1,4 @@
-use crate::{handler::FnExtHandler, FnExt, FromRequest, Handler, IntoResponse, Result};
+use crate::{FnExt, FromRequest, Handler, IntoResponse, Result, handler::FnExtHandler};
 
 /// The trait implemented by types that can be converted to a [`Handler`].
 pub trait IntoHandler<I, E> {

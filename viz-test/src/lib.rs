@@ -1,13 +1,13 @@
 use reqwest::Client;
 use std::{future::IntoFuture, net::SocketAddr};
 use tokio::net::TcpListener;
-use viz::{serve, Error, Result, Router};
+use viz::{Error, Result, Router, serve};
 
 pub use http;
 pub use nano_id;
 pub use sessions;
 
-pub use reqwest::{multipart, RequestBuilder};
+pub use reqwest::{RequestBuilder, multipart};
 
 pub struct TestServer {
     addr: SocketAddr,

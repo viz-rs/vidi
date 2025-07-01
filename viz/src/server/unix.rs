@@ -1,6 +1,6 @@
 use std::{future::Future, io::Result};
 
-use tokio::net::{unix::SocketAddr, UnixListener, UnixStream};
+use tokio::net::{UnixListener, UnixStream, unix::SocketAddr};
 
 impl super::Listener for UnixListener {
     type Io = UnixStream;

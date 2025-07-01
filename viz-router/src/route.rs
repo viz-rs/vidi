@@ -218,11 +218,10 @@ mod tests {
     use serde::Deserialize;
     use std::sync::Arc;
     use viz_core::{
-        async_trait,
+        Handler, HandlerExt, IntoHandler, IntoResponse, Method, Next, Request, RequestExt,
+        Response, Result, async_trait,
         handler::Transform,
         types::{Query, State},
-        Handler, HandlerExt, IntoHandler, IntoResponse, Method, Next, Request, RequestExt,
-        Response, Result,
     };
 
     #[tokio::test]

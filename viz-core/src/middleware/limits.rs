@@ -3,7 +3,7 @@
 #[cfg(feature = "multipart")]
 use std::sync::Arc;
 
-use crate::{types, Handler, IntoResponse, Request, Response, Result, Transform};
+use crate::{Handler, IntoResponse, Request, Response, Result, Transform, types};
 
 /// A configuration for [`LimitsMiddleware`].
 #[derive(Clone, Debug)]

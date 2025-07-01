@@ -256,11 +256,11 @@ impl IntoIterator for Resources {
 #[allow(clippy::unused_async)]
 mod tests {
     use super::Kind;
-    use crate::{get, Resources};
+    use crate::{Resources, get};
     use http_body_util::BodyExt;
     use viz_core::{
-        async_trait, Handler, HandlerExt, IntoResponse, Method, Next, Request, Response,
-        ResponseExt, Result, Transform,
+        Handler, HandlerExt, IntoResponse, Method, Next, Request, Response, ResponseExt, Result,
+        Transform, async_trait,
     };
 
     #[tokio::test]

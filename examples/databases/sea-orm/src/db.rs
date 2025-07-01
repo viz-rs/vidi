@@ -2,8 +2,8 @@
 
 use crate::entities::todo::Entity;
 use sea_orm::{
-    sea_query::{ColumnDef, SqliteQueryBuilder, Table, TableCreateStatement},
     ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema,
+    sea_query::{ColumnDef, SqliteQueryBuilder, Table, TableCreateStatement},
 };
 
 ///

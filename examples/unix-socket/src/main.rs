@@ -9,7 +9,7 @@
 async fn main() -> viz::Result<()> {
     use tokio::net::UnixListener;
     use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-    use viz::{get, serve, IntoHandler, Result, Router};
+    use viz::{IntoHandler, Result, Router, get, serve};
 
     tracing_subscriber::registry()
         .with(

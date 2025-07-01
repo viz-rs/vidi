@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::LazyLock};
 use serde::Serialize;
 use tera::{Context, Tera};
 use tokio::net::TcpListener;
-use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
+use viz::{Error, Request, Response, ResponseExt, Result, Router, serve};
 
 static TPLS: LazyLock<Tera> =
     LazyLock::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());

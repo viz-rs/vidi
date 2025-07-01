@@ -5,8 +5,8 @@ use std::{borrow::Cow, marker::PhantomData};
 use http_body_util::Full;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use viz_core::{
-    header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
     Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode,
+    header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
 };
 
 /// Serve a single embedded file.

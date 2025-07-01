@@ -53,7 +53,7 @@ pub use core::future::Future;
 pub use futures_util::future;
 #[doc(inline)]
 pub use headers;
-pub use http::{header, Method, StatusCode};
+pub use http::{Method, StatusCode, header};
 pub use hyper::body::{Body as HttpBody, Incoming};
 pub use hyper_util::rt::TokioIo as Io;
 pub use thiserror::Error as ThisError;

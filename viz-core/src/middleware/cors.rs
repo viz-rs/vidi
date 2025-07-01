@@ -3,16 +3,16 @@
 use std::{collections::HashSet, fmt, sync::Arc};
 
 use crate::{
+    Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode, Transform,
     header::{
-        HeaderMap, HeaderName, HeaderValue, ACCESS_CONTROL_ALLOW_CREDENTIALS,
-        ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_HEADERS,
-        ACCESS_CONTROL_REQUEST_METHOD, ORIGIN, VARY,
+        ACCESS_CONTROL_ALLOW_CREDENTIALS, ACCESS_CONTROL_ALLOW_HEADERS,
+        ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_REQUEST_HEADERS, ACCESS_CONTROL_REQUEST_METHOD,
+        HeaderMap, HeaderName, HeaderValue, ORIGIN, VARY,
     },
     headers::{
         AccessControlAllowHeaders, AccessControlAllowMethods, AccessControlExposeHeaders,
         HeaderMapExt,
     },
-    Handler, IntoResponse, Method, Request, RequestExt, Response, Result, StatusCode, Transform,
 };
 
 /// A configuration for [`CorsMiddleware`].

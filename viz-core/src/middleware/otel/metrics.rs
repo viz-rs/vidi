@@ -6,8 +6,8 @@ use std::time::SystemTime;
 
 use http::uri::Scheme;
 use opentelemetry::{
-    metrics::{Histogram, Meter, UpDownCounter},
     KeyValue,
+    metrics::{Histogram, Meter, UpDownCounter},
 };
 use opentelemetry_semantic_conventions::trace::{
     CLIENT_ADDRESS, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
@@ -121,7 +121,7 @@ where
             .call(req)
             .await
             .map(IntoResponse::into_response)
-            .map(|resp| {
+            .inspect(|resp| {
                 active_requests.add(-1, &attributes);
 
                 attributes.push(KeyValue::new(
@@ -130,8 +130,6 @@ where
                 ));
 
                 response_size.record(resp.content_length().unwrap_or(0), &attributes);
-
-                resp
             });
 
         duration.record(

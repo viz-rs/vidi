@@ -6,8 +6,8 @@ use std::{
 use rfc7239::{NodeIdentifier, NodeName};
 
 use crate::{
-    header::{HeaderValue, FORWARDED},
     Request, RequestExt, Result,
+    header::{FORWARDED, HeaderValue},
 };
 
 /// Gets real ip remote addr from request headers.

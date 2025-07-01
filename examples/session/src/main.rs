@@ -4,7 +4,7 @@ use tokio::net::TcpListener;
 use sessions::MemoryStorage;
 
 use viz::{
-    get,
+    Request, RequestExt, Result, Router, get,
     middleware::{
         cookie,
         helper::CookieOptions,
@@ -12,7 +12,6 @@ use viz::{
     },
     serve,
     types::CookieKey,
-    Request, RequestExt, Result, Router,
 };
 
 async fn index(req: Request) -> Result<&'static str> {

@@ -1,14 +1,14 @@
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use viz::{
-    middleware::limits,
-    serve,
-    // types::{Multipart, PayloadError},
-    types,
     Request,
     RequestExt,
     Result,
     Router,
+    middleware::limits,
+    serve,
+    // types::{Multipart, PayloadError},
+    types,
 };
 
 async fn echo(mut req: Request) -> Result<String> {

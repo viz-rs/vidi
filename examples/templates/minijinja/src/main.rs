@@ -2,10 +2,10 @@
 
 use std::{env, net::SocketAddr, path::PathBuf, sync::LazyLock};
 
-use minijinja::{context, path_loader, Environment};
+use minijinja::{Environment, context, path_loader};
 use serde::Serialize;
 use tokio::net::TcpListener;
-use viz::{serve, Error, Request, Response, ResponseExt, Result, Router};
+use viz::{Error, Request, Response, ResponseExt, Result, Router, serve};
 
 static TPLS: LazyLock<Environment> = LazyLock::new(|| {
     let dir = env::var("CARGO_MANIFEST_DIR").map(PathBuf::from).unwrap();

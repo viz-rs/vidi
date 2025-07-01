@@ -11,11 +11,11 @@ use tokio::io::AsyncReadExt;
 use tokio_util::io::ReaderStream;
 
 use viz_core::{
+    Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result, StatusCode,
     headers::{
         AcceptRanges, ContentLength, ContentRange, ContentType, ETag, HeaderMap, HeaderMapExt,
         IfMatch, IfModifiedSince, IfNoneMatch, IfUnmodifiedSince, LastModified, Range,
     },
-    Handler, IntoResponse, Method, Request, RequestExt, Response, ResponseExt, Result, StatusCode,
 };
 
 mod directory;
@@ -260,8 +260,8 @@ mod tests {
     use super::{Dir, File};
     use std::sync::Arc;
     use viz_core::{
-        types::{Params, RouteInfo},
         Handler, IntoResponse, Request, Result, StatusCode,
+        types::{Params, RouteInfo},
     };
 
     #[tokio::test]

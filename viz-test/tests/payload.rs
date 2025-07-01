@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use viz::{
-    middleware::limits, types, Error, Request, RequestLimitsExt, Response, ResponseExt, Result,
-    Router, StatusCode,
+    Error, Request, RequestLimitsExt, Response, ResponseExt, Result, Router, StatusCode,
+    middleware::limits, types,
 };
 use viz_test::TestServer;
 

@@ -41,12 +41,12 @@ members = [
 [workspace.package]
 version = "0.10.0"
 authors = ["Fangdun Tsai <cfddream@gmail.com>"]
-edition = "2021"
+edition = "2024"
 homepage = "https://viz.rs"
 documentation = "https://docs.rs/viz"
 repository = "https://github.com/viz-rs/viz"
 license = "MIT"
-rust-version = "1.75"
+rust-version = "1.85"
 
 [workspace.dependencies]
 viz = { version = "0.10.0", path = "viz" }
