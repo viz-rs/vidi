@@ -1,11 +1,15 @@
 //! HTTP Handler test cases
 
-#![allow(dead_code)]
-#![allow(non_local_definitions)]
-#![allow(clippy::unused_async)]
+#![allow(clippy::diverging_sub_expression)]
+#![allow(clippy::semicolon_if_nothing_returned)]
 #![allow(clippy::similar_names)]
+#![allow(clippy::unused_async)]
 #![allow(clippy::wildcard_imports)]
+#![allow(dead_code)]
 #![allow(dependency_on_unit_never_type_fallback)]
+#![allow(non_local_definitions)]
+#![allow(unreachable_code)]
+#![allow(unused_variables)]
 
 use http_body_util::Full;
 use viz_core::handler::CatchError;
@@ -236,9 +240,10 @@ async fn handler() -> Result<()> {
             .catch_error::<_, CustomError2, &'static str>(|_: CustomError2| async move {
                 "Custom Error 2"
             })
-            .catch_unwind(
-                |_: Box<dyn std::any::Any + Send>| async move { panic!("Custom Error 2") },
-            );
+            .catch_unwind(|_: Box<dyn std::any::Any + Send>| async move {
+                let respond: () = panic!("Custom Error 2");
+                respond
+            });
 
         assert!(Handler::call(&aa, Request::new(Body::Empty)).await.is_ok());
 
