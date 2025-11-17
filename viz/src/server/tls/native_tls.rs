@@ -7,7 +7,7 @@ use crate::{Error, Result};
 
 pub use tokio_native_tls::{TlsAcceptor, native_tls::Identity};
 
-/// [`native-tls`]'s config.
+/// `native-tls`'s config.
 pub struct Config {
     identity: Identity,
 }
