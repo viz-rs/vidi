@@ -24,14 +24,15 @@
 //!
 //! use async_net::TcpListener;
 //! use macro_rules_attribute::apply;
+//! use smol_macros::{Executor, main};
 //! use viz_smol::{Request, Result, Router};
 //!
 //! async fn index(_: Request) -> Result<&'static str> {
 //!     Ok("Hello, Viz!")
 //! }
 //!
-//! #[apply(smol_macros::main!)]
-//! async fn main(ex: &Arc<smol_macros::Executor<'_>>) -> io::Result<()> {
+//! #[apply(main!)]
+//! async fn main(ex: &Arc<Executor<'_>>) -> io::Result<()> {
 //!     // Build our application with a route.
 //!     let app = Router::new().get("/", index);
 //!
@@ -40,7 +41,7 @@
 //!     println!("listening on {}", listener.local_addr().unwrap());
 //!
 //!     // Run it
-//!     viz_smol::serve(ex.clone(), listener, app).await
+//!     viz_smol::serve(ex, listener, app).await
 //! }
 //! ```
 //!
@@ -52,7 +53,7 @@
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms), allow(dead_code, unused_variables))
 ))]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod responder;
 pub use responder::Responder;

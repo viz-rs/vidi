@@ -225,15 +225,12 @@ impl ResponseExt for Response {
         T: AsRef<std::path::Path> + Send,
     {
         let value = name
-            .map_or_else(
-                || {
-                    path.as_ref()
-                        .file_name()
-                        .and_then(std::ffi::OsStr::to_str)
-                        .map_or("download", |filename| filename)
-                },
-                |filename| filename,
-            )
+            .unwrap_or_else(|| {
+                path.as_ref()
+                    .file_name()
+                    .and_then(std::ffi::OsStr::to_str)
+                    .map_or("download", |filename| filename)
+            })
             .escape_default();
 
         let mut resp = Self::attachment(&format!("attachment; filename=\"{value}\""));
