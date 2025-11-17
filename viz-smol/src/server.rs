@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, fmt::Debug, io, sync::Arc};
+use std::{fmt::Debug, io, sync::Arc};
 
 use async_executor::Executor;
 use futures_lite::io::{AsyncRead, AsyncWrite};
@@ -21,9 +21,8 @@ mod unix;
 
 /// Serve a server with smol's networking types.
 #[allow(clippy::missing_errors_doc)]
-pub async fn serve<'ex, E, L>(executor: E, listener: L, router: Router) -> io::Result<()>
+pub async fn serve<L>(executor: &Arc<Executor<'_>>, listener: L, router: Router) -> io::Result<()>
 where
-    E: Borrow<Executor<'ex>> + Clone + Send + 'ex,
     L: Listener + Send + 'static,
     L::Io: AsyncRead + AsyncWrite + Send + Unpin,
     L::Addr: Send + Sync + Debug,
@@ -52,10 +51,9 @@ where
         let responder = Responder::<Arc<L::Addr>>::new(tree.clone(), Some(remote_addr.clone()));
 
         // Spawn the service on our executor.
-        let task = executor.borrow().spawn({
-            let executor = executor.clone();
+        let task = executor.spawn({
+            let mut builder = Builder::new(SmolExecutor::new(executor.clone()));
             async move {
-                let mut builder = Builder::new(SmolExecutor::new(AsRefExecutor(executor.borrow())));
                 #[cfg(feature = "http1")]
                 builder.http1().timer(SmolTimer::new());
                 #[cfg(feature = "http2")]
@@ -79,14 +77,4 @@ fn is_connection_error(e: &io::Error) -> bool {
             | io::ErrorKind::ConnectionAborted
             | io::ErrorKind::ConnectionReset
     )
-}
-
-#[derive(Clone)]
-struct AsRefExecutor<'this, 'ex>(&'this Executor<'ex>);
-
-impl<'ex> AsRef<Executor<'ex>> for AsRefExecutor<'_, 'ex> {
-    #[inline]
-    fn as_ref(&self) -> &Executor<'ex> {
-        self.0
-    }
 }

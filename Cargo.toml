@@ -127,7 +127,7 @@ tower = "0.5"
 tower-http = "0.6"
 
 # Soml
-async-channel = "2.3"
+async-channel = "2.5"
 async-executor = "1.13"
 async-io = "2.6"
 async-net = "2.0"
