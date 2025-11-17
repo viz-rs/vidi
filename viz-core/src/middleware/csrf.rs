@@ -217,7 +217,7 @@ where
         let token = base64::engine::general_purpose::URL_SAFE_NO_PAD
             .encode((config.generate)(&secret, otp));
 
-        req.extensions_mut().insert(CsrfToken(token.to_string()));
+        req.extensions_mut().insert(CsrfToken(token.clone()));
         self.config.set(&req, token, secret)?;
 
         self.h

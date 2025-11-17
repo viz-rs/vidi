@@ -1,7 +1,6 @@
 use std::io;
 use std::sync::Arc;
 
-use async_executor::Executor;
 use async_net::TcpListener;
 use macro_rules_attribute::apply;
 use smol_macros::{Executor, main};

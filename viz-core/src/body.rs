@@ -26,9 +26,10 @@ pub enum BodyState {
 ///
 /// [`Request`]: crate::Request
 /// [`Response`]: crate::Response
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum Body<D = Bytes> {
     /// An empty body.
+    #[default]
     Empty,
     /// A body that consists of a single chunk.
     Full(Full<D>),
@@ -86,12 +87,6 @@ impl Body {
     /// A stream created from a [`http_body::Body`].
     pub fn into_stream(self) -> BodyStream<Self> {
         BodyStream::new(self)
-    }
-}
-
-impl Default for Body {
-    fn default() -> Self {
-        Self::Empty
     }
 }
 
