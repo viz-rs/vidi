@@ -1,6 +1,6 @@
 [package]
 name = "viz-tower"
-version = "0.3.0"
+version = "0.4.0"
 documentation = "https://docs.rs/viz-tower"
 description = "An adapter for tower service"
 readme = "README.md"
