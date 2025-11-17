@@ -21,7 +21,7 @@ mod unix;
 
 /// Serve a server with smol's networking types.
 #[allow(clippy::missing_errors_doc)]
-pub async fn serve<L>(executor: Arc<Executor<'_>>, listener: L, router: Router) -> io::Result<()>
+pub async fn serve<L>(executor: &Arc<Executor<'_>>, listener: L, router: Router) -> io::Result<()>
 where
     L: Listener + Send + 'static,
     L::Io: AsyncRead + AsyncWrite + Send + Unpin,
