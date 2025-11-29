@@ -1,9 +1,7 @@
 //! An adapter that makes a tower [`Service`] into a [`Handler`].
 
 use tower::{Service, ServiceExt};
-use viz_core::{
-    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result, StatusCode,
-};
+use viz_core::{Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result};
 
 mod service;
 pub use service::HandlerService;
@@ -66,6 +64,7 @@ mod tests {
     };
     use viz_core::{
         Body, BoxHandler, Handler, HandlerExt, IntoResponse, Request, RequestExt, Response,
+        StatusCode,
     };
 
     #[derive(Clone, Debug, Default)]
