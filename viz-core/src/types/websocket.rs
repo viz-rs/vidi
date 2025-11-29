@@ -40,7 +40,7 @@ impl WebSocket {
     /// The specifies one or more protocols that you wish to use.
     ///
     /// In order of preference. The first one that is supported by the server will be
-    /// selected and responsed.
+    /// selected and responded.
     #[must_use]
     pub fn protocols<I>(mut self, protocols: I) -> Self
     where

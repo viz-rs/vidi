@@ -2,7 +2,7 @@ use std::{convert::Infallible, future::Future, pin::Pin, sync::Arc};
 
 use crate::{Body, Handler, Incoming, IntoResponse, Method, Request, Response, StatusCode, Tree};
 
-/// Handles the HTTP [`Request`] and retures the HTTP [`Response`].
+/// Handles the HTTP [`Request`] and returns the HTTP [`Response`].
 #[derive(Debug)]
 pub struct Responder<A> {
     tree: Arc<Tree>,

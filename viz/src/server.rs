@@ -106,7 +106,7 @@ where
                             }
                         };
 
-                        tracing::trace!("incomming connection accepted: {:?}", peer_addr);
+                        tracing::trace!("incoming connection accepted: {:?}", peer_addr);
 
                         let peer_addr = Arc::new(peer_addr);
 

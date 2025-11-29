@@ -33,7 +33,7 @@ pub struct Config<T> {
 }
 
 impl<T> Config<T> {
-    /// Creats new `OpenTelemetry` tracing config.
+    /// Creates new `OpenTelemetry` tracing config.
     pub fn new(t: T, name: Option<String>) -> Self {
         Self { tracer: t, name }
     }
