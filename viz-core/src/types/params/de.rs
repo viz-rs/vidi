@@ -157,9 +157,7 @@ impl<'de> Deserializer<'de> for PathDeserializer<'de> {
         V: Visitor<'de>,
     {
         if self.path.is_empty() {
-            Err(de::value::Error::custom(
-                "expected at least one parameters",
-            ))
+            Err(de::value::Error::custom("expected at least one parameters"))
         } else {
             visitor.visit_enum(ValueEnum {
                 value: &self.path[0].1,
