@@ -158,7 +158,7 @@ impl<'de> Deserializer<'de> for PathDeserializer<'de> {
     {
         if self.path.is_empty() {
             Err(de::value::Error::custom(
-                "expeceted at least one parameters",
+                "expected at least one parameters",
             ))
         } else {
             visitor.visit_enum(ValueEnum {
@@ -725,6 +725,6 @@ mod tests {
         let s: Result<TestEnum, de::value::Error> =
             de::Deserialize::deserialize(PathDeserializer::new(&params));
         assert!(s.is_err());
-        assert!(format!("{s:?}").contains("expeceted at least one parameters"));
+        assert!(format!("{s:?}").contains("expected at least one parameters"));
     }
 }
