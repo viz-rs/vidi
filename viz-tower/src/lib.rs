@@ -1,7 +1,9 @@
 //! An adapter that makes a tower [`Service`] into a [`Handler`].
 
 use tower::{Service, ServiceExt};
-use viz_core::{Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result};
+use viz_core::{
+    Body, BoxError, Bytes, Error, Handler, HttpBody, Request, Response, Result, StatusCode,
+};
 
 mod service;
 pub use service::HandlerService;
@@ -99,7 +101,10 @@ mod tests {
             .layer(SetRequestIdLayer::x_request_id(MyMakeRequestId::default()))
             .layer(MapResponseLayer::new(IntoResponse::into_response))
             .layer(MapRequestLayer::new(|req: Request<_>| req.map(Body::wrap)))
-            .layer(TimeoutLayer::new(Duration::from_secs(10)))
+            .layer(TimeoutLayer::with_status_code(
+                StatusCode::REQUEST_TIMEOUT,
+                Duration::from_secs(10),
+            ))
             .service(hello_svc);
 
         let r0 = Request::new(Body::Full("12".into()));
