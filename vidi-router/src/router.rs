@@ -501,7 +501,7 @@ mod tests {
             format!("{tree:#?}"),
             "Tree {
     method: GET,
-    paths:
+    paths: 
     / •0
     ├── api/search •6
     ├── se
@@ -514,7 +514,7 @@ mod tests {
             └── : •3
     ,
     method: POST,
-    paths:
+    paths: 
     /
     └── : •0
     ,

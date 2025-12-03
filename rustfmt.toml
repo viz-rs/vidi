@@ -1,5 +1,6 @@
 use_field_init_shorthand = true
 newline_style = "Unix"
+style_edition = "2024"
 
 # Unstable features below
 unstable_features = true
