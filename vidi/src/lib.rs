@@ -21,7 +21,7 @@
 //! ```no_run
 //! use std::net::SocketAddr;
 //! use tokio::net::TcpListener;
-//! use vidi::{serve, Request, Result, Router};
+//! use vidi::{Request, Result, Router, serve};
 //!
 //! async fn index(_: Request) -> Result<&'static str> {
 //!     Ok("Hello, Vidi!")
@@ -83,7 +83,7 @@
 //! impl Handler<Request> for MyHandler {
 //!     type Output = Result<Response>;
 //!
-//!     async fn call(&self, req: Request) -> Self::Output  {
+//!     async fn call(&self, req: Request) -> Self::Output {
 //!         let path = req.path();
 //!         let method = req.method().clone();
 //!         let code = self.code.fetch_add(1, Ordering::SeqCst);
@@ -120,7 +120,7 @@
 //! #   Response, Router, FnExt,
 //! # };
 //! async fn show_user(mut req: Request) -> Result<Response> {
-//!     let Params(id)  = req.extract::<Params<u64>>().await?;
+//!     let Params(id) = req.extract::<Params<u64>>().await?;
 //!     Ok(format!("post {}", id).into_response())
 //! }
 //!
@@ -204,8 +204,7 @@
 //!     })
 //! }
 //!
-//! let routing = Router::new()
-//!     .get("/", index.before(before).around(around).after(after));
+//! let routing = Router::new().get("/", index.before(before).around(around).after(after));
 //! ```
 //!
 //!
@@ -270,7 +269,9 @@
 //!
 //! impl Timeout {
 //!     pub fn new(secs: u64) -> Self {
-//!         Self { delay: Duration::from_secs(secs) }
+//!         Self {
+//!             delay: Duration::from_secs(secs),
+//!         }
 //!     }
 //! }
 //!
@@ -299,35 +300,39 @@
 //! }
 //!
 //! let app = Router::new()
-//!     .get("/", index
-//!         // handler level
-//!         .around(around)
-//!         .around(MyMiddleware {})
-//!         .with(Timeout::new(1))
+//!     .get(
+//!         "/",
+//!         index
+//!             // handler level
+//!             .around(around)
+//!             .around(MyMiddleware {})
+//!             .with(Timeout::new(1)),
 //!     )
-//!     .route("/users/:id", get(
-//!         show_user
+//!     .route(
+//!         "/users/:id",
+//!         get(show_user
 //!             .into_handler()
 //!             .map_into_response()
 //!             // handler level
 //!             .around(around)
-//!             .with(Timeout::new(0))
-//!         )
+//!             .with(Timeout::new(0)))
 //!         .post(
 //!             (|_| async { Ok(Response::text("update")) })
-//!             // handler level
-//!             .around(around)
-//!             .with(Timeout::new(0))
+//!                 // handler level
+//!                 .around(around)
+//!                 .with(Timeout::new(0)),
 //!         )
 //!         // route level
 //!         .with_handler(MyMiddleware {})
-//!         .with(Timeout::new(2))
+//!         .with(Timeout::new(2)),
 //!     )
-//!     .get("/*", not_found
-//!         .map_into_response()
-//!         // handler level
-//!         .around(around)
-//!         .around(MyMiddleware {})
+//!     .get(
+//!         "/*",
+//!         not_found
+//!             .map_into_response()
+//!             // handler level
+//!             .around(around)
+//!             .around(MyMiddleware {}),
 //!     )
 //!     // router level
 //!     .with_handler(around)
@@ -354,13 +359,13 @@
 //! }
 //!
 //! fn get_query_param(query: Option<&str>) -> u16 {
-//!    let query = query.unwrap_or("");
-//!    let q = if let Some(pos) = query.find('q') {
-//!        query.split_at(pos + 2).1.parse().unwrap_or(1)
-//!    } else {
-//!        1
-//!    };
-//!    cmp::min(500, cmp::max(1, q))
+//!     let query = query.unwrap_or("");
+//!     let q = if let Some(pos) = query.find('q') {
+//!         query.split_at(pos + 2).1.parse().unwrap_or(1)
+//!     } else {
+//!         1
+//!     };
+//!     cmp::min(500, cmp::max(1, q))
 //! }
 //! ```
 //!
@@ -379,11 +384,10 @@
 //! }
 //!
 //! let root = Router::new()
-//!   .get("/", index)
-//!   .route("/about", get(|_| async { Ok("about") }));
+//!     .get("/", index)
+//!     .route("/about", get(|_| async { Ok("about") }));
 //!
-//! let search = Router::new()
-//!   .route("/", Route::new().get(|_| async { Ok("search") }));
+//! let search = Router::new().route("/", Route::new().get(|_| async { Ok("search") }));
 //! ```
 //!
 //! ## CRUD, Verbs
@@ -405,12 +409,14 @@
 //! }
 //!
 //! async fn new_todo(_: Request) -> Result<Response> {
-//!     Ok(Response::html(r#"
+//!     Ok(Response::html(
+//!         r#"
 //!         <form method="post" action="/">
 //!             <input name="todo" />
 //!             <button type="submit">Create</button>
 //!         </form>
-//!     "#))
+//!     "#,
+//!     ))
 //! }
 //!
 //! async fn show_todo(mut req: Request) -> Result<Response> {
@@ -431,10 +437,13 @@
 //! }
 //!
 //! let todos = Router::new()
-//!   .route("/", get(index_todos).post(create_todo))
-//!   .post("/new", new_todo)
-//!   .route("/:id", get(show_todo).patch(update_todo).delete(destroy_todo))
-//!   .get("/:id/edit", edit_todo);
+//!     .route("/", get(index_todos).post(create_todo))
+//!     .post("/new", new_todo)
+//!     .route(
+//!         "/:id",
+//!         get(show_todo).patch(update_todo).delete(destroy_todo),
+//!     )
+//!     .get("/:id/edit", edit_todo);
 //! ```
 //!
 //! ## Resources
@@ -483,15 +492,15 @@
 //! }
 //!
 //! let users = Resources::default()
-//!   .named("user")
-//!   .route("/search", get(search_users))
-//!   .index(index_users)
-//!   .new(new_user)
-//!   .create(create_user)
-//!   .show(show_user)
-//!   .edit(edit_user)
-//!   .update(update_user)
-//!   .destroy(delete_user);
+//!     .named("user")
+//!     .route("/search", get(search_users))
+//!     .index(index_users)
+//!     .new(new_user)
+//!     .create(create_user)
+//!     .show(show_user)
+//!     .edit(edit_user)
+//!     .update(update_user)
+//!     .destroy(delete_user);
 //! ```
 //!
 //! ## Nested

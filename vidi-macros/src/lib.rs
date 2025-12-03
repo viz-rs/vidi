@@ -11,8 +11,7 @@
 //! # use vidi_macros::handler;
 //!
 //! #[handler]
-//! fn about() -> impl IntoResponse {
-//! }
+//! fn about() -> impl IntoResponse {}
 //!
 //! #[handler]
 //! async fn index() -> impl IntoResponse {
