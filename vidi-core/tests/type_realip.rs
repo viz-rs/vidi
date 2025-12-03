@@ -1,9 +1,9 @@
 //! `RealIp` type test cases
 
 use vidi_core::{
-    header::{HeaderValue, FORWARDED},
-    types::RealIp,
     Request, RequestExt,
+    header::{FORWARDED, HeaderValue},
+    types::RealIp,
 };
 
 #[test]

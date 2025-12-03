@@ -51,10 +51,10 @@ impl From<Router> for Tree {
                     path.insert(0, '/');
                 }
                 for (method, handler) in methods {
-                    if let Some(t) =
-                        tree.as_mut()
-                            .iter_mut()
-                            .find_map(|(m, t)| if *m == method { Some(t) } else { None })
+                    if let Some(t) = tree
+                        .as_mut()
+                        .iter_mut()
+                        .find_map(|(m, t)| if *m == method { Some(t) } else { None })
                     {
                         let _ = t.insert(&path, handler);
                     } else {

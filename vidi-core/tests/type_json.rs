@@ -1,6 +1,6 @@
 //! JSON type test cases
 
-use vidi_core::{types::Json, IntoResponse, ResponseExt};
+use vidi_core::{IntoResponse, ResponseExt, types::Json};
 
 #[test]
 fn json() {
