@@ -3,7 +3,7 @@ use tokio::net::TcpListener;
 use tokio::signal;
 use tracing::{error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{Request, Result, Router, serve};
+use vidi::{Request, Result, Router, serve};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")

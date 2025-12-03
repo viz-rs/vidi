@@ -1,8 +1,8 @@
-//! `SeaOrm` example for Viz framework.
+//! `SeaOrm` example for Vidi framework.
 use sea_orm_example::{api, db::init_db};
 use std::{env, net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
-use viz::{Result, Router, handlers::serve, middleware, serve, types::State};
+use vidi::{Result, Router, handlers::serve, middleware, serve, types::State};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

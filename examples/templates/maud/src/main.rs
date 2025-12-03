@@ -4,7 +4,7 @@
 use maud::{DOCTYPE, PreEscaped, html};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{Request, Response, ResponseExt, Result, Router, serve};
+use vidi::{Request, Response, ResponseExt, Result, Router, serve};
 
 pub struct Todo<'a> {
     id: u64,

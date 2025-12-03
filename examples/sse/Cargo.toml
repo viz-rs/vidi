@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz = { workspace = true, features = ["sse"] }
+vidi = { workspace = true, features = ["sse"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 tokio-stream.workspace = true

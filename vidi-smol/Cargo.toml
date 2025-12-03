@@ -1,0 +1,86 @@
+[package]
+name = "vidi-smol"
+version = "0.4.0"
+documentation = "https://docs.rs/vidi-smol"
+description = "An adapter for smol runtime"
+readme = "README.md"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+default = [
+  "state",
+  "limits",
+  "query",
+  "form",
+  "json",
+  "multipart",
+  "params",
+  "cookie",
+  "session",
+
+  "http1",
+]
+
+state = ["vidi-core/state"]
+limits = ["vidi-core/limits"]
+
+query = ["vidi-core/query"]
+form = ["vidi-core/form"]
+json = ["vidi-core/json"]
+multipart = ["vidi-core/multipart"]
+params = ["vidi-core/params"]
+
+cookie = ["vidi-core/cookie"]
+cookie-private = ["vidi-core/cookie-private"]
+cookie-signed = ["vidi-core/cookie-signed"]
+
+session = ["cookie", "cookie-private", "vidi-core/session"]
+
+csrf = ["cookie", "cookie-private", "vidi-core/csrf"]
+cors = ["vidi-core/cors"]
+
+http1 = ["dep:hyper", "dep:hyper-util", "hyper?/http1", "hyper-util?/http1"]
+http2 = ["dep:hyper", "dep:hyper-util", "hyper?/http2", "hyper-util?/http2"]
+
+unix-socket = []
+
+macros = ["dep:vidi-macros"]
+
+handlers = ["dep:vidi-handlers"]
+
+otel = ["vidi-core/otel"]
+otel-tracing = ["otel", "vidi-core/otel-tracing"]
+otel-metrics = ["otel", "vidi-core/otel-metrics"]
+otel-prometheus = ["handlers", "vidi-handlers?/prometheus"]
+
+[dependencies]
+vidi-core.workspace = true
+vidi-router.workspace = true
+vidi-handlers = { workspace = true, optional = true }
+vidi-macros = { workspace = true, optional = true }
+
+hyper = { workspace = true, optional = true }
+hyper-util = { workspace = true, optional = true }
+
+tracing.workspace = true
+
+async-executor.workspace = true
+async-net.workspace = true
+smol-hyper.workspace = true
+futures-lite.workspace = true
+
+[dev-dependencies]
+smol-macros.workspace = true
+macro_rules_attribute.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true

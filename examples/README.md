@@ -1,4 +1,4 @@
-# Examples for Viz
+# Examples for Vidi
 
 Here you can find a lot of small crabs 🦀.
 
@@ -12,7 +12,7 @@ Here you can find a lot of small crabs 🦀.
 * [Extract body from Multipart](forms/multipart)
 * [Extract body data with a limits](limits)
 * [Websockt Chat](websocket-chat)
-* [Socketioxide](https://github.com/Totodore/socketioxide/blob/main/examples/viz-echo/)
+* [Socketioxide](https://github.com/Totodore/socketioxide/blob/main/examples/vidi-echo/)
 * [Server-Sent Events](sse)
 * [Session](session)
 * [CSRF](csrf)
@@ -38,7 +38,7 @@ Here you can find a lot of small crabs 🦀.
 
 ## Usage
 
-### Run it in `viz` directory
+### Run it in `vidi` directory
 
 ```console
 $ cargo run --bin xxx-example -- --nocapture

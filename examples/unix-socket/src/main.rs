@@ -1,15 +1,15 @@
 //! Unix Domain Socket
 //!
 //! ```sh
-//! curl --unix-socket /tmp/viz.sock http://localhost/
+//! curl --unix-socket /tmp/vidi.sock http://localhost/
 //! ```
 
 #[cfg(unix)]
 #[tokio::main]
-async fn main() -> viz::Result<()> {
+async fn main() -> vidi::Result<()> {
     use tokio::net::UnixListener;
     use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-    use viz::{IntoHandler, Result, Router, get, serve};
+    use vidi::{IntoHandler, Result, Router, get, serve};
 
     tracing_subscriber::registry()
         .with(
@@ -23,7 +23,7 @@ async fn main() -> viz::Result<()> {
         Ok("Hello world!")
     }
 
-    let path = "/tmp/viz.sock";
+    let path = "/tmp/vidi.sock";
     println!("listening on http://{path}");
 
     let listener = UnixListener::bind(path)?;

@@ -1,7 +1,7 @@
 use std::{net::SocketAddr, time::Duration};
 use tokio::net::TcpListener;
 
-use viz::{
+use vidi::{
     Method, Request, RequestExt, Result, Router,
     middleware::{
         cookie,

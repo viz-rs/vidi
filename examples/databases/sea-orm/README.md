@@ -1,4 +1,4 @@
-# Viz SeaOrm example
+# Vidi SeaOrm example
 
 UI inspired by: https://github.com/HapticX/happyx/blob/master/examples/todo/README.md
 

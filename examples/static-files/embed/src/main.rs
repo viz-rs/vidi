@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{Result, Router, StatusCode, handlers::embed, serve};
+use vidi::{Result, Router, StatusCode, handlers::embed, serve};
 
 #[derive(rust_embed::RustEmbed)]
 #[folder = "public"]

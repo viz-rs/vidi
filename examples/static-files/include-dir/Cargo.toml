@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz.workspace = true
+vidi.workspace = true
 http-body-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 

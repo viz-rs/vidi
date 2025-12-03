@@ -5,7 +5,7 @@ use opentelemetry_otlp::{SpanExporter, WithExportConfig};
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{Error, Request, Result, Router, middleware::otel, serve};
+use vidi::{Error, Request, Result, Router, middleware::otel, serve};
 
 fn init_tracer_provider() -> SdkTracerProvider {
     global::set_text_map_propagator(TraceContextPropagator::new());

@@ -5,7 +5,7 @@ use std::{
 use tokio::net::TcpListener;
 
 use serde::{Deserialize, Serialize};
-use viz::{
+use vidi::{
     Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
     middleware, serve,
     types::{Json, Params, Query, State},

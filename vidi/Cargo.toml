@@ -1,0 +1,100 @@
+[package]
+name = "vidi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+documentation.workspace = true
+readme = "README.md"
+description = "Fast, robust, flexible, lightweight web framework for Rust"
+keywords = ["async", "framework", "http", "service", "web"]
+categories = ["asynchronous", "network-programming", "web-programming"]
+
+[features]
+default = [
+  "state",
+  "limits",
+  "query",
+  "form",
+  "json",
+  "multipart",
+  "params",
+  "cookie",
+  "session",
+
+  "http1",
+]
+
+state = ["vidi-core/state"]
+limits = ["vidi-core/limits"]
+
+query = ["vidi-core/query"]
+form = ["vidi-core/form"]
+json = ["vidi-core/json"]
+multipart = ["vidi-core/multipart"]
+params = ["vidi-core/params"]
+
+cookie = ["vidi-core/cookie"]
+cookie-private = ["vidi-core/cookie-private"]
+cookie-signed = ["vidi-core/cookie-signed"]
+
+session = ["cookie", "cookie-private", "vidi-core/session"]
+
+websocket = ["vidi-core/websocket"]
+sse = ["vidi-core/sse"]
+fs = ["vidi-core/fs"]
+
+csrf = ["cookie", "cookie-private", "vidi-core/csrf"]
+cors = ["vidi-core/cors"]
+
+compression = ["vidi-core/compression"]
+
+http1 = ["dep:hyper", "dep:hyper-util", "hyper?/http1", "hyper-util?/http1"]
+http2 = ["dep:hyper", "dep:hyper-util", "hyper?/http2", "hyper-util?/http2"]
+
+unix-socket = []
+
+macros = ["dep:vidi-macros"]
+
+handlers = ["dep:vidi-handlers"]
+serve = ["handlers", "vidi-handlers?/serve"]
+embed = ["handlers", "vidi-handlers?/embed"]
+
+otel = ["vidi-core/otel"]
+otel-tracing = ["otel", "vidi-core/otel-tracing"]
+otel-metrics = ["otel", "vidi-core/otel-metrics"]
+otel-prometheus = ["handlers", "vidi-handlers?/prometheus"]
+
+rustls = ["dep:rustls-pemfile", "dep:futures-util", "dep:tokio-rustls"]
+native-tls = ["dep:futures-util", "dep:tokio-native-tls"]
+
+[dependencies]
+vidi-core.workspace = true
+vidi-router.workspace = true
+vidi-handlers = { workspace = true, optional = true }
+vidi-macros = { workspace = true, optional = true }
+
+hyper = { workspace = true, optional = true }
+hyper-util = { workspace = true, optional = true, features = ["server-auto", "server-graceful"] }
+
+futures-util = { workspace = true, optional = true }
+tracing.workspace = true
+
+rustls-pemfile = { workspace = true, optional = true }
+tokio-native-tls = { workspace = true, optional = true }
+tokio-rustls = { workspace = true, optional = true }
+
+tokio = { workspace = true, features = ["macros"] }
+tokio-util = { workspace = true, features = ["net"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true

@@ -8,7 +8,7 @@ use std::{
     sync::{Arc, LazyLock, Mutex, PoisonError},
 };
 use tokio::net::TcpListener;
-use viz::{
+use vidi::{
     Error, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode,
     header::HeaderValue, middleware::limits, serve, types::State,
 };

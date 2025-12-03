@@ -14,7 +14,7 @@ use utoipa::{
     openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
 };
 use utoipa_swagger_ui::Config;
-use viz::{
+use vidi::{
     Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
     StatusCode,
     header::{self, HeaderMap},

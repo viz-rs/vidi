@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{
+use vidi::{
     Request,
     RequestExt,
     Result,

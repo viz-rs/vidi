@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz-smol.workspace = true
+vidi-smol.workspace = true
 
 async-net.workspace = true
 smol-macros.workspace = true

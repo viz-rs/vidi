@@ -4,7 +4,7 @@ use std::sync::Arc;
 use async_net::TcpListener;
 use macro_rules_attribute::apply;
 use smol_macros::{Executor, main};
-use viz_smol::{IntoResponse, Request, Response, Result, Router};
+use vidi_smol::{IntoResponse, Request, Response, Result, Router};
 
 #[apply(main!)]
 async fn main(ex: &Arc<Executor<'_>>) -> io::Result<()> {
@@ -16,7 +16,7 @@ async fn main(ex: &Arc<Executor<'_>>) -> io::Result<()> {
     println!("listening on {}", listener.local_addr().unwrap());
 
     // Run it
-    viz_smol::serve(ex, listener, app).await
+    vidi_smol::serve(ex, listener, app).await
 }
 
 async fn handler(_: Request) -> Result<Response> {

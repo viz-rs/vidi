@@ -1,31 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>Viz & htmlx</title>
-  <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
-</head>
-<body>
-  <form
-    hx-post="/todos"
-    hx-on="htmx:configRequest: event.detail.parameters.completed = completed.checked"
-    hx-swap="none"
-    id="form"
-  >
-    <input type="checkbox" name="completed" id="completed" />
-    <label for="completed">Done</label>
-    <input type="text" name="text" id="text" />
-    <button type="submit">Add</button>
-  </form>
-  <div
-    hx-get="/todos"
-    hx-trigger="newTodo from:form"
-    id="todos"
-  >
-    <ul id="list">
-    {{#each todos as | todo |}}
-      <li>{{text}} {{completed}}</li>
-    {{/each}}
-    </ul>
-  </div>
-</body>
+  <head>
+    <title>Vidi & htmlx</title>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.9"
+      integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <form
+      hx-post="/todos"
+      hx-on="htmx:configRequest: event.detail.parameters.completed = completed.checked"
+      hx-swap="none"
+      id="form"
+    >
+      <input type="checkbox" name="completed" id="completed" />
+      <label for="completed">Done</label>
+      <input type="text" name="text" id="text" />
+      <button type="submit">Add</button>
+    </form>
+    <div hx-get="/todos" hx-trigger="newTodo from:form" id="todos">
+      <ul id="list">
+        {{#each todos as | todo |}}
+        <li>{{text}} {{completed}}</li>
+        {{/each}}
+      </ul>
+    </div>
+  </body>
 </html>

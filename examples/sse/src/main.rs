@@ -4,7 +4,7 @@ use systemstat::{Platform, System};
 use tokio::net::TcpListener;
 use tokio::time::{Duration, interval};
 use tokio_stream::wrappers::IntervalStream;
-use viz::{
+use vidi::{
     Error, HandlerExt, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router,
     StatusCode, get,
     header::ACCEPT,

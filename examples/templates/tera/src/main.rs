@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::LazyLock};
 use serde::Serialize;
 use tera::{Context, Tera};
 use tokio::net::TcpListener;
-use viz::{Error, Request, Response, ResponseExt, Result, Router, serve};
+use vidi::{Error, Request, Response, ResponseExt, Result, Router, serve};
 
 static TPLS: LazyLock<Tera> =
     LazyLock::new(|| Tera::new("examples/templates/tera/templates/**/*").unwrap());
@@ -16,7 +16,7 @@ struct User<'a> {
 
 async fn index(_: Request) -> Result<Response> {
     let mut ctx = Context::new();
-    ctx.insert("title", "Viz.rs");
+    ctx.insert("title", "Vidi");
     ctx.insert(
         "users",
         &vec![
@@ -25,8 +25,8 @@ async fn index(_: Request) -> Result<Response> {
                 username: "rust-lang",
             },
             User {
-                url: "https://github.com/viz-rs",
-                username: "viz-rs",
+                url: "https://github.com/viz-rs/vidi",
+                username: "vidi",
             },
         ],
     );

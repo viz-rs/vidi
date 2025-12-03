@@ -2,7 +2,7 @@ use futures_util::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tokio::sync::broadcast::{Sender, channel};
-use viz::{
+use vidi::{
     HandlerExt, IntoHandler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
     Router, get, serve,
     types::{Message, Params, State, WebSocket},
