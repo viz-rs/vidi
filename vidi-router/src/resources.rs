@@ -100,7 +100,7 @@ impl Resources {
         self.on(Kind::Empty, Method::GET, handler)
     }
 
-    /// Returens an HTML form for creating the resources.
+    /// Returns an HTML form for creating the resources.
     #[must_use]
     pub fn new<H, O>(self, handler: H) -> Self
     where
@@ -130,7 +130,7 @@ impl Resources {
         self.on(Kind::Id, Method::GET, handler)
     }
 
-    /// Returens an HTML form for editing the resources.
+    /// Returns an HTML form for editing the resources.
     #[must_use]
     pub fn edit<H, O>(self, handler: H) -> Self
     where

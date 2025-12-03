@@ -276,8 +276,8 @@ async fn handler() -> Result<()> {
             .map(map)
             .and_then(and_then)
             .or_else(or_else)
-            .with(vidi_core::middleware::cookie::Config::default());
-        let rhe = e.map_into_response().after(after);
+            .with(viz_core::middleware::cookie::Config::default());
+        let rh_e = e.map_into_response().after(after);
         let rhf = f.map_into_response();
         let rhg = g.map_into_response();
         let rhh = h
@@ -307,7 +307,7 @@ async fn handler() -> Result<()> {
             .boxed();
         let brhc: BoxHandler<_, _> = rhc.boxed();
         let brhd: BoxHandler<_, _> = rhd.boxed();
-        let brhe: BoxHandler<_, _> = rhe.boxed();
+        let brhe: BoxHandler<_, _> = rh_e.boxed();
         let brhf: BoxHandler<_, _> = rhf.boxed();
         let brhg: BoxHandler<_, _> = rhg.boxed();
         let brhh: BoxHandler<_, _> = rhh.boxed();

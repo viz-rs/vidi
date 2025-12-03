@@ -31,7 +31,7 @@ pub enum PayloadError {
 
     #[cfg(feature = "json")]
     /// 400
-    #[error("JSON serialize or deserialize faild, {0}")]
+    #[error("JSON serialize or deserialize failed, {0}")]
     Json(#[from] serde_json::Error),
 
     /// 400

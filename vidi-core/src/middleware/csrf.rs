@@ -249,7 +249,7 @@ pub fn generate(secret: &[u8], otp: Vec<u8>) -> Vec<u8> {
     mask(secret, otp)
 }
 
-/// Verifys Token with a secret
+/// Verifies Token with a secret
 #[must_use]
 pub fn verify(secret: &[u8], raw_token: String) -> bool {
     base64::engine::general_purpose::URL_SAFE_NO_PAD
@@ -261,7 +261,7 @@ pub fn verify(secret: &[u8], raw_token: String) -> bool {
         .is_some()
 }
 
-/// Retures masked token
+/// Returns masked token
 #[allow(clippy::needless_collect)]
 fn mask(secret: &[u8], mut otp: Vec<u8>) -> Vec<u8> {
     otp.extend::<Vec<u8>>(
@@ -274,7 +274,7 @@ fn mask(secret: &[u8], mut otp: Vec<u8>) -> Vec<u8> {
     otp
 }
 
-/// Returens secret
+/// Returns secret
 fn unmask<const N: usize>(mut token: Vec<u8>) -> Vec<u8> {
     // encrypted_csrf_token
     let mut secret = token.split_off(N);

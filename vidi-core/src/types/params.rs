@@ -91,10 +91,10 @@ where
 /// Rejects a parsing error.
 #[derive(Debug, ThisError)]
 pub enum ParamsError {
-    /// Represents pasing single param was failed.
+    /// Represents parsing single param was failed.
     #[error("{}", .0)]
     SingleParse(String),
-    /// Represents pasing multi param was failed.
+    /// Represents parsing multi param was failed.
     #[error(transparent)]
     Parse(#[from] serde::de::value::Error),
     /// Represents params is empty.

@@ -29,8 +29,8 @@ pub use either::Either;
 mod fn_ext;
 pub use fn_ext::FnExt;
 
-mod fn_ext_hanlder;
-pub use fn_ext_hanlder::FnExtHandler;
+mod fn_ext_handler;
+pub use fn_ext_handler::FnExtHandler;
 
 mod into_handler;
 pub use into_handler::IntoHandler;

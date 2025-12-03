@@ -43,7 +43,7 @@ impl Cookies {
         }
     }
 
-    /// Retures the inner mutex [`CookieJar`].
+    /// Returns the inner mutex [`CookieJar`].
     #[must_use]
     pub fn jar(&self) -> &Mutex<CookieJar> {
         &self.inner
@@ -95,7 +95,7 @@ impl Cookies {
         self
     }
 
-    /// Retures the cryptographic master [`Key`][CookieKey].
+    /// Returns the cryptographic master [`Key`][CookieKey].
     ///
     /// # Panics
     ///
