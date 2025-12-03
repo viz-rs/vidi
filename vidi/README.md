@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/viz-rs/vidi-rs.github.io/gh-pages/logo.svg" height="200" />
+  <img src="https://raw.githubusercontent.com/viz-rs/viz-rs.github.io/gh-pages/logo.svg" height="200" />
 </p>
 
 <h1 align="center">
