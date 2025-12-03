@@ -4,7 +4,7 @@ use tokio::net::TcpListener;
 use opentelemetry::{KeyValue, global};
 use opentelemetry_sdk::{Resource, metrics::MeterProviderBuilder};
 
-use viz::{
+use vidi::{
     Error, Request, Result, Router,
     handlers::prometheus::{ExporterBuilder, Prometheus, Registry},
     middleware::otel,
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
         .with_reader(exporter)
         .with_resource(
             Resource::builder_empty()
-                .with_attributes([KeyValue::new("service.name", "viz")])
+                .with_attributes([KeyValue::new("service.name", "vidi")])
                 .build(),
         )
         .build();

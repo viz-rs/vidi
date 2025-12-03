@@ -5,8 +5,8 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz.workspace = true
-viz-tower.workspace = true
+vidi.workspace = true
+vidi-tower.workspace = true
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 tracing.workspace = true

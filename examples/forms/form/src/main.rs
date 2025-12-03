@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{
+use vidi::{
     IntoHandler, Request, Response, ResponseExt, Result, Router, get, middleware::limits, serve,
     types::Form,
 };

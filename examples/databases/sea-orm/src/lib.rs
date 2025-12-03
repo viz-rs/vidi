@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 #![deny(warnings)]
-//! `SeaOrm` example for Viz framework.
+//! `SeaOrm` example for Vidi framework.
 
 pub mod api;
 pub mod db;

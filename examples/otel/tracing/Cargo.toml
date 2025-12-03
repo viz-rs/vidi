@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz = { workspace = true, features = ["otel-tracing"] }
+vidi = { workspace = true, features = ["otel-tracing"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 opentelemetry.workspace = true

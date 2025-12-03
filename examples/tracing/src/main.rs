@@ -2,7 +2,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{Request, RequestExt, Result, Router, serve};
+use vidi::{Request, RequestExt, Result, Router, serve};
 
 #[instrument]
 async fn index(req: Request) -> Result<&'static str> {

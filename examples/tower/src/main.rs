@@ -1,4 +1,4 @@
-//! Viz + Tower services
+//! Vidi + Tower services
 
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
@@ -12,8 +12,8 @@ use tower_http::{
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use viz::{Body, Error, IntoResponse, Request, Response, Result, Router, serve};
-use viz_tower::{Layered, ServiceHandler};
+use vidi::{Body, Error, IntoResponse, Request, Response, Result, Router, serve};
+use vidi_tower::{Layered, ServiceHandler};
 
 async fn index(_: Request) -> Result<Response> {
     Ok("Hello, World!".into_response())

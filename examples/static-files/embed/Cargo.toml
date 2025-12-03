@@ -12,7 +12,7 @@ tracing = [
 ]
 
 [dependencies]
-viz = { workspace = true, features = ["embed"] }
+vidi = { workspace = true, features = ["embed"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 rust-embed.workspace = true

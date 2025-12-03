@@ -5,14 +5,14 @@ use crate::entities::todo::{ActiveModel, Entity as todoEntity, Model as Todo};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, DatabaseConnection, EntityTrait, Set, TryIntoModel,
 };
-use viz::{
+use vidi::{
     IntoResponse, Request, RequestExt, Response, ResponseExt, Result,
     types::{Json, Params, State},
 };
 
 /// list todos
 /// # Errors
-/// - `viz::Error`
+/// - `vidi::Error`
 pub async fn list(mut req: Request) -> Result<Response> {
     let State(db) = req.extract::<State<DatabaseConnection>>().await?;
     let todos = todoEntity::find()
@@ -24,7 +24,7 @@ pub async fn list(mut req: Request) -> Result<Response> {
 
 /// create todos
 /// # Errors
-/// - `viz::Error`
+/// - `vidi::Error`
 pub async fn create(mut req: Request) -> Result<Response> {
     let (State(db), Json(todo)) = req
         .extract::<(State<DatabaseConnection>, Json<Todo>)>()
@@ -45,7 +45,7 @@ pub async fn create(mut req: Request) -> Result<Response> {
 /// update todos
 /// PUT /todos/:id
 /// # Errors
-/// - `viz::Error`
+/// - `vidi::Error`
 pub async fn update(mut req: Request) -> Result<Response> {
     let (State(db), Params(id), Json(todo)) = req
         .extract::<(State<DatabaseConnection>, Params<i32>, Json<Todo>)>()
@@ -64,7 +64,7 @@ pub async fn update(mut req: Request) -> Result<Response> {
 /// delete todos
 /// DELETE /todos/:id
 /// # Errors
-/// - `viz::Error`
+/// - `vidi::Error`
 pub async fn delete(mut req: Request) -> Result<Response> {
     let (State(db), Params(id)) = req
         .extract::<(State<DatabaseConnection>, Params<i32>)>()

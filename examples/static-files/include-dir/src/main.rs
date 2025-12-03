@@ -4,7 +4,7 @@ use http_body_util::Full;
 use include_dir::{Dir, include_dir};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use viz::{
+use vidi::{
     IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Router, StatusCode, serve,
 };
 

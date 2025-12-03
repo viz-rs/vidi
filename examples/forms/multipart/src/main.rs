@@ -2,7 +2,7 @@ use futures_util::TryStreamExt;
 use std::{fs::File, net::SocketAddr};
 use tempfile::tempdir;
 use tokio::net::TcpListener;
-use viz::{
+use vidi::{
     IntoHandler, IntoResponse, Request, Response, ResponseExt, Result, Router,
     middleware::limits,
     serve,

@@ -42,7 +42,7 @@ jobs:
 
   coverage:
     name: Coverage
-    environment: Viz
+    environment: Vidi
     runs-on: ubuntu-latest
     env:
       RUSTFLAGS: --cfg hyper_unstable_tracing

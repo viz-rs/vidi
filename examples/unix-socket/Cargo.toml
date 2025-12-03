@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz = { workspace = true, features = ["unix-socket"] }
+vidi = { workspace = true, features = ["unix-socket"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 tracing.workspace = true

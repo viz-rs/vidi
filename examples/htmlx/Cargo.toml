@@ -5,7 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-viz = { workspace = true, features = ["serve"] }
+vidi = { workspace = true, features = ["serve"] }
 
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true

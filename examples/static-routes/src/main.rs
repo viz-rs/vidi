@@ -6,7 +6,7 @@ use std::{
 };
 use tokio::net::TcpListener;
 
-use viz::{
+use vidi::{
     Body, Handler, IntoResponse, Io, Method, Request, RequestExt, Response, Result, Router,
     StatusCode, Tree,
     types::{Params, RouteInfo},

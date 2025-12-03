@@ -5,7 +5,7 @@ use std::{env, net::SocketAddr, path::PathBuf, sync::LazyLock};
 use minijinja::{Environment, context, path_loader};
 use serde::Serialize;
 use tokio::net::TcpListener;
-use viz::{Error, Request, Response, ResponseExt, Result, Router, serve};
+use vidi::{Error, Request, Response, ResponseExt, Result, Router, serve};
 
 static TPLS: LazyLock<Environment> = LazyLock::new(|| {
     let dir = env::var("CARGO_MANIFEST_DIR").map(PathBuf::from).unwrap();
@@ -25,15 +25,15 @@ async fn index(_: Request) -> Result<Response> {
         .get_template("index.html")
         .map_err(Error::boxed)?
         .render(context! {
-            title => "Viz.rs",
+            title => "Vidi",
             users => &vec![
                 User {
                     url: "https://github.com/rust-lang",
                     username: "rust-lang",
                 },
                 User {
-                    url: "https://github.com/viz-rs",
-                    username: "viz-rs",
+                    url: "https://github.com/viz-rs/vidi",
+                    username: "vidi",
                 },
             ],
         })

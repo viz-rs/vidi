@@ -3,7 +3,7 @@ use tokio::net::TcpListener;
 
 use sessions::MemoryStorage;
 
-use viz::{
+use vidi::{
     Request, RequestExt, Result, Router, get,
     middleware::{
         cookie,

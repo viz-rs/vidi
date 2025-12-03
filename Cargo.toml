@@ -1,14 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
-    "viz",
-    "viz-core",
-    "viz-handlers",
-    "viz-macros",
-    "viz-router",
-    "viz-tower",
-    "viz-smol",
-    "viz-test",
+    "vidi",
+    "vidi-core",
+    "vidi-handlers",
+    "vidi-macros",
+    "vidi-router",
+    "vidi-tower",
+    "vidi-smol",
+    "vidi-test",
 
     "examples/hello-world",
     "examples/unix-socket",
@@ -40,24 +40,24 @@ members = [
 
 [workspace.package]
 version = "0.11.0"
-authors = ["Fangdun Tsai <cfddream@gmail.com>"]
+authors = ["Fangdun Tsai <fundon@pindash.io>"]
 edition = "2024"
-homepage = "https://viz.rs"
-documentation = "https://docs.rs/viz"
-repository = "https://github.com/viz-rs/viz"
+homepage = "https://vidi.viz.rs"
+documentation = "https://docs.rs/vidi"
+repository = "https://github.com/viz-rs/vidi"
 license = "MIT"
 rust-version = "1.85"
 
 [workspace.dependencies]
-viz = { version = "0.11.0", path = "viz" }
-viz-core = { version = "0.11.0", path = "viz-core" }
-viz-router = { version = "0.11.0", path = "viz-router" }
-viz-handlers = { version = "0.11.0", path = "viz-handlers", default-features = false }
-viz-macros = { version = "0.2.0", path = "viz-macros" }
-viz-test = { version = "0.4.0", path = "viz-test" }
-viz-tower = { version = "0.4.0", path = "viz-tower" }
+vidi = { version = "0.11.0", path = "vidi" }
+vidi-core = { version = "0.11.0", path = "vidi-core" }
+vidi-router = { version = "0.11.0", path = "vidi-router" }
+vidi-handlers = { version = "0.11.0", path = "vidi-handlers", default-features = false }
+vidi-macros = { version = "0.2.0", path = "vidi-macros" }
+vidi-test = { version = "0.4.0", path = "vidi-test" }
+vidi-tower = { version = "0.4.0", path = "vidi-tower" }
 
-viz-smol = { version = "0.4.0", path = "viz-smol" }
+vidi-smol = { version = "0.4.0", path = "vidi-smol" }
 
 anyhow = "1.0"
 async-trait = "0.1"
