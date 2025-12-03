@@ -276,7 +276,7 @@ async fn handler() -> Result<()> {
             .map(map)
             .and_then(and_then)
             .or_else(or_else)
-            .with(viz_core::middleware::cookie::Config::default());
+            .with(vidi_core::middleware::cookie::Config::default());
         let rh_e = e.map_into_response().after(after);
         let rhf = f.map_into_response();
         let rhg = g.map_into_response();
