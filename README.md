@@ -1,1 +1,1 @@
-viz/README.md
+vidi/README.md
