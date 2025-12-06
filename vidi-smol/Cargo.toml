@@ -1,6 +1,6 @@
 [package]
 name = "vidi-smol"
-version = "0.4.0"
+version.workspace = true
 documentation = "https://docs.rs/vidi-smol"
 description = "An adapter for smol runtime"
 readme = "README.md"
