@@ -39,7 +39,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.11.0"
+version = "0.1.0"
 authors = ["Fangdun Tsai <fundon@pindash.io>"]
 edition = "2024"
 homepage = "https://vidi.viz.rs"
@@ -49,15 +49,14 @@ license = "MIT"
 rust-version = "1.85"
 
 [workspace.dependencies]
-vidi = { version = "0.11.0", path = "vidi" }
-vidi-core = { version = "0.11.0", path = "vidi-core" }
-vidi-router = { version = "0.11.0", path = "vidi-router" }
-vidi-handlers = { version = "0.11.0", path = "vidi-handlers", default-features = false }
-vidi-macros = { version = "0.2.0", path = "vidi-macros" }
-vidi-test = { version = "0.4.0", path = "vidi-test" }
-vidi-tower = { version = "0.4.0", path = "vidi-tower" }
-
-vidi-smol = { version = "0.4.0", path = "vidi-smol" }
+vidi = { version = "0.1.0", path = "vidi" }
+vidi-core = { version = "0.1.0", path = "vidi-core" }
+vidi-router = { version = "0.1.0", path = "vidi-router" }
+vidi-handlers = { version = "0.1.0", path = "vidi-handlers", default-features = false }
+vidi-macros = { version = "0.1.0", path = "vidi-macros" }
+vidi-test = { version = "0.1.0", path = "vidi-test" }
+vidi-tower = { version = "0.1.0", path = "vidi-tower" }
+vidi-smol = { version = "0.1.0", path = "vidi-smol" }
 
 anyhow = "1.0"
 async-trait = "0.1"
