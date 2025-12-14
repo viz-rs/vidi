@@ -78,19 +78,7 @@ async fn main() -> Result<()> {
 }
 ```
 
-More examples can be found
-[here](https://github.com/viz-rs/vidi/tree/main/examples).
-
-## Performance
-
-Vidi is optimized for performance with:
-- Zero-cost abstractions and minimal allocations
-- Efficient router with optimized path matching
-- Inline hints for hot paths
-- Configurable limits and timeouts
-- Comprehensive performance documentation
-
-See [docs/PERFORMANCE.md](docs/PERFORMANCE.md) for optimization best practices and [docs/OPTIMIZATIONS.md](docs/OPTIMIZATIONS.md) for details on framework-level improvements.
+More examples can be found [here](https://github.com/viz-rs/vidi/tree/main/examples).
 
 ## Get started
 
