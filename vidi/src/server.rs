@@ -73,6 +73,7 @@ impl<L> Server<L> {
     /// Sets the graceful shutdown timeout duration.
     ///
     /// Default is 10 seconds.
+    #[must_use]
     pub fn graceful_timeout(mut self, timeout: Duration) -> Self {
         self.graceful_timeout = timeout;
         self
