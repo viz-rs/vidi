@@ -39,6 +39,7 @@ pub struct Server<L, S = Pending<()>> {
     signal: S,
     tree: crate::Tree,
     builder: Builder<TokioExecutor>,
+    graceful_timeout: Duration,
 }
 
 impl<L> Server<L> {
@@ -54,6 +55,7 @@ impl<L> Server<L> {
             builder,
             signal: pending(),
             tree: router.into(),
+            graceful_timeout: Duration::from_secs(10),
         }
     }
 
@@ -64,7 +66,16 @@ impl<L> Server<L> {
             tree: self.tree,
             builder: self.builder,
             listener: self.listener,
+            graceful_timeout: self.graceful_timeout,
         }
+    }
+
+    /// Sets the graceful shutdown timeout duration.
+    ///
+    /// Default is 10 seconds.
+    pub fn graceful_timeout(mut self, timeout: Duration) -> Self {
+        self.graceful_timeout = timeout;
+        self
     }
 }
 
@@ -85,6 +96,7 @@ where
             signal,
             builder,
             listener,
+            graceful_timeout,
         } = self;
 
         Box::pin(async move {
@@ -98,7 +110,9 @@ where
                         let (stream, peer_addr) = match conn {
                             Ok(conn) => conn,
                             Err(err) => {
-                                if !is_connection_error(&err) {
+                                if is_connection_error(&err) {
+                                    tracing::trace!("connection error (ignored): {err}");
+                                } else {
                                     tracing::error!("listener accept error: {err}");
                                     tokio::time::sleep(Duration::from_secs(1)).await;
                                 }
@@ -109,7 +123,6 @@ where
                         tracing::trace!("incoming connection accepted: {:?}", peer_addr);
 
                         let peer_addr = Arc::new(peer_addr);
-
                         let stream = TokioIo::new(Box::pin(stream));
 
                         let responder = Responder::new(tree.clone(), Some(peer_addr.clone()));
@@ -138,8 +151,8 @@ where
                 () = graceful.shutdown() => {
                     tracing::trace!("Gracefully shutdown!");
                 },
-                () = tokio::time::sleep(Duration::from_secs(10)) => {
-                    tracing::error!("Waited 10 seconds for graceful shutdown, aborting...");
+                () = tokio::time::sleep(graceful_timeout) => {
+                    tracing::error!("Waited {} seconds for graceful shutdown, aborting...", graceful_timeout.as_secs());
                 }
             }
 
@@ -148,6 +161,7 @@ where
     }
 }
 
+#[inline]
 fn is_connection_error(e: &io::Error) -> bool {
     matches!(
         e.kind(),

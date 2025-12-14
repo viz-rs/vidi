@@ -57,6 +57,7 @@ impl Params {
     /// # Errors
     ///
     /// Throws a `ParamsError`
+    #[inline]
     pub fn find<T>(&self, name: &str) -> Result<T, ParamsError>
     where
         T: FromStr,
@@ -64,13 +65,7 @@ impl Params {
     {
         self.iter()
             .find(|p| p.0 == name)
-            .ok_or_else(|| {
-                let mut s = String::new();
-                s.push_str("missing ");
-                s.push_str(name);
-                s.push_str(" param");
-                ParamsError::SingleParse(s)
-            })?
+            .ok_or_else(|| ParamsError::SingleParse(format!("missing {name} param")))?
             .1
             .parse()
             .map_err(|e: T::Err| ParamsError::SingleParse(e.to_string()))

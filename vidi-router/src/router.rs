@@ -32,21 +32,18 @@ impl Router {
         Self { routes: None }
     }
 
+    #[inline]
     fn push<S>(routes: &mut Vec<(String, Route)>, path: S, route: Route)
     where
         S: AsRef<str>,
     {
         let path = path.as_ref();
-        match routes
-            .iter_mut()
-            .find_map(|(p, r)| if p == path { Some(r) } else { None })
-        {
-            Some(r) => {
-                *r = route.into_iter().fold(
-                    // original route
-                    r.clone().into_iter().collect(),
-                    |or: Route, (method, handler)| or.on(method, handler),
-                );
+        match routes.iter_mut().find(|(p, _)| p == path) {
+            Some((_, r)) => {
+                // Merge new route handlers into existing route
+                for (method, handler) in route {
+                    *r = r.clone().on(method, handler);
+                }
             }
             None => routes.push((path.to_string(), route)),
         }
@@ -54,6 +51,7 @@ impl Router {
 
     /// Inserts a path-route pair into the router.
     #[must_use]
+    #[inline]
     pub fn route<S>(mut self, path: S, route: Route) -> Self
     where
         S: AsRef<str>,
@@ -72,18 +70,22 @@ impl Router {
     where
         S: AsRef<str>,
     {
-        let mut path = path.as_ref().to_string();
-        if !path.ends_with('/') {
-            path.push('/');
+        let path = path.as_ref();
+        let mut base_path = String::with_capacity(path.len() + 1);
+        base_path.push_str(path);
+        if !base_path.ends_with('/') {
+            base_path.push('/');
         }
 
-        resource.into_iter().fold(self, |router, (mut sp, route)| {
+        resource.into_iter().fold(self, |router, (sp, route)| {
             let is_empty = sp.is_empty();
-            sp = path.clone() + &sp;
+            let mut full_path = String::with_capacity(base_path.len() + sp.len());
+            full_path.push_str(&base_path);
+            full_path.push_str(&sp);
             if is_empty {
-                sp = sp.trim_end_matches('/').to_string();
+                full_path.pop(); // Remove trailing '/'
             }
-            router.route(sp, route)
+            router.route(full_path, route)
         })
     }
 
@@ -94,19 +96,23 @@ impl Router {
     where
         S: AsRef<str>,
     {
-        let mut path = path.as_ref().to_string();
-        if !path.ends_with('/') {
-            path.push('/');
+        let path = path.as_ref();
+        let mut base_path = String::with_capacity(path.len() + 1);
+        base_path.push_str(path);
+        if !base_path.ends_with('/') {
+            base_path.push('/');
         }
 
         match router.routes {
-            Some(routes) => routes.into_iter().fold(self, |router, (mut sp, route)| {
+            Some(routes) => routes.into_iter().fold(self, |router, (sp, route)| {
                 let is_empty = sp.is_empty();
-                sp = path.clone() + &sp;
+                let mut full_path = String::with_capacity(base_path.len() + sp.len());
+                full_path.push_str(&base_path);
+                full_path.push_str(&sp);
                 if is_empty {
-                    sp = sp.trim_end_matches('/').to_string();
+                    full_path.pop(); // Remove trailing '/'
                 }
-                router.route(sp, route)
+                router.route(full_path, route)
             }),
             None => self,
         }
@@ -127,6 +133,7 @@ impl Router {
 
     /// Adds a handler with a path and any HTTP verbs."
     #[must_use]
+    #[inline]
     pub fn any<S, H, O>(self, path: S, handler: H) -> Self
     where
         S: AsRef<str>,
