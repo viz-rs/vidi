@@ -118,9 +118,10 @@ pub trait HandlerExt<I>: Handler<I> {
     where
         Self: Sized,
     {
-        match enable {
-            true => Either::Left(self),
-            false => Either::Right(r),
+        if enable {
+            Either::Left(self)
+        } else {
+            Either::Right(r)
         }
     }
 
