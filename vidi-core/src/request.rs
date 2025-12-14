@@ -182,14 +182,17 @@ pub trait RequestExt: private::Sealed + Sized {
 }
 
 impl RequestExt for Request {
+    #[inline]
     fn schema(&self) -> Option<&http::uri::Scheme> {
         self.uri().scheme()
     }
 
+    #[inline]
     fn path(&self) -> &str {
         self.uri().path()
     }
 
+    #[inline]
     fn query_string(&self) -> Option<&str> {
         self.uri().query()
     }
@@ -203,6 +206,7 @@ impl RequestExt for Request {
             .map_err(PayloadError::UrlDecode)
     }
 
+    #[inline]
     fn header<K, T>(&self, key: K) -> Option<T>
     where
         K: header::AsHeaderName,
@@ -216,6 +220,7 @@ impl RequestExt for Request {
             .and_then(Result::ok)
     }
 
+    #[inline]
     fn header_typed<H>(&self) -> Option<H>
     where
         H: headers::Header,
@@ -223,10 +228,12 @@ impl RequestExt for Request {
         self.headers().typed_get()
     }
 
+    #[inline]
     fn content_length(&self) -> Option<u64> {
         self.header(header::CONTENT_LENGTH)
     }
 
+    #[inline]
     fn content_type(&self) -> Option<mime::Mime> {
         self.header(header::CONTENT_TYPE)
     }
@@ -364,15 +371,18 @@ impl RequestExt for Request {
         self.route_info().params.find(name)
     }
 
+    #[inline]
     fn remote_addr(&self) -> Option<&std::net::SocketAddr> {
         self.extensions().get()
     }
 
     #[cfg(feature = "params")]
+    #[inline]
     fn route_info(&self) -> &Arc<RouteInfo> {
         self.extensions().get().expect("should get current route")
     }
 
+    #[inline]
     fn realip(&self) -> Option<RealIp> {
         RealIp::parse(self)
     }
@@ -427,6 +437,7 @@ pub trait RequestLimitsExt: private::Sealed + Sized {
 
 #[cfg(feature = "limits")]
 impl RequestLimitsExt for Request {
+    #[inline]
     fn limits(&self) -> &Limits {
         self.extensions()
             .get::<Limits>()

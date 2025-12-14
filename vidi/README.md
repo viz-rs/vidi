@@ -78,8 +78,7 @@ async fn main() -> Result<()> {
 }
 ```
 
-More examples can be found
-[here](https://github.com/viz-rs/vidi/tree/main/examples).
+More examples can be found [here](https://github.com/viz-rs/vidi/tree/main/examples).
 
 ## Get started
 
