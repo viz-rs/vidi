@@ -9,4 +9,4 @@ vidi.workspace = true
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
-askama = "0.14"
+askama = "0.15"

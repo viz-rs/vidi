@@ -78,7 +78,7 @@ serde_urlencoded = { workspace = true, optional = true }
 sessions-core = { workspace = true, optional = true }
 
 # CSRF
-getrandom = { version = "0.3", optional = true }
+getrandom = { version = "0.4", optional = true }
 base64 = { version = "0.22", optional = true }
 
 # Compression
