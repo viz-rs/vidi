@@ -244,15 +244,13 @@ where
                 .header(ACCESS_CONTROL_REQUEST_HEADERS)
                 .map_or((true, None), |hs: HeaderValue| {
                     (
-                        hs.to_str()
-                            .map(|hs| {
-                                hs.split(',')
-                                    .map(str::as_bytes)
-                                    .map(HeaderName::from_bytes)
-                                    .filter_map(Result::ok)
-                                    .any(|header| self.config.allow_headers.contains(&header))
-                            })
-                            .unwrap_or(false),
+                        hs.to_str().is_ok_and(|hs| {
+                            hs.split(',')
+                                .map(str::as_bytes)
+                                .map(HeaderName::from_bytes)
+                                .filter_map(Result::ok)
+                                .any(|header| self.config.allow_headers.contains(&header))
+                        }),
                         Some(hs),
                     )
                 });
