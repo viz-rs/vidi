@@ -133,7 +133,7 @@ impl Stream for Body {
 
     #[inline]
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        match match self.get_mut() {
+        let frame = match self.get_mut() {
             Self::Empty => return Poll::Ready(None),
             Self::Full(inner) => Pin::new(inner)
                 .poll_frame(cx)
@@ -145,7 +145,9 @@ impl Stream for Body {
             Self::Incoming(inner) => Pin::new(inner)
                 .poll_frame(cx)
                 .map_err(std::io::Error::other)?,
-        } {
+        };
+
+        match frame {
             Poll::Pending => Poll::Pending,
             Poll::Ready(None) => Poll::Ready(None),
             Poll::Ready(Some(frame)) => Poll::Ready(frame.into_data().map(Ok).ok()),

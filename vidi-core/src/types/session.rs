@@ -107,21 +107,21 @@ impl Session {
     /// Marks the session for renewal.
     pub fn renew(&self) {
         let status = self.status().load(Ordering::Acquire);
-        // not allowed `PURGED & RENEWED`
-        if status != PURGED && status != RENEWED {
-            self.status().store(RENEWED, Ordering::SeqCst);
+        if status == PURGED || status == RENEWED {
+            return;
         }
+        self.status().store(RENEWED, Ordering::SeqCst);
     }
 
     /// Marks the session for purging.
     pub fn purge(&self) {
         let status = self.status().load(Ordering::Acquire);
-        // not allowed `PURGED`
-        if status != PURGED {
-            self.status().store(PURGED, Ordering::SeqCst);
-            if let Ok(mut d) = self.lock_data().write() {
-                d.clear();
-            }
+        if status == PURGED {
+            return;
+        }
+        self.status().store(PURGED, Ordering::SeqCst);
+        if let Ok(mut d) = self.lock_data().write() {
+            d.clear();
         }
     }
 
