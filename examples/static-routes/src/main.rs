@@ -7,9 +7,8 @@ use std::{
 use tokio::net::TcpListener;
 
 use vidi::{
-    Body, Handler, IntoResponse, Io, Request, RequestExt, Response, Result, Router,
-    StatusCode, Tree,
-    types::RouteInfo,
+    Body, Handler, IntoResponse, Io, Request, RequestExt, Response, Result, Router, StatusCode,
+    Tree, types::RouteInfo,
 };
 
 /// Static Lazy Routes
@@ -49,23 +48,21 @@ async fn main() -> Result<()> {
 async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Response, hyper::Error> {
     let method = req.method().clone();
     let path = req.path().to_owned();
-    Ok(
-        match TREE.find_with_head(&method, &path) {
-            Some((handler, route)) => {
-                if addr.is_some() {
-                    req.extensions_mut().insert(addr.take());
-                }
-                req.extensions_mut().insert(Arc::from(RouteInfo::new(
-                    *route.id,
-                    route.pattern(),
-                    route.params(),
-                )));
-                handler
-                    .call(req)
-                    .await
-                    .unwrap_or_else(IntoResponse::into_response)
+    Ok(match TREE.find_with_head(&method, &path) {
+        Some((handler, route)) => {
+            if addr.is_some() {
+                req.extensions_mut().insert(addr.take());
             }
-            None => StatusCode::NOT_FOUND.into_response(),
-        },
-    )
+            req.extensions_mut().insert(Arc::from(RouteInfo::new(
+                *route.id,
+                route.pattern(),
+                route.params(),
+            )));
+            handler
+                .call(req)
+                .await
+                .unwrap_or_else(IntoResponse::into_response)
+        }
+        None => StatusCode::NOT_FOUND.into_response(),
+    })
 }

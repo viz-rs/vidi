@@ -259,10 +259,7 @@ fn serve(path: &Path, headers: &HeaderMap) -> Result<Response> {
 mod tests {
     use super::{Dir, File};
     use std::sync::Arc;
-    use vidi_core::{
-        Handler, IntoResponse, Request, Result, StatusCode,
-        types::RouteInfo,
-    };
+    use vidi_core::{Handler, IntoResponse, Request, Result, StatusCode, types::RouteInfo};
 
     #[tokio::test]
     async fn file() -> Result<()> {

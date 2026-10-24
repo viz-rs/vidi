@@ -1,6 +1,9 @@
 use crate::{Handler, Result};
 
-impl_handler_combinator!(After, "Maps the output `Result<T>` after the handler is called.");
+impl_handler_combinator!(
+    After,
+    "Maps the output `Result<T>` after the handler is called."
+);
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for After<H, F>

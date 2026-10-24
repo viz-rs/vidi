@@ -170,8 +170,7 @@ mod tests {
     use std::sync::Arc;
     use vidi_core::{
         Body, Error, Handler, HandlerExt, IntoResponse, Method, Next, Request, RequestExt,
-        Response, ResponseExt, Result, StatusCode, Transform, async_trait,
-        types::RouteInfo,
+        Response, ResponseExt, Result, StatusCode, Transform, async_trait, types::RouteInfo,
     };
 
     use crate::{Resources, Route, Router, Tree, any, get};
@@ -425,11 +424,7 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        let route_info = Arc::from(RouteInfo::new(
-            *route.id,
-            route.pattern(),
-            route.params(),
-        ));
+        let route_info = Arc::from(RouteInfo::new(*route.id, route.pattern(), route.params()));
         assert_eq!(route.pattern(), "/posts/:post_id/users/:user_id");
         assert_eq!(route_info.pattern, "/posts/:post_id/users/:user_id");
         req.extensions_mut().insert(route_info);

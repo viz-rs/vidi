@@ -1,6 +1,9 @@
 use crate::{Error, Handler, Result};
 
-impl_handler_combinator!(OrElse, "Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.");
+impl_handler_combinator!(
+    OrElse,
+    "Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output."
+);
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for OrElse<H, F>

@@ -1,6 +1,9 @@
 use crate::{Handler, Result};
 
-impl_handler_combinator!(AndThen, "Calls `op` if the output is `Ok`, otherwise returns the `Err` value of the output.");
+impl_handler_combinator!(
+    AndThen,
+    "Calls `op` if the output is `Ok`, otherwise returns the `Err` value of the output."
+);
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for AndThen<H, F>

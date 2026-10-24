@@ -1,6 +1,9 @@
 use crate::{Handler, IntoResponse, Response, Result, future::FutureExt};
 
-impl_handler_combinator!(CatchUnwind, "Catches unwinding panics while calling the handler.");
+impl_handler_combinator!(
+    CatchUnwind,
+    "Catches unwinding panics while calling the handler."
+);
 
 #[crate::async_trait]
 impl<H, F, I, O, R> Handler<I> for CatchUnwind<H, F>

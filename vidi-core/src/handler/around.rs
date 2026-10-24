@@ -3,7 +3,10 @@ use crate::{Handler, Result};
 /// A middleware parameter: a tuple of input and handler.
 pub type Next<I, H> = (I, H);
 
-impl_handler_combinator!(Around, "Wraps around the remaining handler or middleware chain.");
+impl_handler_combinator!(
+    Around,
+    "Wraps around the remaining handler or middleware chain."
+);
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for Around<H, F>

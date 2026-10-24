@@ -5,8 +5,8 @@ use vidi::{
     Method, Request, RequestExt, Result, Router,
     middleware::{
         cookie,
-        csrf::{self, CsrfToken},
         cookies::CookieOptions,
+        csrf::{self, CsrfToken},
     },
     serve,
 };
