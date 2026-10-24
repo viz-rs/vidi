@@ -33,6 +33,7 @@ async fn handler() -> Result<()> {
     impl FromRequest for MyU8 {
         type Error = std::convert::Infallible;
 
+        #[allow(clippy::unused_async_trait_impl)]
         async fn extract(_: &mut Request) -> Result<Self, Self::Error> {
             Ok(Self(u8::MAX))
         }
@@ -43,6 +44,7 @@ async fn handler() -> Result<()> {
     impl FromRequest for MyString {
         type Error = std::convert::Infallible;
 
+        #[allow(clippy::unused_async_trait_impl)]
         async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
             Ok(Self(req.uri().path().to_string()))
         }

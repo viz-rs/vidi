@@ -122,7 +122,7 @@ impl From<hyper::Error> for Error {
 
 impl From<std::convert::Infallible> for Error {
     fn from(e: std::convert::Infallible) -> Self {
-        Self::boxed(e)
+        match e {}
     }
 }
 
