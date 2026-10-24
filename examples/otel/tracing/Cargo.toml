@@ -17,3 +17,5 @@ opentelemetry-otlp = { workspace = true, default-features = false, features = [
     "trace",
     "http-proto",
 ] }
+
+[lints]

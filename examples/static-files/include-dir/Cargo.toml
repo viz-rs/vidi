@@ -10,3 +10,5 @@ http-body-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 include_dir = "0.7"
+
+[lints]

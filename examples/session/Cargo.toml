@@ -11,3 +11,5 @@ tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 sessions = { workspace = true, features = ["memory"] }
 nano-id = "0.4"
+
+[lints]

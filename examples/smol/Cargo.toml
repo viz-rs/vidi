@@ -10,3 +10,5 @@ vidi-smol.workspace = true
 async-net.workspace = true
 smol-macros.workspace = true
 macro_rules_attribute.workspace = true
+
+[lints]

@@ -30,3 +30,5 @@ tokio = { workspace = true, features = ["full"] }
 
 nano-id = "0.4"
 reqwest = { version = "0.13", default-features = false, features = ["cookies", "json", "form", "multipart"] }
+
+[lints]

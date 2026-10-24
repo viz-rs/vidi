@@ -10,3 +10,5 @@ vidi.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 maud = "0.27"
+
+[lints]

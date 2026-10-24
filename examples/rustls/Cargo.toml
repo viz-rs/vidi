@@ -8,3 +8,5 @@ publish = false
 vidi = { workspace = true, features = ["rustls"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[lints]

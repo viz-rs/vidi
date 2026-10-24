@@ -16,3 +16,5 @@ tokio = { workspace = true, features = [
 ] }
 
 tempfile = "3.0"
+
+[lints]

@@ -6,7 +6,6 @@
 #![allow(clippy::unused_async)]
 #![allow(clippy::wildcard_imports)]
 #![allow(dead_code)]
-#![allow(dependency_on_unit_never_type_fallback)]
 #![allow(non_local_definitions)]
 #![allow(unreachable_code)]
 #![allow(unused_variables)]

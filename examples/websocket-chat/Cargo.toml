@@ -9,3 +9,5 @@ vidi = { workspace = true, features = ["websocket"] }
 
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 futures-util.workspace = true
+
+[lints]

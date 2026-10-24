@@ -11,3 +11,5 @@ serde.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 tera = "1.0"
+
+[lints]

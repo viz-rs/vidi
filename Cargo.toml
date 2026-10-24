@@ -54,7 +54,6 @@ vidi-core = { version = "0.1.0", path = "vidi-core" }
 vidi-router = { version = "0.1.0", path = "vidi-router" }
 vidi-handlers = { version = "0.1.0", path = "vidi-handlers", default-features = false }
 vidi-macros = { version = "0.1.0", path = "vidi-macros" }
-vidi-test = { version = "0.1.0", path = "vidi-test" }
 vidi-tower = { version = "0.1.0", path = "vidi-tower" }
 vidi-smol = { version = "0.1.0", path = "vidi-smol" }
 
@@ -74,7 +73,6 @@ path-tree = "0.8"
 # session
 sessions = "0.7"
 sessions-core = "0.7"
-sessions-memory = "0.7"
 
 # http
 headers = "0.4"
@@ -126,9 +124,7 @@ tower = "0.5"
 tower-http = "0.6"
 
 # Soml
-async-channel = "2.5"
 async-executor = "1.14"
-async-io = "2.6"
 async-net = "2.0"
 smol-hyper = "0.1"
 smol-macros = "0.1"
