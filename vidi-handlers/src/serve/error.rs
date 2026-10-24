@@ -1,25 +1,25 @@
 use vidi_core::{IntoResponse, Response, StatusCode, ThisError};
 
-/// Static file serving Error.
+/// Error returned by the static file handler.
 #[derive(Debug, ThisError)]
 pub enum Error {
-    /// Method Not Allowed
+    /// Method not allowed.
     #[error("method not allowed")]
     MethodNotAllowed,
 
-    /// Invalid path
+    /// Invalid path.
     #[error("invalid path")]
     InvalidPath,
 
-    /// Precondition failed
+    /// Precondition failed.
     #[error("precondition failed")]
     PreconditionFailed,
 
-    /// Range could not be satisfied
+    /// Range not satisfiable.
     #[error("range could not be satisfied")]
     RangeUnsatisfied(u64),
 
-    /// Io error
+    /// I/O error.
     #[error("io: {0}")]
     Io(#[from] std::io::Error),
 }

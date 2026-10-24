@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     Handler, IntoResponse, Request, RequestExt, Response, Result, Transform,
-    middleware::helper::{CookieOptions, Cookieable},
+    middleware::cookies::{CookieOptions, Cookieable},
     types::{Cookie, Session},
 };
 
@@ -16,19 +16,19 @@ use super::{PURGED, RENEWED, Storage, Store, UNCHANGED};
 pub struct Config<S, G, V>(Arc<(Store<S, G, V>, CookieOptions)>);
 
 impl<S, G, V> Config<S, G, V> {
-    /// Creates a new configuration with the [`Store`] and [`CookieOptions`].
+    /// Creates a [`Config`] from the [`Store`] and [`CookieOptions`].
     #[must_use]
     pub fn new(store: Store<S, G, V>, cookie: CookieOptions) -> Self {
         Self(Arc::new((store, cookie)))
     }
 
-    /// Gets the store.
+    /// Returns the store.
     #[must_use]
     pub fn store(&self) -> &Store<S, G, V> {
         &self.0.0
     }
 
-    /// Gets the TTL.
+    /// Returns the cookie time-to-live.
     #[must_use]
     pub fn ttl(&self) -> Option<Duration> {
         self.options().max_age

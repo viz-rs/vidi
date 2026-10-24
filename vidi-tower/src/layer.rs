@@ -1,11 +1,11 @@
 use crate::Middleware;
 
-/// Transforms a Tower layer into Vidi Middleware.
+/// Transforms a Tower layer into Vidi middleware.
 #[derive(Debug)]
 pub struct Layered<L>(L);
 
 impl<L> Layered<L> {
-    /// Creates a new tower layer.
+    /// Creates a [`Layered`] transform.
     pub const fn new(l: L) -> Self {
         Self(l)
     }

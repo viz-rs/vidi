@@ -5,7 +5,6 @@ use crate::{
 use headers::HeaderMapExt;
 use http_body_util::{BodyExt, Collected};
 
-#[cfg(any(feature = "params", feature = "multipart"))]
 use std::sync::Arc;
 
 #[cfg(feature = "limits")]
@@ -31,153 +30,142 @@ use crate::types::{Cookie, Cookies, CookiesError};
 #[cfg(feature = "session")]
 use crate::types::Session;
 
+use crate::types::RouteInfo;
+
 #[cfg(feature = "params")]
-use crate::types::{ParamsError, PathDeserializer, RouteInfo};
+use crate::types::{ParamsError, PathDeserializer};
 
 /// The [`Request`] Extension.
 pub trait RequestExt: private::Sealed + Sized {
-    /// Get URL's schema of this request.
+    /// Returns the URL scheme.
     fn schema(&self) -> Option<&http::uri::Scheme>;
 
-    /// Get URL's path of this request.
+    /// Returns the URL path.
     fn path(&self) -> &str;
 
-    /// Get URL's query string of this request.
+    /// Returns the URL query string.
     fn query_string(&self) -> Option<&str>;
 
-    /// Get query data by type.
+    /// Deserializes the query string.
     ///
     /// # Errors
     ///
-    /// Will return [`PayloadError::UrlDecode`] if decoding the query string fails.
+    /// Returns [`PayloadError::UrlDecode`] if decoding the query string fails.
     #[cfg(feature = "query")]
     fn query<T>(&self) -> Result<T, PayloadError>
     where
         T: serde::de::DeserializeOwned;
 
-    /// Get a header with the key.
+    /// Returns a header parsed from the given key.
     fn header<K, T>(&self, key: K) -> Option<T>
     where
         K: header::AsHeaderName,
         T: std::str::FromStr;
 
-    /// Get a header with the specified type.
+    /// Returns a typed header.
     fn header_typed<H>(&self) -> Option<H>
     where
         H: headers::Header;
 
-    /// Get the size of this request's body.
+    /// Returns the body size.
     fn content_length(&self) -> Option<u64>;
 
-    /// Get the media type of this request.
+    /// Returns the media type.
     fn content_type(&self) -> Option<mime::Mime>;
 
-    /// Extract the data from this request by the specified type.
+    /// Extracts a value of type `T` from the request.
     fn extract<T>(&mut self) -> impl Future<Output = Result<T, T::Error>> + Send
     where
         T: FromRequest;
 
-    /// Get an incoming body.
+    /// Takes the request body.
     ///
     /// # Errors
     ///
-    /// Will return [`PayloadError::Empty`] or [`PayloadError::Used`] if the incoming does not
-    /// exist or be used.
+    /// Returns [`PayloadError::Empty`] or [`PayloadError::Used`] if the body is empty or has
+    /// already been read.
     fn incoming(&mut self) -> Result<Body, PayloadError>;
 
-    /// Return with a [Bytes][mdn] representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/arrayBuffer>
+    /// Returns the request body as bytes.
     fn bytes(&mut self) -> impl Future<Output = Result<Bytes, PayloadError>> + Send;
 
-    /// Return with a [Text][mdn] representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/text>
+    /// Returns the request body as text.
     fn text(&mut self) -> impl Future<Output = Result<String, PayloadError>> + Send;
 
-    /// Return with a `application/x-www-form-urlencoded` [FormData][mdn] by the specified type
-    /// representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
+    /// Deserializes the form request body.
     #[cfg(feature = "form")]
     fn form<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
-    /// Return with a [JSON][mdn] by the specified type representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/json>
+    /// Deserializes the JSON request body.
     #[cfg(feature = "json")]
     fn json<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
-    /// Return with a `multipart/form-data` [FormData][mdn] by the specified type
-    /// representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
+    /// Extracts the multipart request body.
     #[cfg(feature = "multipart")]
     fn multipart(&mut self) -> impl Future<Output = Result<Multipart, PayloadError>> + Send;
 
-    /// Return a shared state by the specified type.
+    /// Returns shared state of type `T`.
     #[cfg(feature = "state")]
     fn state<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
 
-    /// Store a shared state.
+    /// Stores shared state of type `T`.
     #[cfg(feature = "state")]
     fn set_state<T>(&mut self, t: T) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
 
-    /// Get a wrapper of `cookie-jar` for managing cookies.
+    /// Returns the cookie jar.
     ///
     /// # Errors
     ///
-    /// Will return [`CookiesError`] if getting cookies fails.
+    /// Returns [`CookiesError`] if reading cookies fails.
     #[cfg(feature = "cookie")]
     fn cookies(&self) -> Result<Cookies, CookiesError>;
 
-    /// Get a cookie by the specified name.
+    /// Returns a cookie by name.
     #[cfg(feature = "cookie")]
     fn cookie<S>(&self, name: S) -> Option<Cookie<'_>>
     where
         S: AsRef<str>;
 
-    /// Get current session.
+    /// Returns the current session.
     #[cfg(feature = "session")]
     fn session(&self) -> &Session;
 
-    /// Get all parameters.
+    /// Deserializes the route params.
     ///
     /// # Errors
     ///
-    /// Will return [`ParamsError`] if deserializer the parameters fails.
+    /// Returns [`ParamsError`] if deserializing the params fails.
     #[cfg(feature = "params")]
     fn params<T>(&self) -> Result<T, ParamsError>
     where
         T: serde::de::DeserializeOwned;
 
-    /// Get single parameter by name.
+    /// Parses a route param by name.
     ///
     /// # Errors
     ///
-    /// Will return [`ParamsError`] if deserializer the single parameter fails.
+    /// Returns [`ParamsError`] if parsing the param fails.
     #[cfg(feature = "params")]
     fn param<T>(&self, name: &str) -> Result<T, ParamsError>
     where
         T: std::str::FromStr,
         T::Err: std::fmt::Display;
 
-    /// Get current route.
-    #[cfg(feature = "params")]
+    /// Returns the current route.
     fn route_info(&self) -> &Arc<RouteInfo>;
 
-    /// Get remote addr.
+    /// Returns the remote address.
     fn remote_addr(&self) -> Option<&std::net::SocketAddr>;
 
-    /// Get realip.
+    /// Returns the resolved real IP.
     fn realip(&self) -> Option<RealIp>;
 }
 
@@ -306,6 +294,7 @@ impl RequestExt for Request {
     }
 
     #[cfg(feature = "multipart")]
+    #[allow(clippy::unused_async_trait_impl)]
     async fn multipart(&mut self) -> Result<Multipart, PayloadError> {
         let m = <Multipart as Payload>::check_type(self.content_type())?;
 
@@ -368,7 +357,14 @@ impl RequestExt for Request {
         T: std::str::FromStr,
         T::Err: std::fmt::Display,
     {
-        self.route_info().params.find(name)
+        self.route_info()
+            .params
+            .iter()
+            .find(|p| p.0 == name)
+            .ok_or_else(|| ParamsError::SingleParse(format!("missing {name} param")))?
+            .1
+            .parse()
+            .map_err(|e: T::Err| ParamsError::SingleParse(e.to_string()))
     }
 
     #[inline]
@@ -376,7 +372,6 @@ impl RequestExt for Request {
         self.extensions().get()
     }
 
-    #[cfg(feature = "params")]
     #[inline]
     fn route_info(&self) -> &Arc<RouteInfo> {
         self.extensions().get().expect("should get current route")
@@ -388,47 +383,35 @@ impl RequestExt for Request {
     }
 }
 
-/// The [`Request`] Extension with a limited body.
+/// Extension for requests with body limits.
 #[cfg(feature = "limits")]
 pub trait RequestLimitsExt: private::Sealed + Sized {
-    /// Get limits settings.
+    /// Returns the limits.
     fn limits(&self) -> &Limits;
 
-    /// Return with a [Bytes][mdn] by a limit representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/arrayBuffer>
+    /// Returns the request body as bytes, limited.
     fn bytes_with(
         &mut self,
         limit: Option<u64>,
         max: u64,
     ) -> impl Future<Output = Result<Bytes, PayloadError>> + Send;
 
-    /// Return with a limited [Text][mdn] representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/text>
+    /// Returns the request body as text, limited.
     fn text_with_limit(&mut self) -> impl Future<Output = Result<String, PayloadError>> + Send;
 
-    /// Return with a limited `application/x-www-form-urlencoded` [FormData][mdn] by the specified type
-    /// representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
+    /// Deserializes the form request body, limited.
     #[cfg(feature = "form")]
     fn form_with_limit<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
-    /// Return with a limited [JSON][mdn] by the specified type representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/json>
+    /// Deserializes the JSON request body, limited.
     #[cfg(feature = "json")]
     fn json_with_limit<T>(&mut self) -> impl Future<Output = Result<T, PayloadError>> + Send
     where
         T: serde::de::DeserializeOwned;
 
-    /// Return with a limited `multipart/form-data` [FormData][mdn] by the specified type
-    /// representation of the request body.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/FormData>
+    /// Extracts the multipart request body, limited.
     #[cfg(feature = "multipart")]
     fn multipart_with_limit(
         &mut self,
@@ -493,6 +476,7 @@ impl RequestLimitsExt for Request {
     }
 
     #[cfg(feature = "multipart")]
+    #[allow(clippy::unused_async_trait_impl)]
     async fn multipart_with_limit(&mut self) -> Result<Multipart, PayloadError> {
         let limit = self.limits().get(<Multipart as Payload>::NAME);
         let m = <Multipart as Payload>::check_header(

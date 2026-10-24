@@ -10,18 +10,18 @@ use crate::{
     header::{FORWARDED, HeaderValue},
 };
 
-/// Gets real ip remote addr from request headers.
+/// Resolves the real client IP from request headers.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct RealIp(pub IpAddr);
 
 impl RealIp {
-    /// X-Real-IP header.
+    /// The `X-Real-IP` header name.
     pub const X_REAL_IP: &'static str = "x-real-ip";
 
-    /// X-Forwarded-For header.
+    /// The `X-Forwarded-For` header name.
     pub const X_FORWARDED_FOR: &'static str = "x-forwarded-for";
 
-    /// Parse the headers.
+    /// Resolves the real IP from the request.
     pub fn parse(req: &Request) -> Option<Self> {
         req.headers()
             .get(Self::X_REAL_IP)

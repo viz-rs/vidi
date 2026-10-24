@@ -1,4 +1,4 @@
-//! CORS Middleware.
+//! CORS middleware.
 
 use std::{collections::HashSet, fmt, sync::Arc};
 
@@ -27,13 +27,13 @@ pub struct Config {
 }
 
 impl Config {
-    /// Create a new [`Config`] with default values.
+    /// Creates a [`Config`] with default values.
     #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Seconds a preflight request can be cached. [MDN]
+    /// Sets the `Access-Control-Max-Age` value. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age
     #[must_use]
@@ -42,7 +42,7 @@ impl Config {
         self
     }
 
-    /// Whether to allow credentials. [MDN]
+    /// Sets whether credentials are allowed. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
     #[must_use]
@@ -51,7 +51,7 @@ impl Config {
         self
     }
 
-    /// Allowed HTTP methods. [MDN]
+    /// Sets the allowed HTTP methods. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
     #[must_use]
@@ -68,7 +68,7 @@ impl Config {
         self
     }
 
-    /// Allowed HTTP headers. [MDN]
+    /// Sets the allowed HTTP headers. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
     #[must_use]
@@ -85,7 +85,7 @@ impl Config {
         self
     }
 
-    /// Allowed origins. [MDN]
+    /// Sets the allowed origins. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
     #[must_use]
@@ -102,7 +102,7 @@ impl Config {
         self
     }
 
-    /// Exposed HTTP headers. [MDN]
+    /// Sets the exposed HTTP headers. [MDN]
     ///
     /// [MDN]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
     #[must_use]
@@ -119,7 +119,7 @@ impl Config {
         self
     }
 
-    /// A function to verify the origin. If the function returns false, the request will be rejected.
+    /// Sets a function that verifies the origin; rejected origins return `403`.
     #[must_use]
     pub fn origin_verify(
         mut self,

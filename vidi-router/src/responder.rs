@@ -1,6 +1,11 @@
 use std::{convert::Infallible, future::Future, pin::Pin, sync::Arc};
 
-use crate::{Body, Handler, Incoming, IntoResponse, Method, Request, Response, StatusCode, Tree};
+use hyper::service::Service;
+use vidi_core::{
+    Body, Handler, Incoming, IntoResponse, Request, Response, StatusCode, types::RouteInfo,
+};
+
+use crate::Tree;
 
 /// Handles the HTTP [`Request`] and returns the HTTP [`Response`].
 #[derive(Debug)]
@@ -13,14 +18,14 @@ impl<A> Responder<A>
 where
     A: Clone + Send + Sync + 'static,
 {
-    /// Creates a Responder for handling the [`Request`].
+    /// Creates a [`Responder`].
     #[must_use]
     pub fn new(tree: Arc<Tree>, remote_addr: Option<A>) -> Self {
         Self { tree, remote_addr }
     }
 }
 
-impl<A> hyper::service::Service<Request<Incoming>> for Responder<A>
+impl<A> Service<Request<Incoming>> for Responder<A>
 where
     A: Clone + Send + Sync + 'static,
 {
@@ -32,32 +37,26 @@ where
         let method = req.method().clone();
         let path = req.uri().path().to_owned();
 
-        let Some((handler, route)) = self.tree.find(&method, &path).or_else(|| {
-            if method == Method::HEAD {
-                self.tree.find(&Method::GET, &path)
-            } else {
-                None
-            }
-        }) else {
+        let Some((handler, route)) = self.tree.find_with_head(&method, &path) else {
             return Box::pin(async move { Ok(StatusCode::NOT_FOUND.into_response()) });
         };
 
         let extensions = req.extensions_mut();
 
         extensions.insert(self.remote_addr.clone());
-        extensions.insert(Arc::from(crate::types::RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: route.params().into(),
-        }));
+        extensions.insert(Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        )));
 
         let handler = handler.clone();
 
         Box::pin(async move {
-            handler
+            Ok(handler
                 .call(req.map(Body::Incoming))
                 .await
-                .or_else(|e| Ok(e.into_response()))
+                .unwrap_or_else(IntoResponse::into_response))
         })
     }
 }

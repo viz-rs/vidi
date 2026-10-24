@@ -1,6 +1,6 @@
-//! Macros for Vidi Web Framework
+//! Proc macros for Vidi.
 //!
-//! Generators for handler
+//! Generates handlers from functions.
 //!
 //! # handler
 //!
@@ -36,7 +36,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{FnArg, ItemFn, Result, ReturnType};
 
-/// Transforms `extract-handler` to a Handler instance.
+/// Transforms a function into a `Handler`.
 #[proc_macro_attribute]
 pub fn handler(_args: TokenStream, input: TokenStream) -> TokenStream {
     generate_handler(input).unwrap_or_else(|e| e.to_compile_error().into())

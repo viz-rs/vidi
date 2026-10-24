@@ -1,6 +1,6 @@
 use crate::{Error, IntoResponse, Response, StatusCode, ThisError};
 
-/// Rejects with an error when [`WebSocket`][super::WebSocket] extraction fails.
+/// Error returned when [`WebSocket`][super::WebSocket] extraction fails.
 #[derive(Debug, ThisError)]
 pub enum WebSocketError {
     /// Missing `Connection` upgrade header.
@@ -35,7 +35,7 @@ pub enum WebSocketError {
     #[error("request upgrade required")]
     ConnectionNotUpgradable,
 
-    /// Transparents [`tokio_tungstenite::tungstenite::Error`].
+    /// Transparent wrapper for [`tokio_tungstenite::tungstenite::Error`].
     #[error(transparent)]
     TungsteniteError(#[from] tokio_tungstenite::tungstenite::Error),
 }
@@ -60,8 +60,4 @@ impl IntoResponse for WebSocketError {
     }
 }
 
-impl From<WebSocketError> for Error {
-    fn from(e: WebSocketError) -> Self {
-        e.into_error()
-    }
-}
+impl_from_error!(WebSocketError);

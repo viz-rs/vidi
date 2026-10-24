@@ -19,7 +19,7 @@ mod unix;
 // #[cfg(any(feature = "native-tls", feature = "rustls"))]
 // pub mod tls;
 
-/// Serve a server with smol's networking types.
+/// Serves connections using smol networking types.
 #[allow(clippy::missing_errors_doc)]
 pub async fn serve<L>(executor: &Arc<Executor<'_>>, listener: L, router: Router) -> io::Result<()>
 where
@@ -34,7 +34,7 @@ where
         let (stream, remote_addr) = match listener.accept().await {
             Ok(conn) => conn,
             Err(e) => {
-                if !is_connection_error(&e) {
+                if !crate::is_connection_error(&e) {
                     // [From `hyper::Server` in 0.14](https://github.com/hyperium/hyper/blob/v0.14.27/src/server/tcp.rs#L186)
                     tracing::error!("listener accept error: {e}");
                     SmolTimer::new()
@@ -68,13 +68,4 @@ where
         // Detach the task and let it run forever.
         task.detach();
     }
-}
-
-fn is_connection_error(e: &io::Error) -> bool {
-    matches!(
-        e.kind(),
-        io::ErrorKind::ConnectionRefused
-            | io::ErrorKind::ConnectionAborted
-            | io::ErrorKind::ConnectionReset
-    )
 }

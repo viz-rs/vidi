@@ -24,18 +24,18 @@ mod error;
 use directory::Directory;
 pub use error::Error;
 
-/// Serve a single file.
+/// Serves a single file.
 #[derive(Clone, Debug)]
 pub struct File {
     path: PathBuf,
 }
 
 impl File {
-    /// Serve a new file by the specified path.
+    /// Serves the file at the given path.
     ///
     /// # Panics
     ///
-    /// If the path is not exists.
+    /// Panics if the path does not exist.
     #[must_use]
     pub fn new(path: impl Into<PathBuf>) -> Self {
         let path = path.into();
@@ -55,7 +55,7 @@ impl Handler<Request> for File {
     }
 }
 
-/// Serve a directory.
+/// Serves a directory.
 #[derive(Clone, Debug)]
 pub struct Dir {
     path: PathBuf,
@@ -64,11 +64,11 @@ pub struct Dir {
 }
 
 impl Dir {
-    /// Serve a new directory by the specified path.
+    /// Serves the directory at the given path.
     ///
     /// # Panics
     ///
-    /// If the path is not exists.
+    /// Panics if the path does not exist.
     #[must_use]
     pub fn new(path: impl Into<PathBuf>) -> Self {
         let path = path.into();
@@ -82,14 +82,14 @@ impl Dir {
         }
     }
 
-    /// Enable directory listing, `disabled` by default.
+    /// Enables directory listing (disabled by default).
     #[must_use]
     pub const fn listing(mut self) -> Self {
         self.listing = true;
         self
     }
 
-    /// Exclude paths from the directory listing.
+    /// Excludes the given names from the directory listing.
     #[must_use]
     pub fn unlisted(mut self, unlisted: Vec<&'static str>) -> Self {
         self.unlisted.replace(unlisted);
@@ -261,7 +261,7 @@ mod tests {
     use std::sync::Arc;
     use vidi_core::{
         Handler, IntoResponse, Request, Result, StatusCode,
-        types::{Params, RouteInfo},
+        types::RouteInfo,
     };
 
     #[tokio::test]
@@ -269,11 +269,11 @@ mod tests {
         let serve = File::new("src/serve.rs");
 
         let mut req: Request = Request::default();
-        req.extensions_mut().insert(Arc::new(RouteInfo {
-            id: 2,
-            pattern: "/*".to_string(),
-            params: Into::<Params>::into(vec![("*1", "serve.rs")]),
-        }));
+        req.extensions_mut().insert(Arc::new(RouteInfo::new(
+            2,
+            "/*".to_string(),
+            vec![("*1", "serve.rs")],
+        )));
         *req.uri_mut() = "/serve.rs".parse().unwrap();
 
         let result = serve.call(req).await;
@@ -281,11 +281,11 @@ mod tests {
         assert_eq!(result.unwrap().status(), StatusCode::OK);
 
         let mut req: Request = Request::default();
-        req.extensions_mut().insert(Arc::new(RouteInfo {
-            id: 2,
-            pattern: "/*".to_string(),
-            params: Into::<Params>::into(vec![("*1", "serve")]),
-        }));
+        req.extensions_mut().insert(Arc::new(RouteInfo::new(
+            2,
+            "/*".to_string(),
+            vec![("*1", "serve")],
+        )));
         *req.uri_mut() = "/serve".parse().unwrap();
 
         let result = serve.call(req).await;
@@ -300,11 +300,11 @@ mod tests {
         let serve = Dir::new("src/serve");
 
         let mut req: Request = Request::default();
-        req.extensions_mut().insert(Arc::new(RouteInfo {
-            id: 2,
-            pattern: "/*".to_string(),
-            params: Into::<Params>::into(vec![("*1", "list.tpl")]),
-        }));
+        req.extensions_mut().insert(Arc::new(RouteInfo::new(
+            2,
+            "/*".to_string(),
+            vec![("*1", "list.tpl")],
+        )));
         *req.uri_mut() = "/list.tpl".parse().unwrap();
 
         let result = serve.call(req).await;
@@ -312,11 +312,11 @@ mod tests {
         assert_eq!(result.unwrap().status(), StatusCode::OK);
 
         let mut req: Request = Request::default();
-        req.extensions_mut().insert(Arc::new(RouteInfo {
-            id: 2,
-            pattern: "/*".to_string(),
-            params: Into::<Params>::into(vec![("*1", "list")]),
-        }));
+        req.extensions_mut().insert(Arc::new(RouteInfo::new(
+            2,
+            "/*".to_string(),
+            vec![("*1", "list")],
+        )));
         *req.uri_mut() = "/list".parse().unwrap();
 
         let result = serve.call(req).await.map_err(IntoResponse::into_response);

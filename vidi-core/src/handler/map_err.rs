@@ -1,19 +1,6 @@
 use crate::{Error, Handler, Result};
 
-/// Maps the `Err` value of the output if after the handler called.
-#[derive(Clone, Debug)]
-pub struct MapErr<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> MapErr<H, F> {
-    /// Creates a [`MapErr`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(MapErr, "Maps the `Err` value of the handler's output.");
 
 #[crate::async_trait]
 impl<H, F, I, O, E> Handler<I> for MapErr<H, F>

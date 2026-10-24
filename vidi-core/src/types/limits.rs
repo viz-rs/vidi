@@ -11,7 +11,7 @@ use super::Json;
 #[cfg(any(feature = "form", feature = "json"))]
 use super::Payload;
 
-/// Extracts the limits settings.
+/// Extracts the limits configuration.
 #[derive(Clone, Debug)]
 pub struct Limits {
     inner: Arc<Vec<(&'static str, u64)>>,
@@ -35,10 +35,10 @@ impl Default for Limits {
 }
 
 impl Limits {
-    /// By default 1024 * 8 = 8KB.
+    /// The default limit: 8 KB.
     pub const NORMAL: u64 = 1024 * 8;
 
-    /// Creates a new Limits.
+    /// Creates [`Limits`] with no entries.
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -46,14 +46,14 @@ impl Limits {
         }
     }
 
-    /// Sorts the limits for binary search.
+    /// Sorts the limits by name.
     #[must_use]
     pub fn sort(mut self) -> Self {
         Arc::make_mut(&mut self.inner).sort_by_key(|a| a.0);
         self
     }
 
-    /// Sets a name-limit pair into the Limits.
+    /// Sets the limit for the given name.
     #[must_use]
     pub fn set(mut self, name: &'static str, limit: u64) -> Self {
         if let Some(val) = self
@@ -69,7 +69,7 @@ impl Limits {
         self
     }
 
-    /// Returns a limit value by the name.
+    /// Returns the limit for the given name.
     pub fn get<S>(&self, name: S) -> Option<u64>
     where
         S: AsRef<str>,
@@ -84,6 +84,7 @@ impl Limits {
 impl FromRequest for Limits {
     type Error = Infallible;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         Ok(req.limits().clone())
     }

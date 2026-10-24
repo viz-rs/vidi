@@ -9,7 +9,7 @@ use vidi_core::{
 
 macro_rules! export_internal_verb {
     ($name:ident $verb:tt) => {
-        #[doc = concat!(" Appends a handler buy the HTTP `", stringify!($verb), "` verb into the route.")]
+        #[doc = concat!(" Appends a `", stringify!($verb), "` handler to the route.")]
         #[must_use]
         pub fn $name<H, O>(self, handler: H) -> Self
         where
@@ -23,7 +23,7 @@ macro_rules! export_internal_verb {
 
 macro_rules! export_verb {
     ($name:ident $verb:ty) => {
-        #[doc = concat!(" Creates a route with a handler and HTTP `", stringify!($verb), "` verb pair.")]
+        #[doc = concat!(" Creates a route with a `", stringify!($verb), "` handler.")]
         #[must_use]
         pub fn $name<H, O>(handler: H) -> Route
         where
@@ -35,14 +35,14 @@ macro_rules! export_verb {
     };
 }
 
-/// A collection of verb-handler pair.
+/// A collection of verb-handler pairs.
 #[derive(Clone, Default)]
 pub struct Route {
     pub(crate) methods: Vec<(Method, BoxHandler)>,
 }
 
 impl Route {
-    /// Creates a new route.
+    /// Creates a [`Route`].
     #[must_use]
     pub const fn new() -> Self {
         Self {
@@ -50,7 +50,7 @@ impl Route {
         }
     }
 
-    /// Appends a HTTP verb and handler pair into the route.
+    /// Appends a verb-handler pair.
     #[must_use]
     pub fn push(mut self, method: Method, handler: BoxHandler) -> Self {
         match self
@@ -66,7 +66,16 @@ impl Route {
         self
     }
 
-    /// Appends a handler by the specified HTTP verb into the route.
+    /// Merges the handlers of `other` into this route, overwriting any matching verbs.
+    #[must_use]
+    pub fn merge(mut self, other: Self) -> Self {
+        for (method, handler) in other {
+            self = self.push(method, handler);
+        }
+        self
+    }
+
+    /// Appends a handler for the given HTTP verb.
     #[must_use]
     pub fn on<H, O>(self, method: Method, handler: H) -> Self
     where
@@ -76,7 +85,7 @@ impl Route {
         self.push(method, handler.map_into_response().boxed())
     }
 
-    /// Appends a handler by any HTTP verbs into the route.
+    /// Appends a handler for all HTTP verbs.
     #[must_use]
     pub fn any<H, O>(self, handler: H) -> Self
     where
@@ -111,7 +120,7 @@ impl Route {
         trace TRACE
     );
 
-    /// Takes a closure and creates an iterator which calls that closure on each handler.
+    /// Maps each handler with the given closure.
     #[must_use]
     pub fn map_handler<F>(self, f: F) -> Self
     where
@@ -122,7 +131,7 @@ impl Route {
             .collect()
     }
 
-    /// Transforms the types to a middleware and adds it.
+    /// Wraps each handler with the given [`Transform`].
     #[must_use]
     pub fn with<T>(self, t: T) -> Self
     where
@@ -132,7 +141,7 @@ impl Route {
         self.map_handler(|handler| t.transform(handler).boxed())
     }
 
-    /// Adds a middleware for the routes.
+    /// Wraps each handler with the middleware.
     #[must_use]
     pub fn with_handler<H>(self, f: H) -> Self
     where
@@ -163,7 +172,7 @@ impl FromIterator<(Method, BoxHandler)> for Route {
     }
 }
 
-/// Creates a route with a handler and HTTP verb pair.
+/// Creates a route with a verb-handler pair.
 pub fn on<H, O>(method: Method, handler: H) -> Route
 where
     H: Handler<Request, Output = Result<O>> + Clone,
@@ -185,7 +194,7 @@ repeat!(
     trace TRACE
 );
 
-/// Creates a route with a handler and any HTTP verbs.
+/// Creates a route with a handler for all HTTP verbs.
 pub fn any<H, O>(handler: H) -> Route
 where
     H: Handler<Request, Output = Result<O>> + Clone,

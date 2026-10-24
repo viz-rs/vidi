@@ -7,7 +7,7 @@ use crate::{Error, Result};
 
 pub use tokio_native_tls::{TlsAcceptor, native_tls::Identity};
 
-/// `native-tls`'s config.
+/// Configuration for `native-tls`.
 pub struct Config {
     identity: Identity,
 }
@@ -19,17 +19,17 @@ impl fmt::Debug for Config {
 }
 
 impl Config {
-    /// Creates a new config with the specified [`Identity`].
+    /// Creates a config with the given [`Identity`].
     #[must_use]
     pub fn new(identity: Identity) -> Self {
         Self { identity }
     }
 
-    /// Creates a new [`TlsAcceptor`] wrapper with the specified [`Identity`].
+    /// Builds a [`TlsAcceptor`] from the given [`Identity`].
     ///
     /// # Errors
     ///
-    /// Will return `Err` if wrapping the identity fails.
+    /// Returns an error if the identity cannot be used.
     pub fn build(self) -> Result<TlsAcceptor> {
         TlsAcceptorWrapper::new(self.identity)
             .map(Into::into)

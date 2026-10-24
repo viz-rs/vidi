@@ -1,4 +1,4 @@
-//! Cookie Middleware.
+//! Cookie middleware.
 
 use std::fmt;
 
@@ -11,14 +11,14 @@ use crate::{
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
 use crate::types::CookieKey;
 
-/// A configure for [`CookieMiddleware`].
+/// A configuration for [`CookieMiddleware`].
 pub struct Config {
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     key: std::sync::Arc<CookieKey>,
 }
 
 impl Config {
-    /// Creates a new config with the [`Key`][CookieKey].
+    /// Creates a config with the given key.
     #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
     #[must_use]
     pub fn with_key(key: CookieKey) -> Self {
@@ -42,7 +42,7 @@ impl fmt::Debug for Config {
         let mut d = f.debug_struct("CookieConfig");
 
         #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
-        d.field("key", &[..]);
+        d.field("key", &std::ops::RangeFull);
 
         d.finish()
     }
@@ -76,7 +76,7 @@ impl<H> fmt::Debug for CookieMiddleware<H> {
         let mut d = f.debug_struct("CookieMiddleware");
 
         #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
-        d.field("key", &[..]);
+        d.field("key", &std::ops::RangeFull);
 
         d.finish()
     }

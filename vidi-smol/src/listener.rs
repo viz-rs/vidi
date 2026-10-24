@@ -1,8 +1,8 @@
 /// A trait for a listener: `TcpListener` and `UnixListener`.
 pub trait Listener {
-    /// The stream's type of this listener.
+    /// The type of the accepted stream.
     type Io;
-    /// The socket address type of this listener.
+    /// The type of the local address.
     type Addr;
 
     /// Accepts a new incoming connection from this listener.
@@ -14,7 +14,6 @@ pub trait Listener {
     ///
     /// # Errors
     ///
-    /// An error will return if got the socket address of the local half of this connection is
-    /// failed.
+    /// Returns an error if the local address cannot be resolved.
     fn local_addr(&self) -> std::io::Result<Self::Addr>;
 }

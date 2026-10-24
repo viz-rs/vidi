@@ -14,11 +14,11 @@ use crate::{BoxError, Error, HttpBody, Result};
 /// A body state.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BodyState {
-    /// The body is inited.
+    /// The body is ready to be read.
     Normal,
     /// The body is empty.
     Empty,
-    /// The body has ben used.
+    /// The body has already been read.
     Used,
 }
 

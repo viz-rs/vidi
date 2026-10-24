@@ -1,4 +1,4 @@
-//! Limits Middleware.
+//! Limits middleware.
 
 #[cfg(feature = "multipart")]
 use std::sync::Arc;
@@ -14,20 +14,20 @@ pub struct Config {
 }
 
 impl Config {
-    /// Creates a new Config.
+    /// Creates a [`Config`].
     #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Sets a limits for the Text/Bytes/Form.
+    /// Sets the limits for text, bytes, and form payloads.
     #[must_use]
     pub fn limits(mut self, limits: types::Limits) -> Self {
         self.limits = limits.sort();
         self
     }
 
-    /// Sets a limits for the Multipart Form.
+    /// Sets the limits for multipart forms.
     #[cfg(feature = "multipart")]
     #[must_use]
     pub fn multipart(mut self, limits: types::MultipartLimits) -> Self {

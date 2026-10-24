@@ -1,4 +1,4 @@
-//! Compression Middleware.
+//! Compression middleware.
 
 use std::str::FromStr;
 
@@ -10,7 +10,7 @@ use crate::{
     header::{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_LENGTH, HeaderValue},
 };
 
-/// Compress response body.
+/// Compresses response bodies.
 #[derive(Debug)]
 pub struct Config;
 
@@ -65,7 +65,7 @@ pub struct Compress<T> {
 }
 
 impl<T> Compress<T> {
-    /// Creates a compressed response with the specified algorithm.
+    /// Creates a [`Compress`] response.
     pub const fn new(inner: T, algo: ContentCoding) -> Self {
         Self { inner, algo }
     }
@@ -97,9 +97,7 @@ impl<T: IntoResponse> IntoResponse for Compress<T> {
     }
 }
 
-/// [`ContentCoding`]
-///
-/// [`ContentCoding`]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding
+/// An `Accept-Encoding` content-coding algorithm.
 #[derive(Debug, Eq, PartialEq)]
 pub enum ContentCoding {
     /// gzip

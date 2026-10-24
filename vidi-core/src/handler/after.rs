@@ -1,19 +1,6 @@
 use crate::{Handler, Result};
 
-/// Maps the output `Result<T>` after the handler called.
-#[derive(Clone, Debug)]
-pub struct After<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> After<H, F> {
-    /// Creates an [`After`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(After, "Maps the output `Result<T>` after the handler is called.");
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for After<H, F>

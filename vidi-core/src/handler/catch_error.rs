@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::{Handler, IntoResponse, Response, Result};
 
-/// Catches rejected error while calling the handler.
+/// Catches an error while calling the handler.
 #[derive(Debug)]
 pub struct CatchError<H, F, E, R> {
     h: H,
@@ -25,7 +25,7 @@ where
 }
 
 impl<H, F, E, R> CatchError<H, F, E, R> {
-    /// Creates a [`CatchError`] handler.
+    /// Creates a [`CatchError`].
     #[inline]
     pub fn new(h: H, f: F) -> Self {
         Self {

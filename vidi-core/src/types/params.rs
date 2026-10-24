@@ -21,25 +21,7 @@ pub(crate) use de::PathDeserializer;
 #[derive(Clone, Debug)]
 pub struct Params<T = Vec<(String, String)>>(pub T);
 
-impl<T> AsRef<T> for Params<T> {
-    fn as_ref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> Deref for Params<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> DerefMut for Params<T> {
-    fn deref_mut(&mut self) -> &mut T {
-        &mut self.0
-    }
-}
+impl_deref!(Params);
 
 impl From<Vec<(&str, &str)>> for Params {
     fn from(v: Vec<(&str, &str)>) -> Self {
@@ -52,11 +34,11 @@ impl From<Vec<(&str, &str)>> for Params {
 }
 
 impl Params {
-    /// Gets single parameter by name.
+    /// Returns a single parameter by name.
     ///
     /// # Errors
     ///
-    /// Throws a `ParamsError`
+    /// Returns a [`ParamsError`] if the parameter is missing or cannot be parsed.
     #[inline]
     pub fn find<T>(&self, name: &str) -> Result<T, ParamsError>
     where
@@ -78,6 +60,7 @@ where
 {
     type Error = ParamsError;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         req.params().map(Params)
     }
@@ -86,25 +69,15 @@ where
 /// Rejects a parsing error.
 #[derive(Debug, ThisError)]
 pub enum ParamsError {
-    /// Represents parsing single param was failed.
+    /// Failed to parse a single param.
     #[error("{}", .0)]
     SingleParse(String),
-    /// Represents parsing multi param was failed.
+    /// Failed to parse multiple params.
     #[error(transparent)]
     Parse(#[from] serde::de::value::Error),
-    /// Represents params is empty.
+    /// The params are empty.
     #[error("params is empty")]
     Empty,
 }
 
-impl IntoResponse for ParamsError {
-    fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
-    }
-}
-
-impl From<ParamsError> for Error {
-    fn from(e: ParamsError) -> Self {
-        e.into_error()
-    }
-}
+impl_error!(ParamsError);

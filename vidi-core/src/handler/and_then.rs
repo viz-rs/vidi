@@ -1,19 +1,6 @@
 use crate::{Handler, Result};
 
-/// Calls `op` if the output is `Ok`, otherwise returns the `Err` value of the output.
-#[derive(Clone, Debug)]
-pub struct AndThen<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> AndThen<H, F> {
-    /// Creates an [`AndThen`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(AndThen, "Calls `op` if the output is `Ok`, otherwise returns the `Err` value of the output.");
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for AndThen<H, F>

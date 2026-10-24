@@ -7,9 +7,9 @@ use std::{
 use tokio::net::TcpListener;
 
 use vidi::{
-    Body, Handler, IntoResponse, Io, Method, Request, RequestExt, Response, Result, Router,
+    Body, Handler, IntoResponse, Io, Request, RequestExt, Response, Result, Router,
     StatusCode, Tree,
-    types::{Params, RouteInfo},
+    types::RouteInfo,
 };
 
 /// Static Lazy Routes
@@ -50,22 +50,16 @@ async fn serve(mut req: Request, mut addr: Option<SocketAddr>) -> Result<Respons
     let method = req.method().clone();
     let path = req.path().to_owned();
     Ok(
-        match TREE.find(&method, &path).or_else(|| {
-            if method == Method::HEAD {
-                TREE.find(&Method::GET, &path)
-            } else {
-                None
-            }
-        }) {
+        match TREE.find_with_head(&method, &path) {
             Some((handler, route)) => {
                 if addr.is_some() {
                     req.extensions_mut().insert(addr.take());
                 }
-                req.extensions_mut().insert(Arc::from(RouteInfo {
-                    id: *route.id,
-                    pattern: route.pattern(),
-                    params: Into::<Params>::into(route.params()),
-                }));
+                req.extensions_mut().insert(Arc::from(RouteInfo::new(
+                    *route.id,
+                    route.pattern(),
+                    route.params(),
+                )));
                 handler
                     .call(req)
                     .await

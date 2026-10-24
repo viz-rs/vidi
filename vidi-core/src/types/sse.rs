@@ -1,4 +1,4 @@
-//! Server-Sent Event Extractor
+//! Server-sent events (SSE).
 //!
 //! [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events>
 
@@ -16,7 +16,7 @@ mod event;
 
 pub use event::Event;
 
-/// Server-Sent Event
+/// A server-sent event response.
 #[derive(Debug)]
 pub struct Sse<S> {
     stream: S,
@@ -27,7 +27,7 @@ impl<S> Sse<S>
 where
     S: Stream<Item = Event> + Send + 'static,
 {
-    /// Creates a new Server-Sent Event.
+    /// Creates an [`Sse`].
     #[must_use]
     pub const fn new(stream: S) -> Self {
         Self {
@@ -36,7 +36,7 @@ where
         }
     }
 
-    /// Sets a interval for Server-Sent Event.
+    /// Sets the keep-alive interval.
     #[must_use]
     pub fn interval(mut self, duration: Duration) -> Self {
         self.interval.replace(duration);

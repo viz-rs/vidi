@@ -1,19 +1,6 @@
 use crate::{Handler, Result};
 
-/// Maps the input before the handler calls.
-#[derive(Clone, Debug)]
-pub struct Before<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> Before<H, F> {
-    /// Creates a [`Before`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(Before, "Maps the input before the handler calls.");
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for Before<H, F>

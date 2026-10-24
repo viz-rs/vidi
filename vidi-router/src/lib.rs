@@ -1,4 +1,4 @@
-//! Router for Vidi Web Framework
+//! Router for the Vidi web framework.
 
 #![doc(html_logo_url = "https://viz.rs/logo.svg")]
 #![doc(html_favicon_url = "https://viz.rs/logo.svg")]
@@ -23,5 +23,8 @@ pub use router::Router;
 
 mod tree;
 pub use tree::Tree;
+
+mod responder;
+pub use responder::Responder;
 
 pub use path_tree::{Path, PathTree};

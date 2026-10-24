@@ -1,4 +1,4 @@
-//! Traits and types for handling an HTTP.
+//! Traits and types for handling HTTP requests.
 
 mod cloneable;
 
@@ -42,7 +42,7 @@ mod map_err;
 pub use map_err::MapErr;
 
 mod map_into_response;
-pub use map_into_response::MapInToResponse;
+pub use map_into_response::MapIntoResponse;
 
 mod or_else;
 pub use or_else::OrElse;
@@ -53,15 +53,15 @@ pub use transform::Transform;
 mod service;
 pub use service::ServiceHandler;
 
-/// A simplified asynchronous interface for handling input and output.
+/// An asynchronous interface for handling input and output.
 ///
 /// Composable request handlers.
 #[crate::async_trait]
 pub trait Handler<Input>: Send + Sync + 'static {
-    /// The returned type after the call operator is used.
+    /// The output type.
     type Output;
 
-    /// Performs the call operation.
+    /// Calls the handler with the input.
     async fn call(&self, input: Input) -> Self::Output;
 }
 
@@ -81,7 +81,7 @@ where
 
 /// The [`HandlerExt`] trait, which provides adapters for chaining and composing handlers.
 ///
-/// Likes the [`FutureExt`] and [`StreamExt`] traits.
+/// Like the [`FutureExt`] and [`StreamExt`] traits.
 ///
 /// [`FutureExt`]: https://docs.rs/futures/latest/futures/future/trait.FutureExt.html
 /// [`StreamExt`]: https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html
@@ -94,7 +94,7 @@ pub trait HandlerExt<I>: Handler<I> {
         Before::new(self, f)
     }
 
-    /// Maps the output `Result<T>` after the handler called.
+    /// Maps the output `Result<T>` after the handler is called.
     fn after<F>(self, f: F) -> After<Self, F>
     where
         Self: Sized,
@@ -125,7 +125,7 @@ pub trait HandlerExt<I>: Handler<I> {
         }
     }
 
-    /// Maps the `Ok` value of the output if after the handler called.
+    /// Maps the `Ok` value of the handler's output.
     fn map<F>(self, f: F) -> Map<Self, F>
     where
         Self: Sized,
@@ -136,11 +136,11 @@ pub trait HandlerExt<I>: Handler<I> {
     /// Maps the handler's output type to the [`Response`].
     ///
     /// [`Response`]: crate::Response
-    fn map_into_response(self) -> MapInToResponse<Self>
+    fn map_into_response(self) -> MapIntoResponse<Self>
     where
         Self: Sized,
     {
-        MapInToResponse::new(self)
+        MapIntoResponse::new(self)
     }
 
     /// Calls op if the result is Ok, otherwise returns the Err value of self.
@@ -151,7 +151,7 @@ pub trait HandlerExt<I>: Handler<I> {
         AndThen::new(self, f)
     }
 
-    /// Maps the `Err` value of the output if after the handler called.
+    /// Maps the `Err` value of the handler's output.
     fn map_err<F>(self, f: F) -> MapErr<Self, F>
     where
         Self: Sized,
@@ -191,7 +191,7 @@ pub trait HandlerExt<I>: Handler<I> {
         BoxHandler::new(self)
     }
 
-    /// Returns a new [`Handler`] that wrapping the `Self` and a type implementing [`Transform`].
+    /// Returns a new [`Handler`] by applying a [`Transform`] to `Self`.
     fn with<T>(self, t: T) -> T::Output
     where
         T: Transform<Self>,
@@ -200,7 +200,7 @@ pub trait HandlerExt<I>: Handler<I> {
         t.transform(self)
     }
 
-    /// Maps the handler.
+    /// Applies a function to the handler, returning the result.
     #[must_use]
     fn with_fn<F>(self, f: F) -> Self
     where

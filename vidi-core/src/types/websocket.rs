@@ -1,4 +1,4 @@
-//! `WebSocket` Extractor
+//! WebSocket extractor.
 
 use std::{borrow::Cow, future::Future, str};
 
@@ -22,7 +22,7 @@ pub use tokio_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
 /// A wrapper around an underlying raw stream which implements the `WebSocket` protocol.
 pub type WebSocketStream<T = Io<Upgraded>> = tokio_tungstenite::WebSocketStream<T>;
 
-/// Then `WebSocket` provides the API for creating and managing a [`WebSocket`][mdn] connection,
+/// Provides the API for creating and managing a [`WebSocket`][mdn] connection,
 /// as well as for sending and receiving data on the connection.
 ///
 /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/WebSocket>
@@ -37,10 +37,9 @@ pub struct WebSocket {
 impl WebSocket {
     const NAME: &'static [u8] = b"websocket";
 
-    /// The specifies one or more protocols that you wish to use.
+    /// Specifies one or more subprotocols to use, in order of preference.
     ///
-    /// In order of preference. The first one that is supported by the server will be
-    /// selected and responded.
+    /// The first protocol supported by the server is selected and responded.
     #[must_use]
     pub fn protocols<I>(mut self, protocols: I) -> Self
     where
@@ -57,11 +56,11 @@ impl WebSocket {
         self
     }
 
-    /// Finish the upgrade, passing a function and a [`WebSocketConfig`] to handle the `WebSocket`.
+    /// Completes the upgrade, invoking the callback with the upgraded stream.
     ///
     /// # Panics
     ///
-    /// When missing `OnUpgrade`
+    /// Panics if the request was not made over an upgradable connection.
     #[must_use]
     pub fn on_upgrade_with_config<F, Fut>(
         mut self,
@@ -88,7 +87,7 @@ impl WebSocket {
         self.into_response()
     }
 
-    /// Finish the upgrade, passing a function to handle the `WebSocket`.
+    /// Completes the upgrade, invoking the callback with the upgraded stream.
     pub fn on_upgrade<F, Fut>(self, callback: F) -> Response
     where
         F: FnOnce(WebSocketStream) -> Fut + Send + 'static,
@@ -101,6 +100,7 @@ impl WebSocket {
 impl FromRequest for WebSocket {
     type Error = WebSocketError;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         // check connection header
         req.header_typed::<Connection>()

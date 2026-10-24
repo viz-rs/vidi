@@ -59,9 +59,7 @@ mod websocket;
 #[cfg(feature = "websocket")]
 pub use websocket::{Message, WebSocket, WebSocketConfig, WebSocketError, WebSocketStream};
 
-#[cfg(feature = "params")]
 mod route_info;
-#[cfg(feature = "params")]
 pub use route_info::RouteInfo;
 
 mod header;

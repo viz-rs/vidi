@@ -6,7 +6,7 @@ use crate::{Resources, Route};
 
 macro_rules! export_verb {
     ($name:ident $verb:ty) => {
-        #[doc = concat!(" Adds a handler with a path and HTTP `", stringify!($verb), "` verb pair.")]
+        #[doc = concat!(" Adds a `", stringify!($verb), "` handler at the given path.")]
         #[must_use]
         pub fn $name<S, H, O>(self, path: S, handler: H) -> Self
         where
@@ -19,14 +19,14 @@ macro_rules! export_verb {
     };
 }
 
-/// A routes collection.
+/// A collection of routes.
 #[derive(Clone, Debug, Default)]
 pub struct Router {
     pub(crate) routes: Option<Vec<(String, Route)>>,
 }
 
 impl Router {
-    /// Creates an empty `Router`.
+    /// Creates an empty [`Router`].
     #[must_use]
     pub const fn new() -> Self {
         Self { routes: None }
@@ -39,17 +39,12 @@ impl Router {
     {
         let path = path.as_ref();
         match routes.iter_mut().find(|(p, _)| p == path) {
-            Some((_, r)) => {
-                // Merge new route handlers into existing route
-                for (method, handler) in route {
-                    *r = r.clone().on(method, handler);
-                }
-            }
+            Some((_, r)) => *r = r.clone().merge(route),
             None => routes.push((path.to_string(), route)),
         }
     }
 
-    /// Inserts a path-route pair into the router.
+    /// Inserts a path-route pair.
     #[must_use]
     #[inline]
     pub fn route<S>(mut self, path: S, route: Route) -> Self
@@ -64,9 +59,9 @@ impl Router {
         self
     }
 
-    /// Nested resources with a path.
-    #[must_use]
-    pub fn resources<S>(self, path: S, resource: Resources) -> Self
+    /// Joins `path` with each sub-path and inserts the resulting routes.
+    #[allow(clippy::similar_names)]
+    fn mount<S>(self, path: S, routes: impl IntoIterator<Item = (String, Route)>) -> Self
     where
         S: AsRef<str>,
     {
@@ -77,7 +72,7 @@ impl Router {
             base_path.push('/');
         }
 
-        resource.into_iter().fold(self, |router, (sp, route)| {
+        routes.into_iter().fold(self, |router, (sp, route)| {
             let is_empty = sp.is_empty();
             let mut full_path = String::with_capacity(base_path.len() + sp.len());
             full_path.push_str(&base_path);
@@ -89,33 +84,22 @@ impl Router {
         })
     }
 
-    /// Nested sub-router with a path.
-    #[allow(clippy::similar_names)]
+    /// Nests resources under a path.
+    #[must_use]
+    pub fn resources<S>(self, path: S, resource: Resources) -> Self
+    where
+        S: AsRef<str>,
+    {
+        self.mount(path, resource)
+    }
+
+    /// Nests a sub-router under a path.
     #[must_use]
     pub fn nest<S>(self, path: S, router: Self) -> Self
     where
         S: AsRef<str>,
     {
-        let path = path.as_ref();
-        let mut base_path = String::with_capacity(path.len() + 1);
-        base_path.push_str(path);
-        if !base_path.ends_with('/') {
-            base_path.push('/');
-        }
-
-        match router.routes {
-            Some(routes) => routes.into_iter().fold(self, |router, (sp, route)| {
-                let is_empty = sp.is_empty();
-                let mut full_path = String::with_capacity(base_path.len() + sp.len());
-                full_path.push_str(&base_path);
-                full_path.push_str(&sp);
-                if is_empty {
-                    full_path.pop(); // Remove trailing '/'
-                }
-                router.route(full_path, route)
-            }),
-            None => self,
-        }
+        self.mount(path, router.routes.unwrap_or_default())
     }
 
     repeat!(
@@ -131,7 +115,7 @@ impl Router {
         trace TRACE
     );
 
-    /// Adds a handler with a path and any HTTP verbs."
+    /// Adds a handler for all HTTP verbs at the given path.
     #[must_use]
     #[inline]
     pub fn any<S, H, O>(self, path: S, handler: H) -> Self
@@ -143,31 +127,23 @@ impl Router {
         self.route(path, Route::new().any(handler))
     }
 
-    /// Takes a closure and creates an iterator which calls that closure on each handler.
+    /// Maps each handler with the given closure.
     #[must_use]
     pub fn map_handler<F>(self, f: F) -> Self
     where
-        F: Fn(BoxHandler<Request, Result<Response>>) -> BoxHandler<Request, Result<Response>>,
+        F: Fn(BoxHandler) -> BoxHandler,
     {
         Self {
             routes: self.routes.map(|routes| {
                 routes
                     .into_iter()
-                    .map(|(path, route)| {
-                        (
-                            path,
-                            route
-                                .into_iter()
-                                .map(|(method, handler)| (method, f(handler)))
-                                .collect(),
-                        )
-                    })
+                    .map(|(path, route)| (path, route.map_handler(&f)))
                     .collect()
             }),
         }
     }
 
-    /// Transforms the types to a middleware and adds it.
+    /// Wraps each handler with the given [`Transform`].
     #[must_use]
     pub fn with<T>(self, t: T) -> Self
     where
@@ -177,7 +153,7 @@ impl Router {
         self.map_handler(|handler| t.transform(handler).boxed())
     }
 
-    /// Adds a middleware for the routes.
+    /// Wraps each handler with the middleware.
     #[must_use]
     pub fn with_handler<H>(self, f: H) -> Self
     where
@@ -195,7 +171,7 @@ mod tests {
     use vidi_core::{
         Body, Error, Handler, HandlerExt, IntoResponse, Method, Next, Request, RequestExt,
         Response, ResponseExt, Result, StatusCode, Transform, async_trait,
-        types::{Params, RouteInfo},
+        types::RouteInfo,
     };
 
     use crate::{Resources, Route, Router, Tree, any, get};
@@ -369,11 +345,11 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        req.extensions_mut().insert(Arc::from(RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: route.params().into(),
-        }));
+        req.extensions_mut().insert(Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        )));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: show foo"
@@ -384,11 +360,11 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        req.extensions_mut().insert(Arc::from(RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: Into::<Params>::into(route.params()),
-        }));
+        req.extensions_mut().insert(Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        )));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: update foo"
@@ -399,11 +375,11 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        req.extensions_mut().insert(Arc::from(RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: route.params().into(),
-        }));
+        req.extensions_mut().insert(Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        )));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
             "posts: delete foo"
@@ -434,11 +410,11 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        req.extensions_mut().insert(Arc::from(RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: route.params().into(),
-        }));
+        req.extensions_mut().insert(Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        )));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: show foo bar"
@@ -449,11 +425,11 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        let route_info = Arc::from(RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: route.params().into(),
-        });
+        let route_info = Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        ));
         assert_eq!(route.pattern(), "/posts/:post_id/users/:user_id");
         assert_eq!(route_info.pattern, "/posts/:post_id/users/:user_id");
         req.extensions_mut().insert(route_info);
@@ -467,11 +443,11 @@ mod tests {
         let node = tree.find(&method, &path);
         assert!(node.is_some());
         let (h, route) = node.unwrap();
-        req.extensions_mut().insert(Arc::from(RouteInfo {
-            id: *route.id,
-            pattern: route.pattern(),
-            params: route.params().into(),
-        }));
+        req.extensions_mut().insert(Arc::from(RouteInfo::new(
+            *route.id,
+            route.pattern(),
+            route.params(),
+        )));
         assert_eq!(
             h.call(req).await?.into_body().collect().await?.to_bytes(),
             "users: delete foo bar"

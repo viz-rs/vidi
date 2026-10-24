@@ -17,7 +17,7 @@ pub use layer::Layered;
 pub struct ServiceHandler<S>(S);
 
 impl<S> ServiceHandler<S> {
-    /// Creates a new [`ServiceHandler`].
+    /// Creates a [`ServiceHandler`].
     pub const fn new(s: S) -> Self {
         Self(s)
     }

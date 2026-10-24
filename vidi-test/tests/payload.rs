@@ -70,7 +70,7 @@ async fn payload() -> Result<()> {
     assert_eq!(resp.status(), StatusCode::UNSUPPORTED_MEDIA_TYPE);
     assert_eq!(
         resp.text().await.map_err(Error::boxed)?,
-        "unsupported media type, `application/javascript; charset=utf-8` is required"
+        "unsupported media type, `application/json` is required"
     );
     let resp = client
         .post("/json")

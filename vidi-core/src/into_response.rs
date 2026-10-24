@@ -6,13 +6,13 @@ use crate::{Body, Error, Response, ResponseExt, Result, StatusCode};
 
 /// Trait implemented by types that can be converted to an HTTP [`Response`].
 pub trait IntoResponse: Sized {
-    /// Convert self to HTTP [`Response`].
+    /// Converts `self` into a [`Response`].
     #[must_use]
     fn into_response(self) -> Response;
 
-    /// Convert self to the [`Error`].
+    /// Converts `self` into an [`Error`].
     fn into_error(self) -> Error {
-        Error::Responder(Box::new(self.into_response()))
+        Error::Response(Box::new(self.into_response()))
     }
 }
 
@@ -36,7 +36,7 @@ impl IntoResponse for Error {
                 *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                 resp
             }
-            Self::Responder(resp) | Self::Report(_, resp) => *resp,
+            Self::Response(resp) | Self::WithResponse(_, resp) => *resp,
         }
     }
 }

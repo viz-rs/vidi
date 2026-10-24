@@ -7,7 +7,7 @@ use vidi::{
     Request, RequestExt, Result, Router, get,
     middleware::{
         cookie,
-        helper::CookieOptions,
+        cookies::CookieOptions,
         session::{self, Store},
     },
     serve,

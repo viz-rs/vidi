@@ -1,4 +1,4 @@
-//! Directory
+//! Directory listing.
 //!
 //! <https://github.com/vercel/serve-handler> MIT
 
@@ -35,8 +35,7 @@ impl Directory {
 
             if unlisted
                 .as_ref()
-                .filter(|unlisted| unlisted.contains(&name.as_str()))
-                .is_some()
+                .is_some_and(|unlisted| unlisted.contains(&name.as_str()))
             {
                 continue;
             }
@@ -114,7 +113,7 @@ impl Display for Directory {
     }
 }
 
-/// Path: (url, name)
+/// Path entry: (url, name).
 #[derive(Debug)]
 struct Paths(Vec<(String, String)>);
 
@@ -127,7 +126,7 @@ impl Display for Paths {
     }
 }
 
-/// File: (relative, title, kind, ext, base)
+/// File entry: (relative, title, kind, ext, base).
 #[derive(Debug)]
 struct Files(Vec<(String, String, bool, Option<String>, String)>);
 

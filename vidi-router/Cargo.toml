@@ -22,13 +22,13 @@ vidi-core.workspace = true
 path-tree.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+hyper.workspace = true
 
 [dev-dependencies]
 anyhow.workspace = true
 bytes.workspace = true
 serde_derive.workspace = true
 
-hyper.workspace = true
 http-body-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 

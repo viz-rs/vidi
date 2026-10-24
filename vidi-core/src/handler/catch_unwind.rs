@@ -1,19 +1,6 @@
 use crate::{Handler, IntoResponse, Response, Result, future::FutureExt};
 
-/// Catches unwinding panics while calling the handler.
-#[derive(Clone, Debug)]
-pub struct CatchUnwind<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> CatchUnwind<H, F> {
-    /// Creates an [`CatchUnwind`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(CatchUnwind, "Catches unwinding panics while calling the handler.");
 
 #[crate::async_trait]
 impl<H, F, I, O, R> Handler<I> for CatchUnwind<H, F>

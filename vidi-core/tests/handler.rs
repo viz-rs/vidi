@@ -90,7 +90,7 @@ async fn handler() -> Result<()> {
 
         impl From<CustomError2> for Error {
             fn from(e: CustomError2) -> Self {
-                Self::Report(Box::new(e), Box::new(CustomError::NotFound.into_response()))
+                Self::WithResponse(Box::new(e), Box::new(CustomError::NotFound.into_response()))
             }
         }
 

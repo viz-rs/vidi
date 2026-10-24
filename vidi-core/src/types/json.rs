@@ -1,4 +1,4 @@
-//! Represents a JSON extractor or responder.
+//! JSON extractor and responder.
 
 use std::{
     fmt,
@@ -9,60 +9,10 @@ use crate::{FromRequest, IntoResponse, Request, RequestExt, Response, ResponseEx
 
 use super::{Payload, PayloadError};
 
-/// Extracts JSON data from the body of a request, or responds a JSON data to response.
+/// Extracts JSON from the request body, or responds with JSON.
 pub struct Json<T = ()>(pub T);
 
-impl<T> Json<T> {
-    /// Create new `Json` instance.
-    #[inline]
-    pub const fn new(data: T) -> Self {
-        Self(data)
-    }
-
-    /// Consumes the JSON, returning the wrapped value.
-    #[inline]
-    pub fn into_inner(self) -> T {
-        self.0
-    }
-}
-
-impl<T> Clone for Json<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
-    }
-}
-
-impl<T> AsRef<T> for Json<T> {
-    fn as_ref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> Deref for Json<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> DerefMut for Json<T> {
-    fn deref_mut(&mut self) -> &mut T {
-        &mut self.0
-    }
-}
-
-impl<T> fmt::Debug for Json<T>
-where
-    T: fmt::Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        T::fmt(self, f)
-    }
-}
+impl_newtype!(Json, "JSON");
 
 impl<T> Payload for Json<T> {
     const NAME: &'static str = "json";
@@ -76,7 +26,7 @@ impl<T> Payload for Json<T> {
     }
 
     fn mime() -> mime::Mime {
-        mime::APPLICATION_JAVASCRIPT_UTF_8
+        mime::APPLICATION_JSON
     }
 }
 
@@ -92,7 +42,7 @@ where
     }
 }
 
-/// Responds with JSON Data.
+/// Responds with JSON.
 impl<T> IntoResponse for Json<T>
 where
     T: serde::Serialize,

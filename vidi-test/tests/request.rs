@@ -244,7 +244,7 @@ async fn request_body() -> Result<()> {
 
 #[tokio::test]
 async fn request_session() -> Result<()> {
-    use vidi::middleware::{cookie, helper::CookieOptions, session};
+    use vidi::middleware::{cookie, cookies::CookieOptions, session};
     use vidi_test::{TestServer, nano_id, sessions};
 
     let router = Router::new()

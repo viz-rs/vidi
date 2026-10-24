@@ -1,14 +1,13 @@
-//! Extracts data from the [`Request`] by types.
+//! Extracts data from the [`Request`].
 
 use crate::{Future, IntoResponse, Request};
 
 /// An interface for extracting data from the HTTP [`Request`].
 pub trait FromRequest: Sized {
-    /// The type returned in the event of a conversion error.
+    /// The error type.
     type Error: IntoResponse;
 
     /// Extracts this type from the HTTP [`Request`].
-    #[must_use]
     fn extract(req: &mut Request) -> impl Future<Output = Result<Self, Self::Error>> + Send;
 }
 

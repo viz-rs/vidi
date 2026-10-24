@@ -1,4 +1,4 @@
-//! CSRF Middleware.
+//! CSRF middleware.
 
 use std::{collections::HashSet, fmt, sync::Arc};
 
@@ -8,7 +8,7 @@ use crate::{
     Error, FromRequest, Handler, IntoResponse, Method, Request, RequestExt, Response, Result,
     StatusCode, Transform,
     header::{HeaderName, HeaderValue, VARY},
-    middleware::helper::{CookieOptions, Cookieable},
+    middleware::cookies::{CookieOptions, Cookieable},
 };
 
 #[derive(Debug)]
@@ -22,23 +22,24 @@ struct Inner<S, G, V> {
     verify: V,
 }
 
-/// The CSRF token source that is cookie or session.
+/// The source of the CSRF token.
 #[derive(Debug)]
 pub enum Store {
-    /// Via Cookie.
+    /// Stored in a cookie.
     Cookie,
     #[cfg(feature = "session")]
-    /// Via Session.
+    /// Stored in the session.
     Session,
 }
 
-/// Extracts CSRF token via cookie or session.
+/// Extracts the CSRF token from the cookie or session.
 #[derive(Clone, Debug)]
 pub struct CsrfToken(pub String);
 
 impl FromRequest for CsrfToken {
     type Error = Error;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         req.extensions()
             .get()
@@ -56,10 +57,10 @@ where
     G: Send + Sync,
     V: Send + Sync,
 {
-    /// The name of CSRF header.
+    /// The CSRF header name.
     pub const CSRF_TOKEN: &'static str = "x-csrf-token";
 
-    /// Creates a new configuration.
+    /// Creates a [`Config`].
     pub fn new(
         store: Store,
         ignored_methods: HashSet<Method>,
@@ -79,10 +80,11 @@ where
         }))
     }
 
-    /// Gets the CSRF token from cookies or session.
+    /// Returns the CSRF token from the cookie or session.
     ///
     /// # Errors
-    /// TODO
+    ///
+    /// Returns an error if the token cannot be read or decoded.
     pub fn get(&self, req: &Request) -> Result<Option<Vec<u8>>> {
         let inner = self.as_ref();
         match inner.store {
@@ -109,10 +111,11 @@ where
         }
     }
 
-    /// Sets the CSRF token to cookies or session.
+    /// Sets the CSRF token in the cookie or session.
     ///
     /// # Errors
-    /// TODO
+    ///
+    /// Returns an error if the token cannot be stored.
     #[allow(unused)]
     pub fn set(&self, req: &Request, token: String, secret: Vec<u8>) -> Result<()> {
         let inner = self.as_ref();
@@ -232,10 +235,11 @@ where
     }
 }
 
-/// Gets random secret
+/// Generates a random secret.
 ///
 /// # Errors
-/// TODO
+///
+/// Returns an error if the system random number generator fails.
 pub fn secret() -> Result<Vec<u8>> {
     let mut buf = [0u8; 32];
     getrandom::fill(&mut buf)
@@ -243,13 +247,13 @@ pub fn secret() -> Result<Vec<u8>> {
     Ok(buf.to_vec())
 }
 
-/// Generates Token
+/// Generates a token by masking `secret` with `otp`.
 #[must_use]
 pub fn generate(secret: &[u8], otp: Vec<u8>) -> Vec<u8> {
     mask(secret, otp)
 }
 
-/// Verifies Token with a secret
+/// Verifies a token against the secret.
 #[must_use]
 pub fn verify(secret: &[u8], raw_token: String) -> bool {
     base64::engine::general_purpose::URL_SAFE_NO_PAD
@@ -257,11 +261,10 @@ pub fn verify(secret: &[u8], raw_token: String) -> bool {
         .ok()
         .filter(|b| b.len() == 64)
         .map(unmask::<32>)
-        .filter(|t| t == secret)
-        .is_some()
+        .is_some_and(|t| t == secret)
 }
 
-/// Returns masked token
+/// Masks `secret` with `otp`.
 #[allow(clippy::needless_collect)]
 fn mask(secret: &[u8], mut otp: Vec<u8>) -> Vec<u8> {
     otp.extend::<Vec<u8>>(
@@ -274,7 +277,7 @@ fn mask(secret: &[u8], mut otp: Vec<u8>) -> Vec<u8> {
     otp
 }
 
-/// Returns secret
+/// Unmasks the secret from `token`.
 fn unmask<const N: usize>(mut token: Vec<u8>) -> Vec<u8> {
     // encrypted_csrf_token
     let mut secret = token.split_off(N);

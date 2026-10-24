@@ -2,7 +2,7 @@ use std::fmt::{self, Write};
 
 use bytes::Bytes;
 
-/// Event Message
+/// An SSE event.
 ///
 /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format>
 #[allow(clippy::struct_field_names)]
@@ -15,41 +15,30 @@ pub struct Event {
     comment: Option<String>,
 }
 
+macro_rules! impl_event_string_setter {
+    ($name:ident, $desc:literal) => {
+        #[doc = concat!("Sets the ", $desc, ".")]
+        #[must_use]
+        pub fn $name(mut self, value: impl Into<String>) -> Self {
+            self.$name.replace(value.into());
+            self
+        }
+    };
+}
+
 impl Event {
-    /// The event ID to set the `EventSource` object's last event ID value.
-    #[must_use]
-    pub fn id(mut self, id: impl Into<String>) -> Self {
-        self.id.replace(id.into());
-        self
-    }
+    impl_event_string_setter!(id, "event ID");
+    impl_event_string_setter!(data, "data field");
+    impl_event_string_setter!(event, "event type");
 
-    /// The data field for the message.
-    #[must_use]
-    pub fn data(mut self, data: impl Into<String>) -> Self {
-        self.data.replace(data.into());
-        self
-    }
-
-    /// A string identifying the type of event described.
-    #[must_use]
-    pub fn event(mut self, event: impl Into<String>) -> Self {
-        self.event.replace(event.into());
-        self
-    }
-
-    /// The reconnection time.
+    /// Sets the reconnection time.
     #[must_use]
     pub fn retry(mut self, retry: u64) -> Self {
         self.retry.replace(retry);
         self
     }
 
-    /// The comment field for the message.
-    #[must_use]
-    pub fn comment(mut self, comment: impl Into<String>) -> Self {
-        self.comment.replace(comment.into());
-        self
-    }
+    impl_event_string_setter!(comment, "comment field");
 }
 
 impl fmt::Display for Event {

@@ -1,19 +1,6 @@
 use crate::{Handler, Result};
 
-/// Maps the `Ok` value of the output if after the handler called.
-#[derive(Clone, Debug)]
-pub struct Map<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> Map<H, F> {
-    /// Creates a [`Map`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(Map, "Maps the `Ok` value of the handler's output.");
 
 #[crate::async_trait]
 impl<H, F, I, O, T> Handler<I> for Map<H, F>

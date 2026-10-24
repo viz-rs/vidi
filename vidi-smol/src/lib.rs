@@ -55,13 +55,12 @@
 ))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-mod responder;
-pub use responder::Responder;
-
 mod listener;
 pub use listener::Listener;
 
+#[cfg(any(feature = "http1", feature = "http2"))]
 mod server;
+#[cfg(any(feature = "http1", feature = "http2"))]
 pub use server::serve;
 
 // #[cfg(any(feature = "native-tls", feature = "rustls"))]

@@ -14,12 +14,20 @@ pub struct TestServer {
     client: Client,
 }
 
+macro_rules! http_method {
+    ($name:ident) => {
+        pub fn $name(&self, url: impl AsRef<str>) -> RequestBuilder {
+            self.client.$name(self.path(url))
+        }
+    };
+}
+
 impl TestServer {
-    /// Creates new test server
+    /// Starts a test server with the given router.
     ///
     /// # Errors
     ///
-    /// Will return `Err` if the server fails to start.
+    /// Returns an error if the server fails to start.
     pub async fn new(router: Router) -> Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:0").await?;
         let addr = listener.local_addr()?;
@@ -42,19 +50,8 @@ impl TestServer {
         self.addr
     }
 
-    pub fn get(&self, url: impl AsRef<str>) -> RequestBuilder {
-        self.client.get(self.path(url))
-    }
-
-    pub fn post(&self, url: impl AsRef<str>) -> RequestBuilder {
-        self.client.post(self.path(url))
-    }
-
-    pub fn delete(&self, url: impl AsRef<str>) -> RequestBuilder {
-        self.client.delete(self.path(url))
-    }
-
-    pub fn put(&self, url: impl AsRef<str>) -> RequestBuilder {
-        self.client.put(self.path(url))
-    }
+    http_method!(get);
+    http_method!(post);
+    http_method!(delete);
+    http_method!(put);
 }

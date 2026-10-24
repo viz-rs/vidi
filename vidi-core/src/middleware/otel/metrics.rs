@@ -4,15 +4,11 @@
 
 use std::time::SystemTime;
 
-use http::uri::Scheme;
 use opentelemetry::{
     KeyValue,
     metrics::{Histogram, Meter, UpDownCounter},
 };
-use opentelemetry_semantic_conventions::trace::{
-    CLIENT_ADDRESS, HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE,
-    NETWORK_PROTOCOL_VERSION, SERVER_ADDRESS, SERVER_PORT, URL_SCHEME,
-};
+use opentelemetry_semantic_conventions::trace::HTTP_RESPONSE_STATUS_CODE;
 
 use crate::{Handler, IntoResponse, Request, RequestExt, Response, ResponseExt, Result, Transform};
 
@@ -21,7 +17,7 @@ const HTTP_SERVER_DURATION: &str = "http.server.duration";
 const HTTP_SERVER_REQUEST_SIZE: &str = "http.server.request.size";
 const HTTP_SERVER_RESPONSE_SIZE: &str = "http.server.response.size";
 
-/// Request metrics middleware config.
+/// Request metrics middleware configuration.
 #[derive(Clone, Debug)]
 pub struct Config {
     active_requests: UpDownCounter<i64>,
@@ -31,7 +27,7 @@ pub struct Config {
 }
 
 impl Config {
-    /// Creates a new Config
+    /// Creates a [`Config`].
     #[must_use]
     pub fn new(meter: &Meter) -> Self {
         let active_requests = meter
@@ -111,7 +107,7 @@ where
         } = self;
 
         let timer = SystemTime::now();
-        let mut attributes = build_attributes(&req, req.route_info().pattern.as_str());
+        let mut attributes = super::build_attributes(&req, req.route_info().pattern.as_str());
 
         active_requests.add(1, &attributes);
 
@@ -139,40 +135,4 @@ where
 
         resp
     }
-}
-
-fn build_attributes(req: &Request, http_route: &str) -> Vec<KeyValue> {
-    let mut attributes = Vec::with_capacity(5);
-    // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#http-server>
-    attributes.push(KeyValue::new(HTTP_ROUTE, http_route.to_string()));
-
-    // <https://github.com/open-telemetry/semantic-conventions/blob/v1.21.0/docs/http/http-spans.md#common-attributes>
-    attributes.push(KeyValue::new(HTTP_REQUEST_METHOD, req.method().to_string()));
-    attributes.push(KeyValue::new(
-        NETWORK_PROTOCOL_VERSION,
-        format!("{:?}", req.version()),
-    ));
-
-    if let Some(remote_addr) = req.remote_addr() {
-        attributes.push(KeyValue::new(CLIENT_ADDRESS, remote_addr.to_string()));
-    }
-
-    let uri = req.uri();
-    if let Some(host) = uri.host() {
-        attributes.push(KeyValue::new(SERVER_ADDRESS, host.to_string()));
-    }
-    if let Some(port) = uri
-        .port_u16()
-        .map(i64::from)
-        .filter(|port| *port != 80 && *port != 443)
-    {
-        attributes.push(KeyValue::new(SERVER_PORT, port));
-    }
-
-    attributes.push(KeyValue::new(
-        URL_SCHEME,
-        uri.scheme().unwrap_or(&Scheme::HTTP).to_string(),
-    ));
-
-    attributes
 }

@@ -1,22 +1,9 @@
 use crate::{Handler, Result};
 
-/// Represents a middleware parameter, which is a tuple that includes Request and `BoxHandler`.
+/// A middleware parameter: a tuple of input and handler.
 pub type Next<I, H> = (I, H);
 
-/// Wraps around the remaining handler or middleware chain.
-#[derive(Clone, Debug)]
-pub struct Around<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> Around<H, F> {
-    /// Creates an [`Around`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(Around, "Wraps around the remaining handler or middleware chain.");
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for Around<H, F>

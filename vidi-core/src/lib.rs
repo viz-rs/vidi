@@ -1,4 +1,4 @@
-//! The core traits and types in for the [`Vidi`].
+//! Core traits and types for [`Vidi`].
 //!
 //! [`Vidi`]: https://docs.rs/vidi/latest/vidi
 
@@ -57,6 +57,19 @@ pub use http::{Method, StatusCode, header};
 pub use hyper::body::{Body as HttpBody, Incoming};
 pub use hyper_util::rt::TokioIo as Io;
 pub use thiserror::Error as ThisError;
+
+/// Returns `true` if the error is a transient connection error that can be ignored.
+#[doc(hidden)]
+#[must_use]
+#[inline]
+pub fn is_connection_error(error: &std::io::Error) -> bool {
+    matches!(
+        error.kind(),
+        std::io::ErrorKind::ConnectionRefused
+            | std::io::ErrorKind::ConnectionAborted
+            | std::io::ErrorKind::ConnectionReset
+    )
+}
 
 #[doc(hidden)]
 mod tuples {

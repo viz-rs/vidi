@@ -24,7 +24,7 @@ pub(crate) enum ClientAuth {
     Required(Vec<u8>),
 }
 
-/// `rustls`'s config.
+/// Configuration for `rustls`.
 #[derive(Debug)]
 pub struct Config {
     cert: Vec<u8>,
@@ -40,7 +40,7 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Create a new Tls config
+    /// Creates a TLS config.
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -51,42 +51,42 @@ impl Config {
         }
     }
 
-    /// sets the Tls certificate
+    /// Sets the TLS certificate.
     #[must_use]
     pub fn cert(mut self, cert: impl Into<Vec<u8>>) -> Self {
         self.cert = cert.into();
         self
     }
 
-    /// sets the Tls key
+    /// Sets the TLS key.
     #[must_use]
     pub fn key(mut self, key: impl Into<Vec<u8>>) -> Self {
         self.key = key.into();
         self
     }
 
-    /// Sets the trust anchor for optional Tls client authentication
+    /// Sets the trust anchor for optional client authentication.
     #[must_use]
     pub fn client_auth_optional(mut self, trust_anchor: impl Into<Vec<u8>>) -> Self {
         self.client_auth = ClientAuth::Optional(trust_anchor.into());
         self
     }
 
-    /// Sets the trust anchor for required Tls client authentication
+    /// Sets the trust anchor for required client authentication.
     #[must_use]
     pub fn client_auth_required(mut self, trust_anchor: impl Into<Vec<u8>>) -> Self {
         self.client_auth = ClientAuth::Required(trust_anchor.into());
         self
     }
 
-    /// sets the DER-encoded OCSP response
+    /// Sets the DER-encoded OCSP response.
     #[must_use]
     pub fn ocsp_resp(mut self, ocsp_resp: impl Into<Vec<u8>>) -> Self {
         self.ocsp_resp = ocsp_resp.into();
         self
     }
 
-    /// builds the Tls `ServerConfig`
+    /// Builds the TLS `ServerConfig`.
     ///
     /// # Errors
     pub fn build(self) -> Result<ServerConfig> {

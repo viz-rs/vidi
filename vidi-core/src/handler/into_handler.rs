@@ -5,7 +5,7 @@ pub trait IntoHandler<I, E> {
     /// The target handler.
     type Handler: Handler<I>;
 
-    /// Converts self to a [`Handler`].
+    /// Converts `self` into a [`Handler`].
     #[must_use]
     fn into_handler(self) -> Self::Handler;
 }

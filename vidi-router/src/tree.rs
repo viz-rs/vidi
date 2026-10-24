@@ -6,12 +6,12 @@ use vidi_core::{BoxHandler, Method};
 
 use crate::{Route, Router};
 
-/// Store all final routes.
+/// Stores the final route tree.
 #[derive(Clone, Default)]
 pub struct Tree(Vec<(Method, PathTree<BoxHandler>)>);
 
 impl Tree {
-    /// Find a handler by the HTTP method and the URI's path.
+    /// Finds a handler by method and path.
     #[must_use]
     pub fn find<'a, 'b>(
         &'a self,
@@ -23,7 +23,23 @@ impl Tree {
             .find_map(|(m, t)| if m == method { t.find(path) } else { None })
     }
 
-    /// Consumes the Tree, returning the wrapped value.
+    /// Finds a handler by method and path, falling back to `GET` for `HEAD` requests.
+    #[must_use]
+    pub fn find_with_head<'a, 'b>(
+        &'a self,
+        method: &'b Method,
+        path: &'b str,
+    ) -> Option<(&'a BoxHandler, Path<'a, 'b>)> {
+        self.find(method, path).or_else(|| {
+            if method == Method::HEAD {
+                self.find(&Method::GET, path)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Returns the inner trees, consuming the `Tree`.
     #[must_use]
     pub fn into_inner(self) -> Vec<(Method, PathTree<BoxHandler>)> {
         self.0

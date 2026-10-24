@@ -1,5 +1,5 @@
-/// Then `Transform` trait defines the interface of a handler factory that wraps inner handler to
-/// a Handler during construction.
+/// The [`Transform`] trait defines the interface of a handler factory that wraps an inner
+/// handler to produce a new handler during construction.
 pub trait Transform<H> {
     /// A new handler.
     type Output;

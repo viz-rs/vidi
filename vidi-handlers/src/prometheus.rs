@@ -15,14 +15,14 @@ pub use opentelemetry_prometheus::ExporterBuilder;
 #[doc(inline)]
 pub use prometheus::Registry;
 
-/// The [`Registry`] wrapper.
+/// Prometheus metrics handler.
 #[derive(Clone, Debug)]
 pub struct Prometheus {
     registry: Registry,
 }
 
 impl Prometheus {
-    /// Creates a new [`Prometheus`].
+    /// Creates a [`Prometheus`] handler.
     #[must_use]
     pub const fn new(registry: Registry) -> Self {
         Self { registry }

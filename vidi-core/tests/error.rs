@@ -15,7 +15,7 @@ fn error() {
     assert!(e.downcast_mut::<std::io::Error>().is_some());
 
     let e: Error = (std::io::Error::other("error"), StatusCode::OK).into();
-    assert_eq!("report", e.to_string());
+    assert_eq!("error", e.to_string());
     assert!(e.is::<std::io::Error>());
     assert!(e.downcast::<std::io::Error>().is_ok());
     let e: Error = (std::io::Error::other("error"), StatusCode::OK).into();

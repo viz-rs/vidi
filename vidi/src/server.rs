@@ -27,7 +27,7 @@ mod tcp;
 #[cfg(all(unix, feature = "unix-socket"))]
 mod unix;
 
-/// Starts a server and serves the connections.
+/// Starts serving connections.
 pub fn serve<L>(listener: L, router: Router) -> Server<L> {
     Server::<L>::new(listener, router)
 }
@@ -43,12 +43,12 @@ pub struct Server<L, S = Pending<()>> {
 }
 
 impl<L> Server<L> {
-    /// Starts a [`Server`] with a listener and a [`Router`].
+    /// Creates a [`Server`] from a listener and [`Router`].
     pub fn new(listener: L, router: Router) -> Self {
         Self::with_builder(listener, router, Builder::new(TokioExecutor::new()))
     }
 
-    /// Starts a [`Server`] with a listener, a [`Router`] and a [`Builder`].
+    /// Creates a [`Server`] from a listener, [`Router`], and [`Builder`].
     pub fn with_builder(listener: L, router: Router, builder: Builder<TokioExecutor>) -> Self {
         Server {
             listener,
@@ -111,7 +111,7 @@ where
                         let (stream, peer_addr) = match conn {
                             Ok(conn) => conn,
                             Err(err) => {
-                                if is_connection_error(&err) {
+                                if crate::is_connection_error(&err) {
                                     tracing::trace!("connection error (ignored): {err}");
                                 } else {
                                     tracing::error!("listener accept error: {err}");
@@ -160,14 +160,4 @@ where
             Ok(())
         })
     }
-}
-
-#[inline]
-fn is_connection_error(e: &io::Error) -> bool {
-    matches!(
-        e.kind(),
-        io::ErrorKind::ConnectionRefused
-            | io::ErrorKind::ConnectionAborted
-            | io::ErrorKind::ConnectionReset
-    )
 }

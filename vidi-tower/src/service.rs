@@ -11,7 +11,7 @@ use vidi_core::{Error, Handler, Request, Response, Result};
 pub struct HandlerService<H>(H);
 
 impl<H> HandlerService<H> {
-    /// Creates a new [`HandlerService`].
+    /// Creates a [`HandlerService`].
     pub const fn new(h: H) -> Self {
         Self(h)
     }

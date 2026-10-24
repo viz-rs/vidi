@@ -9,7 +9,7 @@ repository.workspace = true
 rust-version.workspace = true
 readme = "README.md"
 documentation = "https://docs.rs/vidi-core"
-description = "The core traits and types in for Vidi"
+description = "The core traits and types for Vidi"
 keywords = ["async", "framework", "http", "service", "web"]
 categories = ["asynchronous", "network-programming", "web-programming"]
 
@@ -50,9 +50,19 @@ cors = []
 
 compression = ["tokio-util/io", "dep:async-compression"]
 
-otel = ["dep:opentelemetry", "dep:opentelemetry-semantic-conventions"]
-otel-tracing = ["otel", "opentelemetry?/trace"]
-otel-metrics = ["otel", "opentelemetry?/metrics"]
+otel = []
+otel-tracing = [
+  "otel",
+  "dep:opentelemetry",
+  "dep:opentelemetry-semantic-conventions",
+  "opentelemetry?/trace",
+]
+otel-metrics = [
+  "otel",
+  "dep:opentelemetry",
+  "dep:opentelemetry-semantic-conventions",
+  "opentelemetry?/metrics",
+]
 
 [dependencies]
 async-trait.workspace = true

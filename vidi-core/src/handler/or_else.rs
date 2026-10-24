@@ -1,19 +1,6 @@
 use crate::{Error, Handler, Result};
 
-/// Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.
-#[derive(Clone, Debug)]
-pub struct OrElse<H, F> {
-    h: H,
-    f: F,
-}
-
-impl<H, F> OrElse<H, F> {
-    /// Creates an [`OrElse`] handler.
-    #[inline]
-    pub const fn new(h: H, f: F) -> Self {
-        Self { h, f }
-    }
-}
+impl_handler_combinator!(OrElse, "Calls `op` if the output is `Err`, otherwise returns the `Ok` value of the output.");
 
 #[crate::async_trait]
 impl<H, F, I, O> Handler<I> for OrElse<H, F>

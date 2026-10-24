@@ -168,7 +168,7 @@
 //! The [`HandlerExt`] is an extension trait for [Handler]s that provides a variety of convenient
 //! combinator functions.
 //!
-//! Likes the [`FutureExt`] and [`StreamExt`] traits.
+//! Like the [`FutureExt`] and [`StreamExt`] traits.
 //!
 //! ```
 //! # use vidi::{
@@ -531,16 +531,18 @@
 ))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-mod responder;
-pub use responder::Responder;
-
 mod listener;
 pub use listener::Listener;
 
+#[cfg(any(feature = "http1", feature = "http2"))]
 mod server;
+#[cfg(any(feature = "http1", feature = "http2"))]
 pub use server::{Server, serve};
 
-#[cfg(any(feature = "native-tls", feature = "rustls"))]
+#[cfg(all(
+    any(feature = "http1", feature = "http2"),
+    any(feature = "native-tls", feature = "rustls")
+))]
 pub use server::tls;
 
 pub use vidi_core::*;

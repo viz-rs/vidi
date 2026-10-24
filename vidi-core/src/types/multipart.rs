@@ -1,4 +1,4 @@
-//! Represents a Multipart extractor.
+//! Multipart body extractor.
 
 use form_data::FormData;
 
@@ -8,7 +8,7 @@ use super::{Payload, PayloadError};
 
 pub use form_data::{Error as MultipartError, Limits as MultipartLimits};
 
-/// Extracts the data from the multipart body of a request.
+/// Extracts data from the multipart request body.
 pub type Multipart<T = Body> = FormData<T>;
 
 impl<T> Payload for Multipart<T> {
@@ -58,8 +58,4 @@ impl IntoResponse for MultipartError {
     }
 }
 
-impl From<MultipartError> for Error {
-    fn from(e: MultipartError) -> Self {
-        e.into_error()
-    }
-}
+impl_from_error!(MultipartError);

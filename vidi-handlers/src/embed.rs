@@ -1,4 +1,4 @@
-//! Static files serving and embedding.
+//! Embedded static file serving.
 
 use std::{borrow::Cow, marker::PhantomData};
 
@@ -9,7 +9,7 @@ use vidi_core::{
     header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
 };
 
-/// Serve a single embedded file.
+/// Serves a single embedded file.
 #[derive(Debug)]
 pub struct File<E>(Cow<'static, str>, PhantomData<E>);
 
@@ -20,7 +20,7 @@ impl<E> Clone for File<E> {
 }
 
 impl<E> File<E> {
-    /// Serve a new file by the specified path.
+    /// Serves the file at the given path.
     #[must_use]
     pub fn new(path: &'static str) -> Self {
         Self(path.into(), PhantomData)
@@ -39,7 +39,7 @@ where
     }
 }
 
-/// Serve a embedded directory.
+/// Serves an embedded directory.
 #[derive(Debug)]
 pub struct Dir<E>(PhantomData<E>);
 

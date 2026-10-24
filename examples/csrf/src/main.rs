@@ -6,7 +6,7 @@ use vidi::{
     middleware::{
         cookie,
         csrf::{self, CsrfToken},
-        helper::CookieOptions,
+        cookies::CookieOptions,
     },
     serve,
 };

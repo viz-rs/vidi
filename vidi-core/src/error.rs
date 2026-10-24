@@ -2,25 +2,25 @@ use std::error::Error as StdError;
 
 use crate::{IntoResponse, Response, StatusCode, ThisError};
 
-/// An owned dynamically typed [`StdError`].
+/// A boxed [`StdError`].
 pub type BoxError = Box<dyn StdError + Send + Sync>;
 
-/// Represents errors that can occur handling application.
+/// Errors that can occur while handling a request.
 #[derive(Debug, ThisError)]
 pub enum Error {
-    /// Receives a boxed [`std::error::Error`][StdError] as an error.
+    /// A boxed [`std::error::Error`][StdError].
     #[error(transparent)]
     Boxed(BoxError),
-    /// Receives a [`Response`] as an error.
+    /// A [`Response`] used as an error.
     #[error("response")]
-    Responder(Box<Response>),
-    /// Receives a boxed [`std::error::Error`][StdError] and [`Response`] pair as an error.
-    #[error("report")]
-    Report(BoxError, Box<Response>),
+    Response(Box<Response>),
+    /// A boxed [`std::error::Error`][StdError] paired with a [`Response`].
+    #[error("{0}")]
+    WithResponse(BoxError, Box<Response>),
 }
 
 impl Error {
-    /// Create a new error object from any error type.
+    /// Creates an [`Error`] from any error type.
     pub fn boxed<T>(t: T) -> Self
     where
         T: Into<BoxError>,
@@ -28,7 +28,7 @@ impl Error {
         Self::Boxed(t.into())
     }
 
-    /// Forwards to the method defined on the type `dyn Error`.
+    /// Returns whether the inner error is of type `T`.
     #[must_use]
     #[inline]
     pub fn is<T>(&self) -> bool
@@ -36,16 +36,16 @@ impl Error {
         T: StdError + 'static,
     {
         match self {
-            Self::Boxed(e) | Self::Report(e, _) => e.is::<T>(),
-            Self::Responder(_) => false,
+            Self::Boxed(e) | Self::WithResponse(e, _) => e.is::<T>(),
+            Self::Response(_) => false,
         }
     }
 
-    /// Attempt to downcast the error object to a concrete type.
+    /// Downcasts the error to a concrete type.
     ///
     /// # Errors
     ///
-    /// Throws an `Error` if downcast fails.
+    /// Returns an `Error` if the downcast fails.
     #[inline]
     pub fn downcast<T>(self) -> Result<T, Self>
     where
@@ -57,16 +57,16 @@ impl Error {
                 Err(e) => Err(Self::Boxed(e)),
             };
         }
-        if let Self::Report(e, r) = self {
+        if let Self::WithResponse(e, r) = self {
             return match e.downcast::<T>() {
                 Ok(e) => Ok(*e),
-                Err(e) => Err(Self::Report(e, r)),
+                Err(e) => Err(Self::WithResponse(e, r)),
             };
         }
         Err(self)
     }
 
-    /// Downcast this error object by reference.
+    /// Downcasts the error by reference.
     #[must_use]
     #[inline]
     pub fn downcast_ref<T>(&self) -> Option<&T>
@@ -76,13 +76,13 @@ impl Error {
         if let Self::Boxed(e) = self {
             return e.downcast_ref::<T>();
         }
-        if let Self::Report(e, _) = self {
+        if let Self::WithResponse(e, _) = self {
             return e.downcast_ref::<T>();
         }
         None
     }
 
-    /// Downcast this error object by mutable reference.
+    /// Downcasts the error by mutable reference.
     #[inline]
     pub fn downcast_mut<T>(&mut self) -> Option<&mut T>
     where
@@ -91,7 +91,7 @@ impl Error {
         if let Self::Boxed(e) = self {
             return e.downcast_mut::<T>();
         }
-        if let Self::Report(e, _) = self {
+        if let Self::WithResponse(e, _) = self {
             return e.downcast_mut::<T>();
         }
         None
@@ -104,7 +104,7 @@ where
     T: IntoResponse,
 {
     fn from((e, t): (E, T)) -> Self {
-        Self::Report(e.into(), Box::new(t.into_response()))
+        Self::WithResponse(e.into(), Box::new(t.into_response()))
     }
 }
 

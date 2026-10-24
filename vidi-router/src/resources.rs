@@ -7,18 +7,18 @@ use vidi_core::{
 
 use crate::Route;
 
-/// A Kind for generating Resources path.
+/// The kind of resource path.
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum Kind {
-    /// index | create
+    /// Collection path: `index` and `create`.
     Empty,
-    /// new: `new`
+    /// `new` path.
     New,
-    /// show | update | destroy: `{}_id`
+    /// Member path: `show`, `update`, `destroy` (`{}_id`).
     Id,
-    /// edit: `{}_id/edit`
+    /// `edit` path (`{}_id/edit`).
     Edit,
-    /// `String`
+    /// Custom path.
     Custom(String),
 }
 
@@ -31,7 +31,7 @@ pub struct Resources {
 }
 
 impl Resources {
-    /// Named for the resources.
+    /// Sets the resource name.
     #[must_use]
     pub fn named<S>(mut self, name: S) -> Self
     where
@@ -41,31 +41,34 @@ impl Resources {
         self
     }
 
-    /// Without referencing an ID for a resource.
+    /// Marks the resource as singular (no member ID).
     #[must_use]
     pub const fn singular(mut self) -> Self {
         self.singular = true;
         self
     }
 
-    /// Inserts a path-route pair into the resources.
-    #[must_use]
-    pub fn route<S>(mut self, path: S, route: Route) -> Self
-    where
-        S: AsRef<str>,
-    {
-        let kind = Kind::Custom(path.as_ref().to_owned());
+    /// Merges `route` into the existing route for `kind`, or inserts a new pair.
+    fn push_route(&mut self, kind: Kind, route: Route) {
         match self
             .routes
             .iter_mut()
             .find(|(p, _)| p == &kind)
             .map(|(_, r)| r)
         {
-            Some(r) => *r = route.into_iter().fold(r.clone(), |r, (m, h)| r.on(m, h)),
-            None => {
-                self.routes.push((kind, route));
-            }
+            Some(r) => *r = r.clone().merge(route),
+            None => self.routes.push((kind, route)),
         }
+    }
+
+    /// Inserts a path-route pair.
+    #[must_use]
+    pub fn route<S>(mut self, path: S, route: Route) -> Self
+    where
+        S: AsRef<str>,
+    {
+        let kind = Kind::Custom(path.as_ref().to_owned());
+        self.push_route(kind, route);
         self
     }
 
@@ -74,23 +77,11 @@ impl Resources {
         H: Handler<Request, Output = Result<O>> + Clone,
         O: IntoResponse,
     {
-        match self
-            .routes
-            .iter_mut()
-            .find(|(p, _)| p == &kind)
-            .map(|(_, r)| r)
-        {
-            Some(r) => {
-                *r = r.clone().on(method, handler);
-            }
-            None => {
-                self.routes.push((kind, Route::new().on(method, handler)));
-            }
-        }
+        self.push_route(kind, Route::new().on(method, handler));
         self
     }
 
-    /// Displays a list of the resources.
+    /// Adds the `index` handler.
     #[must_use]
     pub fn index<H, O>(self, handler: H) -> Self
     where
@@ -100,7 +91,7 @@ impl Resources {
         self.on(Kind::Empty, Method::GET, handler)
     }
 
-    /// Returns an HTML form for creating the resources.
+    /// Adds the `new` handler.
     #[must_use]
     pub fn new<H, O>(self, handler: H) -> Self
     where
@@ -110,7 +101,7 @@ impl Resources {
         self.on(Kind::New, Method::GET, handler)
     }
 
-    /// Creates the resources.
+    /// Adds the `create` handler.
     #[must_use]
     pub fn create<H, O>(self, handler: H) -> Self
     where
@@ -120,7 +111,7 @@ impl Resources {
         self.on(Kind::Empty, Method::POST, handler)
     }
 
-    /// Displays the resources.
+    /// Adds the `show` handler.
     #[must_use]
     pub fn show<H, O>(self, handler: H) -> Self
     where
@@ -130,7 +121,7 @@ impl Resources {
         self.on(Kind::Id, Method::GET, handler)
     }
 
-    /// Returns an HTML form for editing the resources.
+    /// Adds the `edit` handler.
     #[must_use]
     pub fn edit<H, O>(self, handler: H) -> Self
     where
@@ -140,7 +131,7 @@ impl Resources {
         self.on(Kind::Edit, Method::GET, handler)
     }
 
-    /// Updates the resources, by default the `PUT` verb.
+    /// Adds the `update` handler (`PUT`).
     #[must_use]
     pub fn update<H, O>(self, handler: H) -> Self
     where
@@ -150,7 +141,7 @@ impl Resources {
         self.on(Kind::Id, Method::PUT, handler)
     }
 
-    /// Updates the resources, by the `PATCH` verb.
+    /// Adds the `update` handler (`PATCH`).
     #[must_use]
     pub fn update_with_patch<H, O>(self, handler: H) -> Self
     where
@@ -160,7 +151,7 @@ impl Resources {
         self.on(Kind::Id, Method::PATCH, handler)
     }
 
-    /// Deletes the resources.
+    /// Adds the `destroy` handler.
     #[must_use]
     pub fn destroy<H, O>(self, handler: H) -> Self
     where
@@ -170,7 +161,7 @@ impl Resources {
         self.on(Kind::Id, Method::DELETE, handler)
     }
 
-    /// Takes a closure and creates an iterator which calls that closure on each handler.
+    /// Maps each handler with the given closure.
     #[must_use]
     pub fn map_handler<F>(self, f: F) -> Self
     where
@@ -182,20 +173,12 @@ impl Resources {
             routes: self
                 .routes
                 .into_iter()
-                .map(|(path, route)| {
-                    (
-                        path,
-                        route
-                            .into_iter()
-                            .map(|(method, handler)| (method, f(handler)))
-                            .collect(),
-                    )
-                })
+                .map(|(path, route)| (path, route.map_handler(&f)))
                 .collect(),
         }
     }
 
-    /// Transforms the types to a middleware and adds it.
+    /// Wraps each handler with the given [`Transform`].
     #[must_use]
     pub fn with<T>(self, t: T) -> Self
     where
@@ -205,7 +188,7 @@ impl Resources {
         self.map_handler(|handler| t.transform(handler).boxed())
     }
 
-    /// Adds a middleware for the resources.
+    /// Wraps each handler with the middleware.
     #[must_use]
     pub fn with_handler<H>(self, f: H) -> Self
     where
@@ -232,14 +215,14 @@ impl IntoIterator for Resources {
                             if self.singular {
                                 String::new()
                             } else {
-                                format!(":{}_id", &self.name)
+                                format!(":{}_id", self.name)
                             }
                         }
                         Kind::Edit => {
                             if self.singular {
                                 "edit".to_string()
                             } else {
-                                format!(":{}_id/edit", &self.name)
+                                format!(":{}_id/edit", self.name)
                             }
                         }
                         Kind::Custom(path) => path,

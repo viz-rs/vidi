@@ -9,7 +9,7 @@ repository.workspace = true
 rust-version.workspace = true
 readme = "README.md"
 documentation = "https://docs.rs/vidi-test"
-description = "The core traits and types in for Vidi"
+description = "Testing utilities for Vidi"
 keywords = ["async", "framework", "http", "service", "web"]
 categories = ["asynchronous", "network-programming", "web-programming"]
 

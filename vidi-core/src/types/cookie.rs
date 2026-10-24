@@ -1,4 +1,4 @@
-//! Represents a cookie-jar extractor.
+//! Cookie-jar extractor.
 
 use std::{
     fmt,
@@ -33,7 +33,7 @@ impl Clone for Cookies {
 }
 
 impl Cookies {
-    /// Creates a new Cookies with the [`CookieJar`].
+    /// Creates [`Cookies`] from a [`CookieJar`].
     #[must_use]
     pub fn new(cookie_jar: CookieJar) -> Self {
         Self {
@@ -43,20 +43,20 @@ impl Cookies {
         }
     }
 
-    /// Returns the inner mutex [`CookieJar`].
+    /// Returns the inner [`CookieJar`].
     #[must_use]
     pub fn jar(&self) -> &Mutex<CookieJar> {
         &self.inner
     }
 
-    /// Removes `cookie` from this cookies.
+    /// Removes a cookie by name.
     pub fn remove(&self, name: impl AsRef<str>) {
         if let Ok(mut c) = self.jar().lock() {
             c.remove(Cookie::from(name.as_ref().to_string()));
         }
     }
 
-    /// Returns a `Cookie` inside this cookies with the name.
+    /// Returns the cookie with the given name.
     pub fn get(&self, name: impl AsRef<str>) -> Option<Cookie<'_>> {
         self.jar()
             .lock()
@@ -64,21 +64,21 @@ impl Cookies {
             .and_then(|c| c.get(name.as_ref()).cloned())
     }
 
-    /// Adds `cookie` to this cookies.
+    /// Adds a cookie.
     pub fn add(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
             c.add(cookie.into_owned());
         }
     }
 
-    /// Adds an "original" `cookie` to this cookies.
+    /// Adds an "original" cookie.
     pub fn add_original(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
             c.add_original(cookie.into_owned());
         }
     }
 
-    /// Removes all delta cookies.
+    /// Clears the cookie delta.
     pub fn reset_delta(&self) {
         if let Ok(mut c) = self.jar().lock() {
             c.reset_delta();
@@ -88,18 +88,18 @@ impl Cookies {
 
 #[cfg(any(feature = "cookie-signed", feature = "cookie-private"))]
 impl Cookies {
-    /// A cryptographic master key for use with `Signed` and/or `Private` jars.
+    /// Sets the cryptographic master key.
     #[must_use]
     pub fn with_key(mut self, key: Arc<CookieKey>) -> Self {
         self.key.replace(key);
         self
     }
 
-    /// Returns the cryptographic master [`Key`][CookieKey].
+    /// Returns the cryptographic master key.
     ///
     /// # Panics
     ///
-    /// Will panic if missing a key
+    /// Panics if no key was set.
     #[must_use]
     pub fn key(&self) -> &CookieKey {
         self.key.as_ref().expect("the `CookieKey` is required")
@@ -108,7 +108,7 @@ impl Cookies {
 
 #[cfg(feature = "cookie-private")]
 impl Cookies {
-    /// Returns a reference to the `Cookie` inside this jar with the specified name.
+    /// Returns the cookie with the given name from the private jar.
     pub fn private_get(&self, name: impl AsRef<str>) -> Option<Cookie<'_>> {
         self.jar()
             .lock()
@@ -116,14 +116,14 @@ impl Cookies {
             .and_then(|c| c.private(self.key()).get(name.as_ref()))
     }
 
-    /// Adds `cookie` to the parent jar.
+    /// Adds a cookie to the private jar.
     pub fn private_add(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
             c.private_mut(self.key()).add(cookie.into_owned());
         }
     }
 
-    /// Removes `cookie` from the parent jar.
+    /// Removes a cookie from the private jar.
     pub fn private_remove(&self, name: impl AsRef<str>) {
         if let Ok(mut c) = self.jar().lock() {
             c.private_mut(self.key())
@@ -131,14 +131,14 @@ impl Cookies {
         }
     }
 
-    /// Adds an "original" `cookie` to parent jar.
+    /// Adds an "original" cookie to the private jar.
     pub fn private_add_original(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
             c.private_mut(self.key()).add_original(cookie.into_owned());
         }
     }
 
-    /// Authenticates and decrypts `cookie` and returning the plain `cookie`.
+    /// Authenticates and decrypts a cookie, returning the plaintext cookie.
     #[must_use]
     pub fn private_decrypt(&self, cookie: Cookie<'_>) -> Option<Cookie<'_>> {
         self.jar()
@@ -151,7 +151,7 @@ impl Cookies {
 
 #[cfg(feature = "cookie-signed")]
 impl Cookies {
-    /// Returns a reference to the `Cookie` inside this jar with the specified name.
+    /// Returns the cookie with the given name from the signed jar.
     pub fn signed_get(&self, name: impl AsRef<str>) -> Option<Cookie<'_>> {
         self.jar()
             .lock()
@@ -159,14 +159,14 @@ impl Cookies {
             .and_then(|c| c.signed(self.key()).get(name.as_ref()))
     }
 
-    /// Adds `cookie` to the parent jar.
+    /// Adds a cookie to the signed jar.
     pub fn signed_add(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
             c.signed_mut(self.key()).add(cookie.into_owned());
         }
     }
 
-    /// Removes `cookie` from the parent jar.
+    /// Removes a cookie from the signed jar.
     pub fn signed_remove(&self, name: impl AsRef<str>) {
         if let Ok(mut c) = self.jar().lock() {
             c.signed_mut(self.key())
@@ -174,14 +174,14 @@ impl Cookies {
         }
     }
 
-    /// Adds an "original" `cookie` to parent jar.
+    /// Adds an "original" cookie to the signed jar.
     pub fn signed_add_original(&self, cookie: Cookie<'_>) {
         if let Ok(mut c) = self.jar().lock() {
             c.signed_mut(self.key()).add_original(cookie.into_owned());
         }
     }
 
-    /// Verifies the authenticity and integrity of `cookie` and returning the plain `cookie`.
+    /// Verifies a cookie's authenticity and integrity, returning the plaintext cookie.
     #[must_use]
     pub fn signed_verify(&self, cookie: Cookie<'_>) -> Option<Cookie<'_>> {
         self.jar()
@@ -195,6 +195,7 @@ impl Cookies {
 impl FromRequest for Cookies {
     type Error = CookiesError;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         req.cookies()
     }
@@ -213,20 +214,20 @@ impl fmt::Debug for Cookies {
     }
 }
 
-/// Rejects a error thats reading or parsing the cookies.
+/// Error returned when reading or parsing cookies fails.
 #[derive(Debug, ThisError)]
 pub enum CookiesError {
-    /// Failed to read cookies
+    /// Failed to read cookies.
     #[error("failed to read cookies")]
     Read,
-    /// Failed to parse cookies
+    /// Failed to parse cookies.
     #[error("failed to parse cookies")]
     Parse,
 }
 
 impl From<CookiesError> for Error {
     fn from(e: CookiesError) -> Self {
-        Self::Responder(Box::new(e.into_response()))
+        Self::Response(Box::new(e.into_response()))
     }
 }
 

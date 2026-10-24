@@ -1,4 +1,4 @@
-//! Represents a shared-state extractor or handler/middleware.
+//! Shared-state extractor and middleware.
 
 use std::{
     any::type_name,
@@ -10,44 +10,26 @@ use crate::{
     ThisError, handler::Transform,
 };
 
-/// Extracts state from the extensions of a request.
+/// Extracts shared state from the request.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct State<T: ?Sized>(pub T);
 
 impl<T> State<T> {
-    /// Create new `State` instance.
+    /// Creates a [`State`].
     #[must_use]
     #[inline]
     pub const fn new(data: T) -> Self {
         Self(data)
     }
 
-    /// Consumes the State, returning the wrapped value.
+    /// Returns the wrapped value, consuming the state.
     #[inline]
     pub fn into_inner(self) -> T {
         self.0
     }
 }
 
-impl<T> AsRef<T> for State<T> {
-    fn as_ref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> Deref for State<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> DerefMut for State<T> {
-    fn deref_mut(&mut self) -> &mut T {
-        &mut self.0
-    }
-}
+impl_deref!(State);
 
 impl<T> FromRequest for State<T>
 where
@@ -55,6 +37,7 @@ where
 {
     type Error = StateError;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         req.state().map(Self).ok_or_else(StateError::new::<T>)
     }
@@ -87,27 +70,17 @@ where
     }
 }
 
-/// A [`State`] error.
+/// Error returned when state extraction fails.
 #[derive(Debug, ThisError)]
 #[error("missing state type `{0}`")]
 pub struct StateError(pub &'static str);
 
 impl StateError {
-    /// Creates a `State` Error
+    /// Creates a [`StateError`] for type `T`.
     #[must_use]
     pub fn new<T>() -> Self {
         Self(type_name::<T>())
     }
 }
 
-impl IntoResponse for StateError {
-    fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
-    }
-}
-
-impl From<StateError> for Error {
-    fn from(e: StateError) -> Self {
-        e.into_error()
-    }
-}
+impl_error!(StateError);

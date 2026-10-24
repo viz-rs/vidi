@@ -7,7 +7,7 @@ use crate::{Handler, Request, Response, Result};
 pub struct BoxHandler<I = Request, O = Result<Response>>(BoxCloneable<I, O>);
 
 impl<I, O> BoxHandler<I, O> {
-    /// Creates a new `BoxHandler`.
+    /// Creates a [`BoxHandler`].
     pub fn new<H>(h: H) -> Self
     where
         H: Handler<I, Output = O> + Clone,

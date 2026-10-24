@@ -1,8 +1,8 @@
-//! Request Payload Trait and Payload Error.
+//! Request payload trait and error.
 
 use crate::{Error, IntoResponse, Response, Result, StatusCode, ThisError};
 
-/// Rejects with an error when the body of request extraction fails.
+/// Error returned when request body extraction fails.
 #[derive(Debug, ThisError)]
 pub enum PayloadError {
     /// 400
@@ -81,49 +81,45 @@ impl IntoResponse for PayloadError {
     }
 }
 
-impl From<PayloadError> for Error {
-    fn from(e: PayloadError) -> Self {
-        e.into_error()
-    }
-}
+impl_from_error!(PayloadError);
 
 /// An interface for processing the payload data of the HTTP request.
 pub trait Payload {
-    /// Named the payload.
+    /// The payload name.
     const NAME: &'static str = "payload";
 
-    /// Limited the payload data size, by default 1MB.
+    /// The payload size limit; 1 MB by default.
     const LIMIT: u64 = 1024 * 1024;
 
-    /// Specified a media type.
+    /// The payload media type.
     fn mime() -> mime::Mime;
 
-    /// Detects the payload media type.
+    /// Returns whether the given media type is supported.
     fn detect(m: &mime::Mime) -> bool;
 
-    /// Sets the limit size.
+    /// Returns the effective limit.
     #[must_use]
     #[inline]
     fn limit(limit: Option<u64>) -> u64 {
         limit.unwrap_or(Self::LIMIT)
     }
 
-    /// Detects `Content-Type`
+    /// Checks the `Content-Type` header.
     ///
     /// # Errors
     ///
-    /// Will return [`PayloadError::UnsupportedMediaType`] if the detected media type is not supported.
+    /// Returns [`PayloadError::UnsupportedMediaType`] if the media type is unsupported.
     #[inline]
     fn check_type(m: Option<mime::Mime>) -> Result<mime::Mime, PayloadError> {
         m.filter(Self::detect)
             .ok_or_else(|| PayloadError::UnsupportedMediaType(Self::mime()))
     }
 
-    /// Checks `Content-Length`
+    /// Checks the `Content-Length` header.
     ///
     /// # Errors
     ///
-    /// Will return [`PayloadError::TooLarge`] if the detected content length is too large.
+    /// Returns [`PayloadError::TooLarge`] if the content length exceeds the limit.
     #[inline]
     fn check_length(len: Option<u64>, limit: Option<u64>) -> Result<(), PayloadError> {
         len.map_or_else(
@@ -136,7 +132,7 @@ pub trait Payload {
         )
     }
 
-    /// Checks `Content-Type` & `Content-Length`
+    /// Checks the `Content-Type` and `Content-Length` headers.
     ///
     /// # Errors
     ///

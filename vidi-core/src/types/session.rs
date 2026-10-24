@@ -1,4 +1,4 @@
-//! Represents a session extractor.
+//! Session extractor.
 
 use std::{
     convert::Infallible,
@@ -23,7 +23,7 @@ pub struct Session {
 }
 
 impl Session {
-    /// Creates new `Session` with `Data`
+    /// Creates a [`Session`] from `Data`.
     #[must_use]
     pub fn new(data: Data) -> Self {
         Self {
@@ -34,22 +34,23 @@ impl Session {
         }
     }
 
-    /// Gets status of the session
+    /// Returns the session status.
     #[must_use]
     pub fn status(&self) -> &AtomicU8 {
         &self.state.status
     }
 
-    /// Gets lock data of the session
+    /// Returns the session data lock.
     #[must_use]
     pub fn lock_data(&self) -> &RwLock<Data> {
         &self.state.data
     }
 
-    /// Gets a value by the key
+    /// Returns the value for the given key.
     ///
     /// # Errors
-    /// TODO
+    ///
+    /// Returns an error if the data cannot be read or deserialized.
     pub fn get<T>(&self, key: &str) -> Result<Option<T>, Error>
     where
         T: DeserializeOwned,
@@ -65,47 +66,31 @@ impl Session {
             )
     }
 
-    /// Sets a value by the key
+    /// Sets the value for the given key.
     ///
     /// # Errors
-    /// TODO
+    ///
+    /// Returns an error if the value cannot be serialized.
     pub fn set<T>(&self, key: &str, val: T) -> Result<(), Error>
     where
         T: Serialize,
     {
-        let status = self.status().load(Ordering::Acquire);
-        // not allowed `PURGED`
-        if status != PURGED {
-            if let Ok(mut d) = self.lock_data().write() {
-                // not allowed `RENEWED & CHANGED`
-                if status == UNCHANGED {
-                    self.status().store(CHANGED, Ordering::SeqCst);
-                }
-                d.insert(key.into(), to_value(val).map_err(report_error)?);
-            }
-        }
-        Ok(())
+        self.with_data_mut(|d| {
+            d.insert(key.into(), to_value(val).map_err(report_error)?);
+            Ok(())
+        })
+        .transpose()
+        .map(|_| ())
     }
 
     /// Removes a key from the session, returning the value at the key if the key was previously in
     /// the session.
     #[allow(clippy::must_use_candidate)]
     pub fn remove(&self, key: &str) -> Option<Value> {
-        let status = self.status().load(Ordering::Acquire);
-        // not allowed `PURGED`
-        if status != PURGED {
-            if let Ok(mut d) = self.lock_data().write() {
-                // not allowed `RENEWED & CHANGED`
-                if status == UNCHANGED {
-                    self.status().store(CHANGED, Ordering::SeqCst);
-                }
-                return d.remove(key);
-            }
-        }
-        None
+        self.with_data_mut(|d| d.remove(key)).flatten()
     }
 
-    /// Removes a value and deserialize
+    /// Removes and deserializes the value for the key.
     #[allow(clippy::must_use_candidate)]
     pub fn remove_as<T>(&self, key: &str) -> Option<T>
     where
@@ -114,22 +99,12 @@ impl Session {
         self.remove(key).and_then(|t| from_value(t).ok())
     }
 
-    /// Clears the state
+    /// Clears the session data.
     pub fn clear(&self) {
-        let status = self.status().load(Ordering::Acquire);
-        // not allowed `PURGED`
-        if status != PURGED {
-            if let Ok(mut d) = self.lock_data().write() {
-                // not allowed `RENEWED & CHANGED`
-                if status == UNCHANGED {
-                    self.status().store(CHANGED, Ordering::SeqCst);
-                }
-                d.clear();
-            }
-        }
+        self.with_data_mut(Data::clear);
     }
 
-    /// Renews the new state
+    /// Marks the session for renewal.
     pub fn renew(&self) {
         let status = self.status().load(Ordering::Acquire);
         // not allowed `PURGED & RENEWED`
@@ -138,7 +113,7 @@ impl Session {
         }
     }
 
-    /// Destroys the current state from store
+    /// Marks the session for purging.
     pub fn purge(&self) {
         let status = self.status().load(Ordering::Acquire);
         // not allowed `PURGED`
@@ -150,15 +125,33 @@ impl Session {
         }
     }
 
-    /// Gets all raw key-value data from the session
+    /// Returns the raw session data.
     ///
     /// # Errors
+    ///
+    /// Returns an error if the data cannot be read.
     #[allow(clippy::must_use_candidate)]
     pub fn data(&self) -> Result<Data, Error> {
         self.lock_data()
             .read()
             .map_err(|e| responder_error((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())))
             .map(|d| d.clone())
+    }
+
+    /// Applies `f` to the session data if it is not purged, marking it changed.
+    fn with_data_mut<T>(&self, f: impl FnOnce(&mut Data) -> T) -> Option<T> {
+        let status = self.status().load(Ordering::Acquire);
+        if status == PURGED {
+            return None;
+        }
+        if let Ok(mut d) = self.lock_data().write() {
+            if status == UNCHANGED {
+                self.status().store(CHANGED, Ordering::SeqCst);
+            }
+            Some(f(&mut d))
+        } else {
+            None
+        }
     }
 }
 
@@ -171,17 +164,18 @@ impl fmt::Debug for Session {
 impl FromRequest for Session {
     type Error = Infallible;
 
+    #[allow(clippy::unused_async_trait_impl)]
     async fn extract(req: &mut Request) -> Result<Self, Self::Error> {
         Ok(req.session().clone())
     }
 }
 
 fn responder_error(e: (StatusCode, String)) -> Error {
-    Error::Responder(Box::new(e.into_response()))
+    Error::Response(Box::new(e.into_response()))
 }
 
 fn report_error<E: std::error::Error + Send + Sync + 'static>(e: E) -> Error {
-    Error::Report(
+    Error::WithResponse(
         Box::new(e),
         Box::new(StatusCode::INTERNAL_SERVER_ERROR.into_response()),
     )

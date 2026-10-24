@@ -10,26 +10,22 @@ pub trait ResponseExt: private::Sealed + Sized {
         Response::new(Body::empty())
     }
 
-    /// Get the size of this response's body.
+    /// Returns the body size.
     fn content_length(&self) -> Option<u64>;
 
-    /// Get the media type of this response.
+    /// Returns the media type.
     fn content_type(&self) -> Option<mime::Mime>;
 
-    /// Get a header with the key.
+    /// Returns a header parsed from the given key.
     fn header<K, T>(&self, key: K) -> Option<T>
     where
         K: header::AsHeaderName,
         T: std::str::FromStr;
 
-    /// The response was successful (status in the range [`200-299`][mdn]) or not.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/ok>
+    /// Returns whether the status is successful (200-299).
     fn ok(&self) -> bool;
 
-    /// The response with the specified [`Content-Type`][mdn].
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type>
+    /// Creates a response with the given `Content-Type`.
     fn with<B>(body: B, content_type: &str) -> Response
     where
         B: Into<Body>,
@@ -42,7 +38,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         resp
     }
 
-    /// The response with `text/plain; charset=utf-8` media type.
+    /// Creates a response with `text/plain; charset=utf-8`.
     fn text<B>(body: B) -> Response
     where
         B: Into<Full<Bytes>>,
@@ -50,7 +46,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         Self::with(body.into(), mime::TEXT_PLAIN_UTF_8.as_ref())
     }
 
-    /// The response with `text/html; charset=utf-8` media type.
+    /// Creates a response with `text/html; charset=utf-8`.
     fn html<B>(body: B) -> Response
     where
         B: Into<Full<Bytes>>,
@@ -58,7 +54,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         Self::with(body.into(), mime::TEXT_HTML_UTF_8.as_ref())
     }
 
-    /// The response with `application/octet-stream` media type.
+    /// Creates a response with `application/octet-stream`.
     fn binary<B>(body: B) -> Response
     where
         B: Into<Full<Bytes>>,
@@ -66,11 +62,11 @@ pub trait ResponseExt: private::Sealed + Sized {
         Self::with(body.into(), mime::APPLICATION_OCTET_STREAM.as_ref())
     }
 
-    /// The response with `application/javascript; charset=utf-8` media type.
+    /// Creates a response with `application/json`.
     ///
     /// # Errors
     ///
-    /// Throws an error if serialization fails.
+    /// Returns an error if serialization fails.
     #[cfg(feature = "json")]
     fn json<T>(body: T) -> Result<Response, crate::types::PayloadError>
     where
@@ -83,7 +79,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         ))
     }
 
-    /// Responds to a stream.
+    /// Creates a response from a stream.
     fn stream<S, D, E>(stream: S) -> Response
     where
         S: futures_util::Stream<Item = Result<D, E>> + Send + 'static,
@@ -93,7 +89,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         Response::new(Body::from_stream(stream))
     }
 
-    /// Downloads transfers the file from path as an attachment.
+    /// Transfers the file at `path` as an attachment.
     #[cfg(feature = "fs")]
     fn download<T>(
         path: T,
@@ -102,11 +98,7 @@ pub trait ResponseExt: private::Sealed + Sized {
     where
         T: AsRef<std::path::Path> + Send;
 
-    /// The [`Content-Disposition`][mdn] header indicates if the content is expected to be
-    /// displayed inline in the browser, that is, as a Web page or as part of a Web page,
-    /// or as an attachment, that is downloaded and saved locally.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
+    /// Creates a response with the given `Content-Disposition` header.
     fn attachment(value: &str) -> Response {
         let val = header::HeaderValue::from_str(value)
             .expect("content-disposition is not the correct value");
@@ -115,9 +107,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         resp
     }
 
-    /// The [`Content-Location`][mdn] header indicates an alternate location for the returned data.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Location>
+    /// Creates a response with the given `Content-Location` header.
     fn location<T>(location: T) -> Response
     where
         T: AsRef<str>,
@@ -129,9 +119,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         resp
     }
 
-    /// The response redirects to the specified URL.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect>
+    /// Creates a redirect response to the URL.
     fn redirect<T>(url: T) -> Response
     where
         T: AsRef<str>,
@@ -143,9 +131,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         resp
     }
 
-    /// The response redirects to the specified URL and the status code.
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect>
+    /// Creates a redirect response to the URL with the given status.
     fn redirect_with_status<T>(url: T, status: StatusCode) -> Response
     where
         T: AsRef<str>,
@@ -157,9 +143,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         resp
     }
 
-    /// The response redirects to the [`303`][mdn].
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303>
+    /// Creates a `303 See Other` redirect.
     fn see_other<T>(url: T) -> Response
     where
         T: AsRef<str>,
@@ -167,9 +151,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         Self::redirect_with_status(url, StatusCode::SEE_OTHER)
     }
 
-    /// The response redirects to the [`307`][mdn].
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307>
+    /// Creates a `307 Temporary Redirect`.
     fn temporary<T>(url: T) -> Response
     where
         T: AsRef<str>,
@@ -177,9 +159,7 @@ pub trait ResponseExt: private::Sealed + Sized {
         Self::redirect_with_status(url, StatusCode::TEMPORARY_REDIRECT)
     }
 
-    /// The response redirects to the [`308`][mdn].
-    ///
-    /// [mdn]: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/308>
+    /// Creates a `308 Permanent Redirect`.
     fn permanent<T>(url: T) -> Response
     where
         T: AsRef<str>,
